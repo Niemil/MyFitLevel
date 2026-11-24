@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.myfitlevel.app"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         applicationId = "com.myfitlevel.app"
         minSdk = 26

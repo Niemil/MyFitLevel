@@ -34,7 +34,7 @@ object StepSync {
             val client = HealthConnectClient.getOrCreate(ctx)
             val granted = client.permissionController.getGrantedPermissions()
             if (stepsPerm !in granted) return@withContext "Allow step access in Health Connect first."
-            val metrics = mutableSetOf(StepsRecord.COUNT_TOTAL)
+            val metrics = mutableSetOf<androidx.health.connect.client.aggregate.AggregateMetric<*>>(StepsRecord.COUNT_TOTAL)
             if (distPerm in granted) metrics.add(DistanceRecord.DISTANCE_TOTAL)
             val zone = ZoneId.systemDefault()
             val lines = mutableListOf<String>()

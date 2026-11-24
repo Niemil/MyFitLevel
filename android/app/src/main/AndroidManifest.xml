@@ -32,6 +32,18 @@
         <activity android:name=".SyncActivity" android:exported="false" android:label="@string/sync_title" />
 
         <activity-alias
+            android:name=".StepSyncLauncher"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="MyFitLevel Steps"
+            android:targetActivity=".SyncActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
             android:name="ViewPermissionUsageActivity"
             android:exported="true"
             android:permission="android.permission.START_VIEW_PERMISSION_USAGE"

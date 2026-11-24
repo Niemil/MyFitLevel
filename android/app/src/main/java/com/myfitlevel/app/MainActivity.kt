@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
             domStorageEnabled = true
             cacheMode = WebSettings.LOAD_DEFAULT
             mediaPlaybackRequiresUserGesture = false
+            userAgentString = userAgentString + " MyFitLevelApp/1.0"
         }
         CookieManager.getInstance().setAcceptCookie(true)
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false)
@@ -48,7 +49,13 @@ class MainActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val u = request.url
                 if (u.scheme == "mfl") {
-                    startActivity(Intent(this@MainActivity, SyncActivity::class.java))
+                    if (u.host == "key") {
+                        val tok = u.lastPathSegment ?: ""
+                        if (tok.length >= 20) Prefs.setKey(this@MainActivity, tok)
+                        startActivity(Intent(this@MainActivity, SyncActivity::class.java).putExtra("auto", true))
+                    } else {
+                        startActivity(Intent(this@MainActivity, SyncActivity::class.java))
+                    }
                     return true
                 }
                 if (u.host == Uri.parse(Prefs.SITE).host) return false
@@ -75,8 +82,13 @@ class MainActivity : AppCompatActivity() {
             }
         })
         SyncWorker.schedule(this)
-        if (savedInstanceState == null) web.loadUrl(Prefs.SITE + "/")
+        if (savedInstanceState == null) web.loadUrl(intent.getStringExtra("url") ?: (Prefs.SITE + "/"))
         else web.restoreState(savedInstanceState)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intent.getStringExtra("url")?.let { web.loadUrl(it) }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

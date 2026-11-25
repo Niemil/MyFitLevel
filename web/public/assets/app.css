@@ -1024,3 +1024,4 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 .stx .sc-pop a{background:rgba(255,255,255,.08);border-radius:999px;padding:4px 11px;font-size:.82rem;font-weight:600}
 .stx .sc-pop small{opacity:.7}
 @media(max-width:560px){.stx{grid-template-columns:repeat(2,minmax(0,1fr))}.stx .sc b{font-size:1.7rem}.stx .sc-w .sc-num{font-size:2.5rem}}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}

@@ -68,13 +68,12 @@ layout_header('Steps', 'me');
 </div>
 
 <?php $wal = game_wallet($uid); ?>
-<?php if ($inApp && !$hasKeyApp = (bool)val("SELECT COUNT(*) FROM api_keys WHERE user_id = ? AND name = 'Android app'", [$uid])): ?>
-<div class="card"><h3>📱 Connect this phone</h3>
-  <p class="small">One tap links the app to your account (no key to copy) and then reads your steps from Health Connect.</p>
-  <a class="btn" href="<?= e(url('steps') . '?connect=1') ?>">Connect this phone</a></div>
-<?php elseif ($inApp): ?>
-<div class="card"><h3>📱 This phone is connected</h3>
-  <p class="small">Steps sync by themselves about once an hour. <a href="mfl://sync">Open step sync</a> to sync now or change what the app may read.</p></div>
+<?php if ($inApp): $hasKeyApp = (bool)val("SELECT COUNT(*) FROM api_keys WHERE user_id = ? AND name = 'Android app'", [$uid]); ?>
+<div class="card"><h3>📱 <?= $hasKeyApp ? 'Step sync on this phone' : 'Connect this phone' ?></h3>
+  <p class="small">One tap links this app to your account (no key to copy) and then reads your steps from Health Connect. Steps give points. It is optional: you can also add steps by hand below, or skip them.</p>
+  <div class="btnrow"><a class="btn" href="<?= e(url('steps') . '?connect=1') ?>"><?= $hasKeyApp ? 'Reconnect this phone' : 'Connect this phone' ?></a>
+  <a class="btn ghost" href="mfl://sync">Sync now / Health Connect settings</a></div>
+  <p class="small muted" style="margin-top:8px">New phone, reinstalled the app or reset keys? Tap Reconnect and allow Health Connect again.</p></div>
 <?php endif; ?>
 
 <div class="card">

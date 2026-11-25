@@ -10,6 +10,8 @@ object Prefs {
     fun status(c: Context): String = sp(c).getString("status", "Not synced yet.") ?: ""
     fun setStatus(c: Context, s: String) = sp(c).edit().putString("status", s).putLong("last", System.currentTimeMillis()).apply()
     fun lastSync(c: Context): Long = sp(c).getLong("last", 0L)
+    fun asked(c: Context, k: String): Boolean = sp(c).getBoolean("asked_$k", false)
+    fun setAsked(c: Context, k: String) = sp(c).edit().putBoolean("asked_$k", true).apply()
     fun widgetJson(c: Context): String = sp(c).getString("wjson", "") ?: ""
     fun widgetAt(c: Context): Long = sp(c).getLong("wat", 0L)
     fun setWidgetJson(c: Context, j: String) = sp(c).edit().putString("wjson", j).putLong("wat", System.currentTimeMillis()).apply()

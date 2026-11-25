@@ -14,6 +14,8 @@ import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var web: WebView
@@ -46,6 +48,12 @@ class MainActivity : AppCompatActivity() {
         CookieManager.getInstance().setAcceptCookie(true)
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false)
         web.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView, url: String?) {
+                super.onPageFinished(view, url)
+                val path = Uri.parse(url ?: "").path ?: ""
+                if (path.startsWith("/feed") || path.startsWith("/welcome") || path.startsWith("/profile")) offerSteps()
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 val u = request.url
                 if (u.scheme == "mfl") {
@@ -86,6 +94,45 @@ class MainActivity : AppCompatActivity() {
         SyncWorker.schedule(this)
         if (savedInstanceState == null) web.loadUrl(intent.getStringExtra("url") ?: (Prefs.SITE + "/"))
         else web.restoreState(savedInstanceState)
+    }
+
+    private var offering = false
+
+    /** Once after login: suggest linking this phone / allowing Health Connect. Never nags after you answer. */
+    private fun offerSteps() {
+        if (offering || isFinishing) return
+        if (Prefs.key(this).isEmpty()) {
+            if (Prefs.asked(this, "connect")) return
+            offering = true
+            Prefs.setAsked(this, "connect")
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Sync your steps?")
+                .setMessage("Connect this phone to Health Connect and your daily steps are added automatically. Steps give points too. It is optional, and you can do it later on the Steps page.")
+                .setPositiveButton("Connect") { _, _ -> web.loadUrl(Prefs.SITE + "/steps?connect=1") }
+                .setNegativeButton("Not now", null)
+                .setOnDismissListener { offering = false }
+                .show()
+            return
+        }
+        if (Prefs.asked(this, "perm")) return
+        offering = true
+        lifecycleScope.launch {
+            try {
+                if (androidx.health.connect.client.HealthConnectClient.getSdkStatus(this@MainActivity) != androidx.health.connect.client.HealthConnectClient.SDK_AVAILABLE) return@launch
+                val granted = androidx.health.connect.client.HealthConnectClient.getOrCreate(this@MainActivity).permissionController.getGrantedPermissions()
+                if (StepSync.stepsPerm in granted) { Prefs.setAsked(this@MainActivity, "perm"); return@launch }
+                Prefs.setAsked(this@MainActivity, "perm")
+                android.app.AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Allow step access?")
+                    .setMessage("This phone is linked, but Health Connect has not been allowed to share your steps yet. Allow it to sync steps automatically.")
+                    .setPositiveButton("Allow") { _, _ -> startActivity(Intent(this@MainActivity, SyncActivity::class.java).putExtra("auto", true)) }
+                    .setNegativeButton("Not now", null)
+                    .show()
+            } catch (e: Exception) {
+            } finally {
+                offering = false
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

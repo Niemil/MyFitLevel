@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
 [
 'slug' => 'why-i-built-myfitlevel',
+'rev' => 3, 'prev' => '30c34ccb33e293f1161b21c7cb0fee86',
 'title' => 'Why I built MyFitLevel: a free home for people who miss Fitocracy',
 'excerpt' => 'I used to log every workout on Fitocracy. When it faded away I went looking for a replacement, could not find one, and decided to build it myself.',
 'tags' => 'story,fitocracy,open source',
@@ -37,6 +38,16 @@ I have always liked the spirit of Linux: software that is open, free to use, and
 - **Open source.** The code is on GitHub under the AGPL. Anyone can read it, learn from it, copy it for their own use or help build it.
 - **Non-profit.** I am not trying to make money from it. It runs on the same hosting as my other projects, so keeping it online costs me very little. Maybe one day there will be an optional way to chip in towards running costs, but that is for later, and it will never lock features away.
 - **Privacy-first.** I count visits without tracking individual people, and you can export your data whenever you like.
+
+## Your data, and your tools
+
+Your workouts are yours, so you can get them out and use them however you like. Every member can create a personal key and use the open API, or just export everything.
+
+- **Export it all:** download every set you have ever logged as a CSV file, or as a full JSON export. The CSV opens in Excel and Google Sheets, and with one formula a Google Sheet can pull your workouts in live.
+- **Connect it to other tools:** read your stats, your best lifts, your week or a one-line summary, and even log workouts from other apps and scripts. Subscribe to your workouts in your calendar, or hook it up to Siri Shortcuts.
+- **Widgets everywhere:** show your level, points and streak on your Android home screen, or on your computer with Lively Wallpaper or Rainmeter on Windows, Übersicht on macOS, or Scriptable on iPhone and iPad.
+
+You are free to build something on top of it, and if you make something useful, tell me and I will share it with everyone. The documentation is on the [API page](/api-docs) and the widgets are on the [widgets page](/widgets).
 
 ## Built together
 

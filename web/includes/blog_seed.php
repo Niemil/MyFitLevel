@@ -21,20 +21,30 @@ I asked around in the Fitocracy groups and checked every alternative I could fin
 
 ## So I built it
 
-Building websites is my hobby. I started years ago with WordPress, then spent time learning JavaScript and Python, and these days I build with modern AI tools alongside my own code. That combination means I can go from idea to a working site far faster than I could before. The first working version, where you could register, log a workout and see points, took a single day. Since then it has been a steady stream of improvements: levels, quests, a weekly boss, groups, teams, gyms, an exercise library, step syncing and an Android app.
+Building websites is my hobby. I started years ago with WordPress, then spent time learning JavaScript and Python, and these days I build with modern AI tools alongside my own code. That combination means I can go from idea to a working site far faster than I could before. The first working version, where you could register, log a workout and see points, took a single day. Since then it has been a steady stream of improvements: levels, quests, a weekly boss, groups, teams, gyms and an exercise library.
 
 I took inspiration from the old site's *idea*, not its code or content. MyFitLevel has its own point model, its own look and its own features, so it is not a copy, and it is not affiliated with Fitocracy.
 
-## What it is, and what it will stay
+## A website first, not only an app
 
-- **Free.** No ads and no paywall on the basics like logging and levels.
-- **Open source.** The code is on GitHub under the AGPL, so anyone can read it, learn from it or help build it.
-- **Non-profit.** If running costs ever need help, the plan is optional community support, not locking features away.
-- **Privacy-first.** I count visits without tracking individual people, and you can export your data.
+A lot of fitness trackers exist only as phone apps. I like my phone at the gym as much as anyone, but I do not think you should need a particular phone, or any phone, to be part of a fitness community. MyFitLevel is a website that works on every device: phone, tablet, laptop or a desktop at home. Log a workout at the gym, check your friends' progress from your computer, and pick up where you left off anywhere. There is also an Android app for things a website cannot do, like syncing your steps, but it is a bonus, never a requirement.
+
+## Free, like Linux
+
+I have always liked the spirit of Linux: software that is open, free to use, and shaped by the people who use it. That is the model here.
+
+- **Free.** No ads, no trial that ends, and no paywall on the basics like logging and levels. I am happy to pay for tools I use a lot, but I do not think a place to log your lifts should hold your progress hostage.
+- **Open source.** The code is on GitHub under the AGPL. Anyone can read it, learn from it, copy it for their own use or help build it.
+- **Non-profit.** I am not trying to make money from it. It runs on the same hosting as my other projects, so keeping it online costs me very little. Maybe one day there will be an optional way to chip in towards running costs, but that is for later, and it will never lock features away.
+- **Privacy-first.** I count visits without tracking individual people, and you can export your data whenever you like.
+
+## Built together
+
+Fitocracy was special because of its community, not only its points. That is what I want to rebuild. Nobody gets everything exactly their way, but a community can find the best possible version together: members suggest ideas, report what is broken, and tell me what they miss. If you write code, you can open a pull request. If you do not, a good idea or bug report helps just as much. Gamified fitness is the focus, and everything that makes it better is welcome.
 
 ## How you can help
 
-The best support costs nothing: [join](/register), log a few workouts, tell me what is missing, and invite a training friend. If you write code, the project is open and contributions are welcome. And if you used to be on Fitocracy, I would love to hear what you miss most. Your list decides what gets built next.
+The best support costs nothing: [join](/register), log a few workouts, send feedback, and invite a training friend. And if you used to be on Fitocracy, I would love to hear what you miss most. Your list decides what gets built next.
 
 Curious how it compares to the old site? Read [the Fitocracy alternative page](/fitocracy-alternative) or see [how points work](/points).
 MD,

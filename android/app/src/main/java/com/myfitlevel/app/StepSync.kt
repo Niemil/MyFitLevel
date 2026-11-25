@@ -21,7 +21,9 @@ object StepSync {
     val stepsPerm = HealthPermission.getReadPermission(StepsRecord::class)
     val distPerm = HealthPermission.getReadPermission(DistanceRecord::class)
     const val bgPerm = "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND"
-    val toRequest: Set<String> = setOf(stepsPerm, distPerm, bgPerm)
+    /** Asked first: just steps and distance. The background permission is asked separately so one unsupported item cannot block the dialog. */
+    val toRequest: Set<String> = setOf(stepsPerm, distPerm)
+    val bgRequest: Set<String> = setOf(bgPerm)
 
     /** Reads yesterday and today from Health Connect and sends the totals to the site. Returns a short status line. */
     suspend fun sync(ctx: Context): String = withContext(Dispatchers.IO) {

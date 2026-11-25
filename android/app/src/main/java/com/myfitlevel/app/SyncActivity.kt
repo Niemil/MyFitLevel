@@ -14,8 +14,40 @@ import kotlinx.coroutines.launch
 class SyncActivity : AppCompatActivity() {
     private lateinit var status: TextView
 
-    private val askPerms = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) {
+    private val askBg = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) {
         syncNow()
+    }
+
+    private val askPerms = registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
+        if (StepSync.stepsPerm in granted) {
+            if (StepSync.bgPerm !in granted) {
+                try { askBg.launch(StepSync.bgRequest) } catch (e: Exception) { syncNow() }
+            } else syncNow()
+        } else {
+            showSettingsHelp()
+        }
+    }
+
+    /** The system dialog did not give access (or never showed): send the person to the right settings screen. */
+    private fun showSettingsHelp() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Allow steps in Health Connect")
+            .setMessage("Open the settings, tap \"Steps\" (and \"Distance\") and switch them on for MyFitLevel. Then come back and tap Sync now.")
+            .setPositiveButton("Open settings") { _, _ -> openHealthSettings() }
+            .setNegativeButton("Later", null)
+            .show()
+    }
+
+    private fun openHealthSettings() {
+        val tries = listOf(
+            Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS").putExtra(Intent.EXTRA_PACKAGE_NAME, packageName),
+            Intent("androidx.health.ACTION_MANAGE_HEALTH_PERMISSIONS").putExtra(Intent.EXTRA_PACKAGE_NAME, packageName),
+            Intent(androidx.health.connect.client.HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS),
+        )
+        for (i in tries) {
+            try { startActivity(i); return } catch (e: Exception) { }
+        }
+        android.widget.Toast.makeText(this, "Open Settings > Health Connect > App permissions > MyFitLevel.", android.widget.Toast.LENGTH_LONG).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,6 +76,10 @@ class SyncActivity : AppCompatActivity() {
             col.addView(Button(this).apply {
                 text = "Allow Health Connect"
                 setOnClickListener { askPerms.launch(StepSync.toRequest) }
+            })
+            col.addView(Button(this).apply {
+                text = "Open Health Connect settings"
+                setOnClickListener { openHealthSettings() }
             })
             col.addView(Button(this).apply {
                 text = "Sync now"

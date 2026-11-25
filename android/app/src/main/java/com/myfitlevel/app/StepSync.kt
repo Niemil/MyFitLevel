@@ -59,6 +59,17 @@ object StepSync {
         }
     }
 
+    /** Steps Health Connect has for today on this phone, or null if it cannot be read. */
+    suspend fun todayLocal(ctx: Context): Long? = withContext(Dispatchers.IO) {
+        try {
+            if (HealthConnectClient.getSdkStatus(ctx) != HealthConnectClient.SDK_AVAILABLE) return@withContext null
+            val c = HealthConnectClient.getOrCreate(ctx)
+            if (stepsPerm !in c.permissionController.getGrantedPermissions()) return@withContext null
+            val zone = ZoneId.systemDefault()
+            c.aggregate(AggregateRequest(setOf(StepsRecord.COUNT_TOTAL), TimeRangeFilter.between(LocalDate.now(zone).atStartOfDay(zone).toInstant(), Instant.now())))[StepsRecord.COUNT_TOTAL] ?: 0L
+        } catch (e: Exception) { null }
+    }
+
     private fun post(key: String, date: String, steps: Long, distM: Long): String? {
         val c = URL(Prefs.SITE + "/api/v1/steps").openConnection() as HttpURLConnection
         return try {

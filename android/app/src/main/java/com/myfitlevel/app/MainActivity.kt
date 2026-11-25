@@ -41,13 +41,15 @@ class MainActivity : AppCompatActivity() {
         root.addView(web, android.widget.FrameLayout.LayoutParams(-1, -1))
         val d = resources.displayMetrics.density
         val gear = android.widget.TextView(this).apply {
-            text = "\u2699 App v" + Updater.installedName(this@MainActivity)
+            text = Prefs.chip(this@MainActivity)
             textSize = 11f
             setTextColor(0xFFFFFFFF.toInt())
             setPadding((10 * d).toInt(), (5 * d).toInt(), (10 * d).toInt(), (5 * d).toInt())
             background = android.graphics.drawable.GradientDrawable().apply { setColor(0x99222244.toInt()); cornerRadius = 20 * d }
             alpha = 0.85f
-            setOnClickListener { appMenu() }
+            setOnClickListener { startActivity(Intent(this@MainActivity, SyncActivity::class.java)) }
+            setOnLongClickListener { appMenu(); true }
+            tag = "chip"
         }
         root.addView(gear, android.widget.FrameLayout.LayoutParams(-2, -2, android.view.Gravity.BOTTOM or android.view.Gravity.START).apply { setMargins((8 * d).toInt(), 0, 0, (96 * d).toInt()) })
         setContentView(root)
@@ -176,6 +178,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         SyncWorker.syncSoon(this)
         Updater.check(this)
+        window.decorView.findViewWithTag<android.widget.TextView>("chip")?.text = Prefs.chip(this)
     }
 
     override fun onPause() {

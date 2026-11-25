@@ -37,7 +37,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         web = WebView(this)
-        setContentView(web)
+        val root = android.widget.FrameLayout(this)
+        root.addView(web, android.widget.FrameLayout.LayoutParams(-1, -1))
+        val d = resources.displayMetrics.density
+        val gear = android.widget.TextView(this).apply {
+            text = "\u2699 App v" + Updater.installedName(this@MainActivity)
+            textSize = 11f
+            setTextColor(0xFFFFFFFF.toInt())
+            setPadding((10 * d).toInt(), (5 * d).toInt(), (10 * d).toInt(), (5 * d).toInt())
+            background = android.graphics.drawable.GradientDrawable().apply { setColor(0x99222244.toInt()); cornerRadius = 20 * d }
+            alpha = 0.85f
+            setOnClickListener { appMenu() }
+        }
+        root.addView(gear, android.widget.FrameLayout.LayoutParams(-2, -2, android.view.Gravity.BOTTOM or android.view.Gravity.START).apply { setMargins((8 * d).toInt(), 0, 0, (96 * d).toInt()) })
+        setContentView(root)
         web.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -92,11 +105,25 @@ class MainActivity : AppCompatActivity() {
             }
         })
         SyncWorker.schedule(this)
+        Updater.check(this, true)
         if (savedInstanceState == null) web.loadUrl(intent.getStringExtra("url") ?: (Prefs.SITE + "/"))
         else web.restoreState(savedInstanceState)
     }
 
     private var offering = false
+
+    private fun appMenu() {
+        val items = arrayOf("Step sync (Health Connect)", "Widgets", "Check for app update")
+        android.app.AlertDialog.Builder(this)
+            .setTitle("MyFitLevel app v" + Updater.installedName(this))
+            .setItems(items) { _, i ->
+                when (i) {
+                    0 -> startActivity(Intent(this, SyncActivity::class.java))
+                    1 -> startActivity(Intent(this, WidgetsActivity::class.java))
+                    else -> Updater.check(this, true)
+                }
+            }.show()
+    }
 
     /** Once after login: suggest linking this phone / allowing Health Connect. Never nags after you answer. */
     private fun offerSteps() {

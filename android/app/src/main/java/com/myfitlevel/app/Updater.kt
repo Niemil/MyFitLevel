@@ -28,27 +28,55 @@ object Updater {
         return if (android.os.Build.VERSION.SDK_INT >= 28) i.longVersionCode else @Suppress("DEPRECATION") i.versionCode.toLong()
     }
 
+    private const val RAW = "https://raw.githubusercontent.com/Niemil/MyFitLevel/main/android/app/build.gradle.kts"
+    private const val APK = "https://github.com/Niemil/MyFitLevel/releases/download/latest/MyFitLevel.apk"
+
+    private fun get(u: String): String? {
+        val con = URL(u).openConnection() as HttpURLConnection
+        con.connectTimeout = 10000; con.readTimeout = 10000
+        con.setRequestProperty("Accept", "application/vnd.github+json")
+        con.setRequestProperty("User-Agent", "MyFitLevelApp")
+        return if (con.responseCode == 200) con.inputStream.bufferedReader().use { it.readText() } else null
+    }
+
+    /** force = user asked (or app just started): ignore the throttle and report problems. */
     fun check(a: Activity, force: Boolean = false) {
         val sp = a.getSharedPreferences("mfl", Context.MODE_PRIVATE)
-        if (!force && System.currentTimeMillis() - sp.getLong("upd_check", 0L) < 15 * 60_000L) return
+        if (!force && System.currentTimeMillis() - sp.getLong("upd_check", 0L) < 5 * 60_000L) return
         sp.edit().putLong("upd_check", System.currentTimeMillis()).apply()
         thread {
+            var code = 0L
+            var name = ""
+            var url = APK
             try {
-                val con = URL(API).openConnection() as HttpURLConnection
-                con.connectTimeout = 10000; con.readTimeout = 10000
-                con.setRequestProperty("Accept", "application/vnd.github+json")
-                if (con.responseCode != 200) return@thread
-                val j = JSONObject(con.inputStream.bufferedReader().use { it.readText() })
-                val body = j.optString("body")
-                val code = Regex("versionCode:\\s*(\\d+)").find(body)?.groupValues?.get(1)?.toLongOrNull() ?: return@thread
-                val name = Regex("versionName:\\s*([0-9.]+)").find(body)?.groupValues?.get(1) ?: ""
-                val url = j.optJSONArray("assets")?.optJSONObject(0)?.optString("browser_download_url") ?: return@thread
-                if (code > installedCode(a)) a.runOnUiThread { if (!a.isFinishing) ask(a, name, url) }
-                else if (force) a.runOnUiThread { Toast.makeText(a, "You have the latest version.", Toast.LENGTH_SHORT).show() }
+                val j = get(API)?.let { JSONObject(it) }
+                if (j != null) {
+                    val body = j.optString("body")
+                    code = Regex("versionCode:\\s*(\\d+)").find(body)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+                    name = Regex("versionName:\\s*([0-9.]+)").find(body)?.groupValues?.get(1) ?: ""
+                    j.optJSONArray("assets")?.optJSONObject(0)?.optString("browser_download_url")?.takeIf { it.isNotEmpty() }?.let { url = it }
+                }
             } catch (e: Exception) {
+            }
+            if (code == 0L) try {
+                val g = get(RAW) ?: ""
+                code = Regex("versionCode\\s*=\\s*(\\d+)").find(g)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+                name = Regex("versionName\\s*=\\s*\"([0-9.]+)\"").find(g)?.groupValues?.get(1) ?: ""
+            } catch (e: Exception) {
+            }
+            val mine = installedCode(a)
+            a.runOnUiThread {
+                if (a.isFinishing) return@runOnUiThread
+                when {
+                    code == 0L -> if (force) Toast.makeText(a, "Could not check for updates (no connection to GitHub). This app is v${installedName(a)}.", Toast.LENGTH_LONG).show()
+                    code > mine -> ask(a, name, url)
+                    force -> Toast.makeText(a, "You have the latest version (v${installedName(a)}).", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
+
+    fun installedName(c: Context): String = c.packageManager.getPackageInfo(c.packageName, 0).versionName ?: "?"
 
     private fun ask(a: Activity, name: String, url: String) {
         AlertDialog.Builder(a)

@@ -1,7 +1,7 @@
 /* Android visitors get a one-time offer of the Android app. Not shown inside the app itself, in the installed PWA, or after "Not now". */
 (function () {
   var ua = navigator.userAgent || '';
-  if (!/Android/i.test(ua) || /MyFitLevelApp/.test(ua)) { return; }
+  if (!/Android/i.test(ua) || /MyFitLevelApp/.test(ua) || /; wv\)/.test(ua)) { return; }
   if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) { return; }
   if (/\/android$/.test(location.pathname) || /\/(install|admin)(\/|$)/.test(location.pathname)) { return; }
   var KEY = 'mfl_android_offer', now = Date.now(), seen = 0;

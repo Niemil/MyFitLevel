@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.33.1', '2026-11-25 10:45', 'Android app: one icon, no offer inside the app', ['Fix The Android offer no longer shows inside the app itself (or any Android WebView).', 'Improve The Android app now has a single icon and syncs your steps as soon as you open it, as well as about once an hour in the background.'], 'fix'],
     ['3.33.0', '2026-11-25 08:30', 'Android app page and open-source badges', ['New Landing page now shows Open source, Android app and Open API right under the buttons.', 'New An Android app page with a direct download from GitHub and simple install steps. Android visitors get a one-time offer of the app (not inside the app itself, and never again after Not now).'], 'new'],
     ['3.32.0', '2026-11-25 08:10', 'Open source', ['New MyFitLevel is now open source (AGPL-3.0). The website and the Android app live on GitHub, with install instructions and a way to contribute. There is an Open source link in the footer and on the About page.'], 'new'],
     ['3.31.1', '2026-11-25 06:36', 'Update times fixed', ['Fix The times shown on this Updates page were a couple of hours ahead. They are correct now.'], 'fix'],

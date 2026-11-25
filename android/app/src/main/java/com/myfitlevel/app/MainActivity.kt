@@ -96,6 +96,11 @@ class MainActivity : AppCompatActivity() {
         web.saveState(outState)
     }
 
+    override fun onResume() {
+        super.onResume()
+        SyncWorker.syncSoon(this)
+    }
+
     override fun onPause() {
         super.onPause()
         CookieManager.getInstance().flush()

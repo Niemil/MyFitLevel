@@ -177,6 +177,14 @@ function layout_header(string $title, string $active = '', array $meta = []): vo
           <span class="mwho"><b><?= e(display_name($u)) ?></b><small>Level <?= (int)$mp['level'] ?> · <?= number_format((int)$u['xp']) ?> pts</small>
             <span class="xpbar"><i style="width:<?= (int)$mp['pct'] ?>%"></i></span></span>
         </a>
+        <?php $ms = row('SELECT steps, updated_at FROM daily_steps WHERE user_id = ? ORDER BY day DESC LIMIT 1', [(int)$u['id']]);
+              $msT = row('SELECT steps FROM daily_steps WHERE user_id = ? AND day = ?', [(int)$u['id'], date('Y-m-d')]);
+              if ($ms): $msAge = time() - (int)strtotime((string)$ms['updated_at']); ?>
+        <a class="mstep <?= $msAge > 10800 ? 'stale' : 'fresh' ?>" href="<?= e(url('steps')) ?>">
+          <span><?= $msAge > 10800 ? '⚠️' : '✅' ?> 👟 <b><?= number_format((int)($msT['steps'] ?? 0)) ?></b> steps today</span>
+          <small>Steps updated <?= e(rel_time((string)$ms['updated_at'])) ?> · tap for sync status</small>
+        </a>
+        <?php endif; ?>
         <div class="mgrid">
           <a href="<?= e(url('u/' . $u['username'])) ?>" style="--c:#4dabf7"><?= icon('user') ?><span>Profile</span></a>
           <a href="<?= e(url('messages')) ?>" style="--c:#63e6be"><?= icon('chat') ?><span>Messages</span></a>

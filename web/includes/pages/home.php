@@ -8,6 +8,11 @@ if (me()) {
 $members = (int)val('SELECT COUNT(*) FROM users');
 $workouts = (int)val('SELECT COUNT(*) FROM workouts');
 $lifted = (float)val('SELECT COALESCE(SUM(volume_kg),0) FROM workouts');
+$liftedLb = $lifted * LB_PER_KG;
+$setsN = (int)val('SELECT COUNT(*) FROM workout_sets WHERE is_warmup = 0');
+$repsN = (int)val('SELECT COALESCE(SUM(reps),0) FROM workout_sets WHERE is_warmup = 0');
+$lifters = (int)val('SELECT COUNT(DISTINCT user_id) FROM workouts');
+$avgW = $lifters > 0 ? round($workouts / $lifters, 1) : 0;
 $open = setting('registration', '1') === '1';
 $name = site_name();
 $pub = feed_items(null, 'everyone', null, 6)['items'];
@@ -62,9 +67,14 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
     </div>
     <?php if ($members > 0): ?>
     <div class="h2-stats">
-      <div><b data-count="<?= $members ?>"><?= number_format($members) ?></b><span><?= $members === 1 ? 'member' : 'members' ?></span></div>
-      <div><b data-count="<?= $workouts ?>"><?= number_format($workouts) ?></b><span>workouts logged</span></div>
-      <div><b data-count="<?= (int)round($lifted) ?>"><?= e(fmt_big($lifted)) ?></b><span>kg lifted</span></div>
+      <div><b data-count="<?= $members ?>" data-fmt="c"><?= e(fmt_big($members)) ?></b><span><?= $members === 1 ? 'member' : 'members' ?></span></div>
+      <div><b data-count="<?= $lifters ?>" data-fmt="c"><?= e(fmt_big($lifters)) ?></b><span><?= $lifters === 1 ? 'lifter logging' : 'lifters logging' ?></span></div>
+      <div><b data-count="<?= $workouts ?>" data-fmt="c"><?= e(fmt_big($workouts)) ?></b><span><?= $workouts === 1 ? 'workout' : 'workouts' ?> logged</span></div>
+      <div><b data-count="<?= (int)round($lifted) ?>" data-fmt="c"><?= e(fmt_big($lifted)) ?></b><span>kg lifted</span></div>
+      <div><b data-count="<?= (int)round($liftedLb) ?>" data-fmt="c"><?= e(fmt_big($liftedLb)) ?></b><span>lb lifted</span></div>
+      <div><b data-count="<?= $setsN ?>" data-fmt="c"><?= e(fmt_big($setsN)) ?></b><span><?= $setsN === 1 ? 'set' : 'sets' ?></span></div>
+      <div><b data-count="<?= $repsN ?>" data-fmt="c"><?= e(fmt_big($repsN)) ?></b><span><?= $repsN === 1 ? 'rep' : 'reps' ?></span></div>
+      <div><b data-count="<?= (int)round($avgW * 10) ?>" data-fmt="d1"><?= e(number_format($avgW, 1)) ?></b><span>workouts per lifter</span></div>
     </div>
     <?php endif; ?>
   </div>

@@ -44,6 +44,7 @@ if (is_post() && $open) {
             mail_user_verify(row('SELECT * FROM users WHERE id = ?', [$id]));
         }
         rate_hit($ipKey);
+        stats_signup_record();
         login_user($id);
         redirect('welcome');
     }

@@ -166,13 +166,23 @@ function fmt_weight(?float $kg, string $unit): string
 
 function fmt_big(float $n): string
 {
-    if ($n >= 1000000) {
-        return fmt_num($n / 1000000, 2) . 'M';
+    /* Exact while small, then K / M / B with at most 3 significant digits. */
+    $n = max(0.0, $n);
+    if ($n < 10000) {
+        return number_format($n, 0, '.', ',');
     }
-    if ($n >= 10000) {
-        return fmt_num($n / 1000, 1) . 'k';
+    foreach ([[1e9, 'B'], [1e6, 'M'], [1e3, 'K']] as [$div, $suf]) {
+        if ($n >= $div * 0.9995) {
+            $v = $n / $div;
+            $dec = $v < 10 ? 2 : ($v < 100 ? 1 : 0);
+            $t = number_format($v, $dec, '.', '');
+            if (str_contains($t, '.')) {
+                $t = rtrim(rtrim($t, '0'), '.');
+            }
+            return $t . $suf;
+        }
     }
-    return number_format($n, 0, '.', ' ');
+    return number_format($n, 0, '.', ',');
 }
 
 function fmt_duration(int $sec): string

@@ -15,21 +15,37 @@
   }
 
   /* count-up */
-  function fmt(n) { return n.toLocaleString('en-US'); }
-  function bigFmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'k' : fmt(n); }
-  function countUp(el, to, big) {
+  function compact(n) {
+    if (n < 10000) return Math.round(n).toLocaleString('en-US');
+    var d = [[1e9, 'B'], [1e6, 'M'], [1e3, 'K']];
+    for (var i = 0; i < d.length; i++) {
+      if (n >= d[i][0] * 0.9995) {
+        var v = n / d[i][0], dec = v < 10 ? 2 : (v < 100 ? 1 : 0);
+        var t = v.toFixed(dec);
+        if (t.indexOf('.') > -1) t = t.replace(/0+$/, '').replace(/\.$/, '');
+        return t + d[i][1];
+      }
+    }
+    return String(Math.round(n));
+  }
+  function show(el, v, mode) { el.textContent = mode === 'd1' ? (v / 10).toFixed(1) : compact(v); }
+  function countUp(el, to, mode) {
     if (calm || to < 2) return;
-    var t0 = null, dur = 1400;
+    var t0 = null, dur = 1600;
     function step(t) {
       if (t0 === null) t0 = t;
       var k = Math.min(1, (t - t0) / dur), v = Math.round(to * (1 - Math.pow(1 - k, 3)));
-      el.textContent = big ? bigFmt(v) : fmt(v);
+      show(el, v, mode);
       if (k < 1) requestAnimationFrame(step);
     }
     requestAnimationFrame(step);
   }
   document.querySelectorAll('[data-count]').forEach(function (el, idx) {
-    countUp(el, Number(el.getAttribute('data-count')) || 0, idx === 2);
+    var go = function () { countUp(el, Number(el.getAttribute('data-count')) || 0, el.getAttribute('data-fmt')); };
+    if ('IntersectionObserver' in window) {
+      var o = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { go(); o.disconnect(); } }); });
+      o.observe(el);
+    } else go();
   });
 
   /* demo workout loop */

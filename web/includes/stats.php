@@ -16,7 +16,7 @@ const STATS_KEEP_DAYS = 90;
 
 function stats_ensure(): void
 {
-    if (setting('stats_tables_ok1', '') === '1') {
+    if (setting('stats_tables_ok2', '') === '1') {
         return;
     }
     q("CREATE TABLE IF NOT EXISTS stat_visits (
@@ -55,7 +55,22 @@ function stats_ensure(): void
         ip_end VARBINARY(16) NOT NULL,
         cc CHAR(2) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1");
-    set_setting('stats_tables_ok1', '1');
+    q("CREATE TABLE IF NOT EXISTS stat_signups (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        ts DATETIME NOT NULL,
+        day DATE NOT NULL,
+        ref_type VARCHAR(10) NOT NULL DEFAULT 'direct',
+        ref_host VARCHAR(100) NOT NULL DEFAULT '',
+        utm VARCHAR(60) NOT NULL DEFAULT '',
+        landing VARCHAR(190) NOT NULL DEFAULT '',
+        country CHAR(2) NOT NULL DEFAULT '',
+        device VARCHAR(10) NOT NULL DEFAULT '',
+        pages INT NOT NULL DEFAULT 0,
+        mins INT NOT NULL DEFAULT 0,
+        matched TINYINT NOT NULL DEFAULT 0,
+        KEY (day)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    set_setting('stats_tables_ok2', '1');
 }
 
 function stats_salt(): string
@@ -236,10 +251,40 @@ function stats_track(): ?array
     }
 }
 
+/**
+ * Called once when someone registers. Stores ONE anonymous row (no user id, no IP, no visitor id):
+ * where the visitor first arrived from and which page they landed on. The visit is found through
+ * today's visitor hash (same IP + browser) or, if they accepted cookies, their visitor cookie.
+ */
+function stats_signup_record(): void
+{
+    try {
+        stats_ensure();
+        $ua = substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 400);
+        $consent = stats_consent_state();
+        $vid = stats_vid($consent, $ua);
+        $v = row("SELECT MIN(ts) t0, COUNT(*) n FROM stat_visits WHERE vid = ? AND bot = ''", [$vid]);
+        $first = null;
+        if ($v && (int)$v['n'] > 0) {
+            $first = row("SELECT * FROM stat_visits WHERE vid = ? AND bot = '' ORDER BY id ASC LIMIT 1", [$vid]);
+        }
+        $ok = $first !== null;
+        $mins = $ok ? max(0, (int)round((time() - strtotime((string)$first['ts'])) / 60)) : 0;
+        q('INSERT INTO stat_signups (ts, day, ref_type, ref_host, utm, landing, country, device, pages, mins, matched) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [
+            now(), date('Y-m-d'),
+            $ok ? $first['ref_type'] : 'direct', $ok ? $first['ref_host'] : '', $ok ? $first['utm'] : '',
+            $ok ? $first['path'] : '', $ok ? $first['country'] : stats_country(), $ok ? $first['device'] : '',
+            $ok ? (int)$v['n'] : 0, min($mins, 99999), $ok ? 1 : 0,
+        ]);
+    } catch (Throwable $e) {
+    }
+}
+
 function stats_purge(): void
 {
     q('UPDATE stat_visits SET ip = NULL WHERE ip IS NOT NULL AND ts < ?', [date('Y-m-d H:i:s', time() - STATS_IP_DAYS * 86400)]);
     q('DELETE FROM stat_visits WHERE ts < ?', [date('Y-m-d H:i:s', time() - STATS_KEEP_DAYS * 86400)]);
+    q('DELETE FROM stat_signups WHERE ts < ?', [date('Y-m-d H:i:s', time() - 400 * 86400)]);
     q('DELETE FROM stat_consent WHERE ts < ?', [date('Y-m-d H:i:s', time() - STATS_KEEP_DAYS * 86400)]);
 }
 

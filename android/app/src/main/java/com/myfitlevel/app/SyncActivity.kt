@@ -60,6 +60,10 @@ class SyncActivity : AppCompatActivity() {
             text = "Widgets"
             setOnClickListener { startActivity(Intent(this@SyncActivity, WidgetsActivity::class.java)) }
         })
+        col.addView(Button(this).apply {
+            text = "Check for app update"
+            setOnClickListener { Updater.check(this@SyncActivity, true) }
+        })
         col.addView(label("The app also syncs by itself about once an hour. If you miss a day, correct it by hand on the Steps page.", 13f))
         setContentView(ScrollView(this).apply { addView(col) })
         SyncWorker.schedule(this)

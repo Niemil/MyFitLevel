@@ -21,8 +21,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
+      - name: Signing key (so updates install over the old app)
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then echo "$KS_B64" | base64 -d > android/app/mfl.jks; fi
+          ls android/app/mfl.jks || echo "No signing key found: this build will not install over older ones"
       - name: Build debug APK
         working-directory: android
+        env:
+          MFL_KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
         run: gradle assembleDebug --no-daemon --stacktrace
       - name: Publish APK as a release
         env:
@@ -30,7 +38,7 @@ jobs:
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk MyFitLevel.apk
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest MyFitLevel.apk --title "MyFitLevel Android (latest build)" --notes "Download MyFitLevel.apk on your phone and install it. Built from commit ${GITHUB_SHA::7}."
+          gh release create latest MyFitLevel.apk --title "MyFitLevel Android (latest build)" --notes "versionCode: $(grep -oP 'versionCode = \K[0-9]+' android/app/build.gradle.kts)\nversionName: $(grep -oP 'versionName = "\K[0-9.]+' android/app/build.gradle.kts)\nDownload MyFitLevel.apk on your phone and install it. Built from commit ${GITHUB_SHA::7}."
       - uses: actions/upload-artifact@v4
         with:
           name: MyFitLevel-apk

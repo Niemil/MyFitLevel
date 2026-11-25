@@ -101,6 +101,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         SyncWorker.syncSoon(this)
+        Updater.check(this)
     }
 
     override fun onPause() {

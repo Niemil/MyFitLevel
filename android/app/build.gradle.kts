@@ -10,10 +10,25 @@ android {
         applicationId = "com.myfitlevel.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.3"
+    }
+    signingConfigs {
+        create("mfl") {
+            val ks = file("mfl.jks")
+            if (ks.exists()) {
+                storeFile = ks
+                storePassword = System.getenv("MFL_KS_PASS") ?: "mfl-public-key"
+                keyAlias = "mfl"
+                keyPassword = System.getenv("MFL_KS_PASS") ?: "mfl-public-key"
+            }
+        }
     }
     buildTypes {
+        getByName("debug") {
+            // A fixed signing key, so every new build can be installed over the old one.
+            if (file("mfl.jks").exists()) signingConfig = signingConfigs.getByName("mfl")
+        }
         release { isMinifyEnabled = false }
     }
     compileOptions {

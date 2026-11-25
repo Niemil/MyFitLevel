@@ -5,7 +5,9 @@ $u = require_login();
 $uid = (int)$u['id'];
 game_ensure();
 define('GAME_CSS', true);
-$inApp = str_contains((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 'MyFitLevelApp');
+$ua = (string)($_SERVER['HTTP_USER_AGENT'] ?? '');
+// The app is recognised by its user agent, by the cookie it sets, or by being an Android WebView.
+$inApp = str_contains($ua, 'MyFitLevelApp') || (($_COOKIE['mflapp'] ?? '') === '1') || (bool)preg_match('/; wv\)/', $ua);
 
 // The Android app links itself: it opens this page with ?connect=1, gets its own key and hands it to the app.
 if ($inApp && isset($_GET['connect'])) {

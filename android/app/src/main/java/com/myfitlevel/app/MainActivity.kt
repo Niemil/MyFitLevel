@@ -61,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             userAgentString = userAgentString + " MyFitLevelApp/1.0"
         }
         CookieManager.getInstance().setAcceptCookie(true)
+        CookieManager.getInstance().setCookie(Prefs.SITE, "mflapp=1; Max-Age=31536000; Path=/; Secure; SameSite=Lax")
         CookieManager.getInstance().setAcceptThirdPartyCookies(web, false)
         web.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView, url: String?) {

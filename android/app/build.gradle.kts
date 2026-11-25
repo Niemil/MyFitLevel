@@ -18,9 +18,9 @@ android {
             val ks = file("mfl.jks")
             if (ks.exists()) {
                 storeFile = ks
-                storePassword = System.getenv("MFL_KS_PASS") ?: "mfl-public-key"
+                storePassword = (System.getenv("MFL_KS_PASS") ?: "").ifBlank { "mfl-public-key" }
                 keyAlias = "mfl"
-                keyPassword = System.getenv("MFL_KS_PASS") ?: "mfl-public-key"
+                keyPassword = (System.getenv("MFL_KS_PASS") ?: "").ifBlank { "mfl-public-key" }
             }
         }
     }

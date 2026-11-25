@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity() {
                         val tok = u.lastPathSegment ?: ""
                         if (tok.length >= 20) Prefs.setKey(this@MainActivity, tok)
                         startActivity(Intent(this@MainActivity, SyncActivity::class.java).putExtra("auto", true))
+                    } else if (u.host == "widgets") {
+                        startActivity(Intent(this@MainActivity, WidgetsActivity::class.java))
                     } else {
                         startActivity(Intent(this@MainActivity, SyncActivity::class.java))
                     }

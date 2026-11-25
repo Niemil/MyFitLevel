@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="50dp"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="0"
+    android:initialLayout="@layout/w_boss"
+    android:previewImage="@drawable/prev_boss"
+    android:configure="com.myfitlevel.app.WidgetConfigActivity"
+    android:widgetCategory="home_screen"
+    android:description="@string/wd_boss"
+    android:widgetFeatures="reconfigurable|configuration_optional" />

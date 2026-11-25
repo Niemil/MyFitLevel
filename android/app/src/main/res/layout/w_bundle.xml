@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView android:id="@+id/w_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/w_bg_m" />
+    <LinearLayout android:id="@+id/w_content" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <LinearLayout android:id="@+id/n_head" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="40dp">
+                <TextView android:id="@+id/n_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="15sp" android:textColor="#FFFFFF" android:text="Your name" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_xp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="53,065 points · 3,185 to next" android:maxLines="1" android:ellipsize="end" />
+            </LinearLayout>
+            <TextView android:id="@+id/n_lvl" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="22sp" android:textColor="#FFFFFF" android:text="L26" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_marginEnd="30dp"/>
+        </LinearLayout>
+        <ImageView android:id="@+id/n_bar" android:layout_width="match_parent" android:layout_height="8dp" android:scaleType="fitXY" android:layout_marginTop="4dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:layout_marginTop="8dp">
+            <LinearLayout android:id="@+id/n_steps" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView android:id="@+id/n_s_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="👟 STEPS" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_s_big" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="22sp" android:textColor="#FFFFFF" android:text="8,200" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                <ImageView android:id="@+id/n_s_bar" android:layout_width="match_parent" android:layout_height="7dp" android:scaleType="fitXY" />
+                <TextView android:id="@+id/n_s_sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="of 10,000" android:maxLines="1" android:ellipsize="end" android:layout_marginTop="2dp"/>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/n_boss" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="6dp">
+                <TextView android:id="@+id/n_b_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="👺 Goblin Warlord" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_b_big" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="22sp" android:textColor="#FFFFFF" android:text="30%" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                <ImageView android:id="@+id/n_b_bar" android:layout_width="match_parent" android:layout_height="7dp" android:scaleType="fitXY" />
+                <TextView android:id="@+id/n_b_sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="6d 3h left" android:maxLines="1" android:ellipsize="end" android:layout_marginTop="2dp"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:layout_marginTop="6dp">
+            <LinearLayout android:id="@+id/n_week" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView android:id="@+id/n_w_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="🔥 WEEK" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_w_big" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="18sp" android:textColor="#FFFFFF" android:text="1 / 3" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_w_sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="1-day streak" android:maxLines="1" android:ellipsize="end" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/n_chest" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:layout_marginStart="6dp">
+                <TextView android:id="@+id/n_c_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="🎁 CHEST" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_c_big" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="18sp" android:textColor="#FFFFFF" android:text="Opened" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/n_c_sub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="🪙 1,219 coins" android:maxLines="1" android:ellipsize="end" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="4dp">
+            <FrameLayout android:id="@+id/n_log" android:layout_width="0dp" android:layout_height="28dp" android:layout_weight="1" android:layout_marginEnd="4dp" android:layout_marginStart="4dp">
+                <ImageView android:id="@+id/n_log_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/w_chip" />
+                <TextView android:id="@+id/n_log_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#FFFFFF" android:text="➕ Log" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_gravity="center"/>
+            </FrameLayout>
+            <FrameLayout android:id="@+id/n_feed" android:layout_width="0dp" android:layout_height="28dp" android:layout_weight="1" android:layout_marginEnd="4dp" android:layout_marginStart="4dp">
+                <ImageView android:id="@+id/n_feed_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/w_chip" />
+                <TextView android:id="@+id/n_feed_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#FFFFFF" android:text="📰 Feed" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_gravity="center"/>
+            </FrameLayout>
+            <FrameLayout android:id="@+id/n_bossb" android:layout_width="0dp" android:layout_height="28dp" android:layout_weight="1" android:layout_marginEnd="4dp" android:layout_marginStart="4dp">
+                <ImageView android:id="@+id/n_bossb_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/w_chip" />
+                <TextView android:id="@+id/n_bossb_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#FFFFFF" android:text="🏆 Boss" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_gravity="center"/>
+            </FrameLayout>
+            <FrameLayout android:id="@+id/n_stepsb" android:layout_width="0dp" android:layout_height="28dp" android:layout_weight="1" android:layout_marginEnd="4dp" android:layout_marginStart="4dp">
+                <ImageView android:id="@+id/n_stepsb_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/w_chip" />
+                <TextView android:id="@+id/n_stepsb_t" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#FFFFFF" android:text="👟 Steps" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_gravity="center"/>
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <TextView android:id="@+id/w_msg" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:padding="12dp" android:textSize="13sp" android:textStyle="bold" android:textColor="#FFFFFF" android:visibility="gone" />
+    <LinearLayout android:id="@+id/w_tools" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|end" android:layout_margin="4dp" android:orientation="horizontal">
+        <TextView android:id="@+id/w_updated" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:textSize="9sp" android:textColor="#99FFFFFF" android:text="⟳" />
+        <TextView android:id="@+id/w_cfg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:textSize="10sp" android:textColor="#99FFFFFF" android:text="⚙" />
+    </LinearLayout>
+</FrameLayout>

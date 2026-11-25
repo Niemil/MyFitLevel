@@ -27,7 +27,13 @@
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
             </intent-filter>
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
         </activity>
+
+        <activity android:name=".WidgetConfigActivity" android:exported="true" android:label="Widget settings">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" /></intent-filter>
+        </activity>
+        <activity android:name=".WidgetsActivity" android:exported="false" android:label="Widgets" />
 
         <activity android:name=".SyncActivity" android:exported="false" android:label="@string/sync_title" />
 
@@ -41,5 +47,50 @@
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
         </activity-alias>
+
+        <receiver android:name=".LevelWidget" android:exported="true" android:label="@string/wl_level">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_level" />
+        </receiver>
+        <receiver android:name=".StepsWidget" android:exported="true" android:label="@string/wl_steps">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_steps" />
+        </receiver>
+        <receiver android:name=".BossWidget" android:exported="true" android:label="@string/wl_boss">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_boss" />
+        </receiver>
+        <receiver android:name=".WeekWidget" android:exported="true" android:label="@string/wl_week">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_week" />
+        </receiver>
+        <receiver android:name=".ChestWidget" android:exported="true" android:label="@string/wl_chest">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_chest" />
+        </receiver>
+        <receiver android:name=".ActionsWidget" android:exported="true" android:label="@string/wl_actions">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_actions" />
+        </receiver>
+        <receiver android:name=".LogWidget" android:exported="true" android:label="@string/wl_log">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_log" />
+        </receiver>
+        <receiver android:name=".FeedWidget" android:exported="true" android:label="@string/wl_feed">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_feed" />
+        </receiver>
+        <receiver android:name=".FeedSmallWidget" android:exported="true" android:label="@string/wl_feedsmall">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_feedsmall" />
+        </receiver>
+        <receiver android:name=".MiniWidget" android:exported="true" android:label="@string/wl_mini">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_mini" />
+        </receiver>
+        <receiver android:name=".BundleWidget" android:exported="true" android:label="@string/wl_bundle">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_bundle" />
+        </receiver>
     </application>
 </manifest>

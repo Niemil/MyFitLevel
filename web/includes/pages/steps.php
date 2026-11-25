@@ -149,7 +149,7 @@ $g = fn(string $n) => e(asset('guide/' . $n));
 
 <div class="card">
   <h3>Other apps</h3>
-  <p class="small">Any app that can send a web request works: for example Tasker or MacroDroid can POST the same JSON. A proper Android app with Health Connect is planned for later.</p>
+  <p class="small">Any app that can send a web request works: for example Tasker or MacroDroid can POST the same JSON. Prefer something ready-made? Use the Android app above.</p>
   <pre class="small" style="white-space:pre-wrap">POST <?= e($site) ?>/api/v1/steps
 Authorization: Bearer YOUR_KEY
 Content-Type: application/json

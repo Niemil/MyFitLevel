@@ -12,7 +12,6 @@ $liftedLb = $lifted * LB_PER_KG;
 $setsN = (int)val("SELECT COUNT(*) FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.is_warmup = 0 AND e.kind IN ('weight','bodyweight')");
 $repsN = (int)val("SELECT COALESCE(SUM(s.reps),0) FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.is_warmup = 0 AND e.kind IN ('weight','bodyweight')");
 $stepsN = (int)val('SELECT COALESCE(SUM(steps),0) FROM daily_steps');
-$stepKm = (int)round(((float)val('SELECT COALESCE(SUM(distance_m),0) FROM daily_steps')) / 1000);
 $popular = rows("SELECT e.name, COUNT(DISTINCT s.workout_id) n FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE e.kind IN ('cardio','duration') GROUP BY e.id, e.name HAVING n >= 3 ORDER BY n DESC LIMIT 4");
 $lifters = (int)val('SELECT COUNT(DISTINCT user_id) FROM workouts');
 $avgW = $lifters > 0 ? round($workouts / $lifters, 1) : 0;
@@ -81,7 +80,7 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
       <div class="sc"><i class="sc-ic">📋</i><b data-count="<?= $workouts ?>" data-fmt="c"><?= e(fmt_big($workouts)) ?></b><span class="sc-lab"><?= $workouts === 1 ? 'workout' : 'workouts' ?> logged</span></div>
       <div class="sc"><i class="sc-ic">🔁</i><b data-count="<?= $setsN ?>" data-fmt="c"><?= e(fmt_big($setsN)) ?></b><span class="sc-lab">gym sets</span></div>
       <div class="sc"><i class="sc-ic">🔥</i><b data-count="<?= $repsN ?>" data-fmt="c"><?= e(fmt_big($repsN)) ?></b><span class="sc-lab">gym reps</span></div>
-      <?php if ($stepsN > 0): ?><div class="sc"><i class="sc-ic">👟</i><b data-count="<?= $stepsN ?>" data-fmt="c"><?= e(fmt_big($stepsN)) ?></b><span class="sc-lab">steps walked<?= $stepKm > 0 ? ' · ' . e(fmt_big($stepKm)) . ' km' : '' ?></span></div><?php endif; ?>
+      <?php if ($stepsN > 0): ?><div class="sc"><i class="sc-ic">👟</i><b data-count="<?= $stepsN ?>" data-fmt="c"><?= e(fmt_big($stepsN)) ?></b><span class="sc-lab">steps walked</span></div><?php endif; ?>
       <div class="sc"><i class="sc-ic">📈</i><b data-count="<?= (int)round($avgW * 10) ?>" data-fmt="d1"><?= e(number_format($avgW, 1)) ?></b><span class="sc-lab">workouts per lifter</span></div>
       <?php if ($popular): ?>
       <div class="sc sc-wide sc-pop"><span class="sc-lab">Popular beyond the gym</span>

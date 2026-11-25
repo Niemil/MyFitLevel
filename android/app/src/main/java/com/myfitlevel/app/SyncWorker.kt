@@ -15,6 +15,8 @@ class SyncWorker(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) {
     override suspend fun doWork(): Result {
         if (Prefs.key(applicationContext).isNotEmpty()) {
             Prefs.setStatus(applicationContext, StepSync.sync(applicationContext))
+            WidgetData.fetch(applicationContext)
+            Widgets.updateAll(applicationContext)
         }
         return Result.success()
     }

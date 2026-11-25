@@ -1249,7 +1249,7 @@ function game_team_buffs_def(): array
         'warband'    => ['Warband', '🔥', 'dmg', 20, 168, 1200, '+20% boss damage for everyone, 7 days'],
         'fortune'    => ['Fortune', '💰', 'coin', 15, 168, 350, '+15% coins from workouts, 7 days'],
         'treasure'   => ['Treasure Hunt', '🏴‍☠️', 'coin', 30, 168, 900, '+30% coins from workouts, 7 days'],
-        'rally'      => ['Rally', '📚', 'xp', 25, 168, 250, '+25% team XP from quests and raids, 7 days'],
+        'rally'      => ['Rally', '📚', 'xp', 25, 168, 250, '+25% team points from quests and raids, 7 days'],
     ];
 }
 
@@ -1409,7 +1409,7 @@ function game_team_check(int $teamId): void
         }
         game_team_xp_add($teamId, (int)round(60 * (float)game_cfg('team_xp_mult')), 'quest');
         q('UPDATE teams SET vault = vault + 30 WHERE id = ?', [$teamId]);
-        game_team_notify_all($teamId, 'team', '✅ Team quest done: ' . $qst['title'] . '. +60 team XP, +30 coins in the vault, +' . $coins . ' coins for everyone who trained.');
+        game_team_notify_all($teamId, 'team', '✅ Team quest done: ' . $qst['title'] . '. +60 team points, +30 coins in the vault, +' . $coins . ' coins for everyone who trained.');
     }
 }
 
@@ -1597,7 +1597,7 @@ function game_admin_view(): void
     <label>Team slots per level (comma list, level 1 first) <input name="team_slots" value="<?= e($slots) ?>"></label>
     <label>Boss health multiplier (1 = normal, 2 = twice as tough) <input name="boss_hp_mult" value="<?= e(game_cfg('boss_hp_mult')) ?>"></label>
     <label>Coin multiplier <input name="coin_mult" value="<?= e(game_cfg('coin_mult')) ?>"></label>
-    <label>Team XP multiplier (higher = teams level faster) <input name="team_xp_mult" value="<?= e(game_cfg('team_xp_mult')) ?>"></label>
+    <label>Team points multiplier (higher = teams level faster) <input name="team_xp_mult" value="<?= e(game_cfg('team_xp_mult')) ?>"></label>
     <label>Coins to start a team (0 = free) <input name="team_create_cost" type="number" min="0" max="5000" value="<?= e(game_cfg('team_create_cost')) ?>"></label>
     <label>Steps needed for 1 point <input name="steps_per_point" type="number" min="50" max="5000" value="<?= e(game_cfg('steps_per_point')) ?>"></label>
     <label>Max steps counted per day for points (0 = steps give no points) <input name="steps_cap_day" type="number" min="0" max="100000" value="<?= e(game_cfg('steps_cap_day')) ?>"></label>
@@ -1605,7 +1605,7 @@ function game_admin_view(): void
     <label>Hours before the next boss after a kill <input name="respawn_hours" type="number" min="0" max="72" value="<?= e(game_cfg('respawn_hours')) ?>"></label>
     <button class="btn" type="submit">Save</button>
   </form>
-  <p class="muted small">Team level needs 200 x (level-1)^2 team XP in total: level 5 is 3,200 and level 10 is 16,200. A team that clears its three weekly quests and its raid earns roughly 300 to 400 XP a week.</p>
+  <p class="muted small">Team level needs 200 x (level-1)^2 team points in total: level 5 is 3,200 and level 10 is 16,200. A team that clears its three weekly quests and its raid earns roughly 300 to 400 XP a week.</p>
 </div>
 <?php
 }

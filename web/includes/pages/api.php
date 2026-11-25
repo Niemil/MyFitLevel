@@ -139,6 +139,63 @@ switch ($route) {
             'week_goal' => weekly_goal($uid), 'week_days' => week_days_done($uid, bonus_week_start()), 'week_streak' => weekly_streak($uid, bonus_week_start()),
             'today_routine' => $tr ? $tr['name'] : 'Rest day', 'today_label' => $tr ? $tr['name'] : 'Rest day']);
 
+    case 'widgets':   // everything the Android home-screen widgets need, in one small call
+        game_ensure();
+        $pr = level_progress((int)$user['xp']);
+        $st = user_stats($uid);
+        $wl = game_wallet($uid);
+        $ch = game_chest_state($uid);
+        $goal = max(1000, (int)($wl['steps_goal'] ?? 10000));
+        $stepRow = row('SELECT steps, distance_m, updated_at FROM daily_steps WHERE user_id = ? AND day = ?', [$uid, date('Y-m-d')]);
+        $yest = (int)val('SELECT COALESCE(steps,0) FROM daily_steps WHERE user_id = ? AND day = ?', [$uid, date('Y-m-d', strtotime('yesterday'))]);
+        $wk = date('Y-m-d H:i:s', strtotime('monday this week'));
+        $bossOut = function (?array $b) use ($uid): ?array {
+            if (!$b) {
+                return null;
+            }
+            $r = game_roster_by_key((string)$b['boss_key']);
+            return ['id' => (int)$b['id'], 'name' => $b['name'], 'emoji' => $r[2], 'tier' => (int)$b['tier'], 'hp' => (int)$b['hp'], 'max_hp' => (int)$b['max_hp'],
+                'pct' => (int)max(0, min(100, round((int)$b['hp'] / max(1, (int)$b['max_hp']) * 100))), 'left' => game_fmt_left((string)$b['ends_at']),
+                'ends_at' => $b['ends_at'], 'my_damage' => (int)val('SELECT COALESCE(SUM(damage),0) FROM boss_log WHERE boss_id = ? AND user_id = ?', [$b['id'], $uid]),
+                'raid' => $b['team_id'] !== null];
+        };
+        $team = game_team_of($uid);
+        $nm = fn(array $r): string => ($r['display_name'] ?? '') !== '' ? (string)$r['display_name'] : (string)$r['username'];
+        $mk = function (string $t, string $who, string $text) {
+            return ['at' => $t, 'who' => $who, 'text' => $text];
+        };
+        $all = [];
+        foreach (rows("SELECT w.performed_at t, w.title, w.points, w.set_count, us.username, us.display_name FROM workouts w JOIN users us ON us.id = w.user_id WHERE us.is_banned = 0 ORDER BY w.performed_at DESC LIMIT 8") as $r) {
+            $all[] = $mk($r['t'], $nm($r), '🏋️ ' . ($r['title'] !== null && $r['title'] !== '' ? $r['title'] : 'a workout') . ' · ' . (int)$r['points'] . ' pts');
+        }
+        foreach (rows("SELECT p.created_at t, p.body, us.username, us.display_name FROM posts p JOIN users us ON us.id = p.user_id WHERE us.is_banned = 0 ORDER BY p.created_at DESC LIMIT 5") as $r) {
+            $all[] = $mk($r['t'], $nm($r), '💬 ' . mb_substr(trim(preg_replace('/\s+/', ' ', (string)$r['body'])), 0, 90));
+        }
+        usort($all, fn($a, $b) => strcmp($b['at'], $a['at']));
+        $mine = [];
+        foreach (rows('SELECT performed_at t, title, points FROM workouts WHERE user_id = ? ORDER BY performed_at DESC LIMIT 6', [$uid]) as $r) {
+            $mine[] = $mk($r['t'], 'You', '🏋️ ' . ($r['title'] !== null && $r['title'] !== '' ? $r['title'] : 'Workout') . ' · +' . (int)$r['points'] . ' pts');
+        }
+        foreach (rows('SELECT updated_at t, steps FROM daily_steps WHERE user_id = ? AND steps >= 1000 ORDER BY day DESC LIMIT 3', [$uid]) as $r) {
+            $mine[] = $mk($r['t'], 'You', '👟 ' . number_format((int)$r['steps']) . ' steps');
+        }
+        foreach (rows('SELECT created_at t, body FROM posts WHERE user_id = ? ORDER BY created_at DESC LIMIT 3', [$uid]) as $r) {
+            $mine[] = $mk($r['t'], 'You', '💬 ' . mb_substr(trim(preg_replace('/\s+/', ' ', (string)$r['body'])), 0, 90));
+        }
+        usort($mine, fn($a, $b) => strcmp($b['at'], $a['at']));
+        json_out(['ok' => true, 'now' => now(), 'name' => display_name($user), 'username' => $user['username'],
+            'level' => $pr['level'], 'xp' => (int)$user['xp'], 'level_xp' => $pr['into'], 'level_need' => $pr['need'], 'level_pct' => $pr['pct'],
+            'streak' => $st['streak'], 'workouts' => $st['workouts'], 'prs' => $st['prs'],
+            'week_workouts' => (int)val('SELECT COUNT(*) FROM workouts WHERE user_id = ? AND performed_at >= ?', [$uid, $wk]),
+            'week_points' => (int)val('SELECT COALESCE(SUM(points),0) FROM workouts WHERE user_id = ? AND performed_at >= ?', [$uid, $wk]),
+            'week_goal' => weekly_goal($uid), 'week_days' => week_days_done($uid, bonus_week_start()),
+            'steps_today' => (int)($stepRow['steps'] ?? 0), 'distance_m' => (int)($stepRow['distance_m'] ?? 0), 'steps_goal' => $goal,
+            'steps_yesterday' => $yest, 'steps_updated' => $stepRow['updated_at'] ?? null,
+            'coins' => (int)($wl['coins'] ?? 0), 'chest_ready' => (bool)$ch['can'], 'chest_reward' => (int)$ch['reward'], 'chest_streak' => (int)$ch['streak'],
+            'boss' => $bossOut(game_boss_public()), 'raid' => $team ? $bossOut(game_boss_team((int)$team['id'])) : null,
+            'unread' => (int)val('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0', [$uid]),
+            'feed_all' => array_slice($all, 0, 6), 'feed_mine' => array_slice($mine, 0, 6)]);
+
     case 'stats':
         $st = user_stats($uid);
         json_out(['ok' => true, 'stats' => [

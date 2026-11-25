@@ -280,7 +280,7 @@ if ($viewId) {
     <?php if ($team['description']): ?><p class="muted" style="margin:.2rem 0"><?= e($team['description']) ?></p><?php endif; ?>
     <div class="tm-lvl"><b>Team level <?= $lvl ?><?= $lvl >= $max ? ' (max)' : '' ?></b> · <?= count($members) ?>/<?= $slotsMax ?> members</div>
     <div class="xpbar"><i style="width:<?= $pct ?>%"></i></div>
-    <div class="xpnote"><?= $lvl >= $max ? 'Max level reached 🏰' : number_format($xpNow) . ' / ' . number_format($to) . ' team XP to level ' . ($lvl + 1) . ' (+' . (game_team_slots($lvl + 1) - $slotsMax) . ' slots)' ?></div>
+    <div class="xpnote"><?= $lvl >= $max ? 'Max level reached 🏰' : number_format($xpNow) . ' / ' . number_format($to) . ' team points to level ' . ($lvl + 1) . ' (+' . (game_team_slots($lvl + 1) - $slotsMax) . ' slots)' ?></div>
   </div>
 </div>
 
@@ -305,13 +305,13 @@ if ($viewId) {
 <?php if ($isMember): ?>
 <div class="card">
   <h3>⚔️ Team raid</h3>
-  <p class="muted small" style="margin-top:0">A boss only your team fights. Your workouts also hit the public boss at the same time. Defeat it for coins and team XP.</p>
+  <p class="muted small" style="margin-top:0">A boss only your team fights. Your workouts also hit the public boss at the same time. Defeat it for coins and team points.</p>
   <?php game_boss_card($raid, 'full', $raid ? (int)($raidHits[$uid] ?? 0) : null); ?>
   <?php if ($raid) { game_boss_log_card((int)$raid['id'], $uid, true); } ?>
   <?php if (!$raid): ?>
     <h4 style="margin:.8rem 0 .3rem">Choose the next raid boss</h4>
     <?php if ($waitTs > time()): ?><p class="muted small">The next boss can be called in about <?= max(1, (int)ceil(($waitTs - time()) / 3600)) ?> h. Rest up!</p>
-    <?php else: ?><p class="muted small">Bigger bosses have more health and pay more coins and team XP. If nobody picks within a day, the next one in the cycle appears by itself.<?= $staff ? '' : ' A leader or officer picks.' ?></p>
+    <?php else: ?><p class="muted small">Bigger bosses have more health and pay more coins and team points. If nobody picks within a day, the next one in the cycle appears by itself.<?= $staff ? '' : ' A leader or officer picks.' ?></p>
       <div class="gshop">
       <?php foreach (game_roster() as $i => $rb): $need = game_raid_unlocks()[$i]; $open = $lvl >= $need; ?>
         <form method="post" class="gitem<?= $open ? '' : ' locked' ?>"><?= csrf_field() ?><input type="hidden" name="tid" value="<?= $tid ?>"><input type="hidden" name="do" value="pick_boss"><input type="hidden" name="boss" value="<?= e($rb[0]) ?>">
@@ -331,7 +331,7 @@ if ($viewId) {
       <span class="tq-ic"><?= e($qq['icon']) ?></span>
       <div class="grow"><b><?= e($qq['title']) ?></b> <small class="muted"><?= e($qq['desc']) ?></small>
         <div class="xpbar"><i style="width:<?= $p ?>%"></i></div>
-        <div class="xpnote"><?= $qq['done'] ? 'Done ✔ +60 team XP and coins' : number_format(min($qq['progress'], $qq['target']), $qq['code'] === 'km' ? 1 : 0) . ' / ' . number_format($qq['target']) ?></div></div>
+        <div class="xpnote"><?= $qq['done'] ? 'Done ✔ +60 team points and coins' : number_format(min($qq['progress'], $qq['target']), $qq['code'] === 'km' ? 1 : 0) . ' / ' . number_format($qq['target']) ?></div></div>
     </div>
   <?php endforeach; ?>
   <p class="muted small" style="margin-bottom:0">New quests every Monday. Any member can add progress, and walks and runs count.</p>
@@ -371,7 +371,7 @@ if ($viewId) {
   <form method="post" class="chalform"><?= csrf_field() ?><input type="hidden" name="tid" value="<?= $tid ?>"><input type="hidden" name="do" value="donate">
     <label>Give coins (you have <?= $myCoins ?>) <input name="amount" type="number" min="10" max="5000" value="<?= min(50, max(10, $myCoins)) ?>"></label>
     <button class="btn" type="submit" <?= $myCoins < 10 ? 'disabled' : '' ?>>Give to the vault</button></form>
-  <p class="muted small">Every 10 coins given also adds 1 team XP.<?php if ($gifters): ?> Top givers: <?php foreach ($gifters as $i => $gf): ?><?= $i ? ', ' : '' ?><?= e(display_name($gf)) ?> (<?= (int)$gf['amt'] ?>)<?php endforeach; ?>.<?php endif; ?></p>
+  <p class="muted small">Every 10 coins given also adds 1 team points.<?php if ($gifters): ?> Top givers: <?php foreach ($gifters as $i => $gf): ?><?= $i ? ', ' : '' ?><?= e(display_name($gf)) ?> (<?= (int)$gf['amt'] ?>)<?php endforeach; ?>.<?php endif; ?></p>
   <div class="gshop">
   <?php foreach ($buffDefs as $code => [$bn, $bi, $kind, $pct, $hrs, $cost, $desc]): $on = $bonus['active'][$code] ?? null; ?>
     <form method="post" class="gitem<?= $on ? ' on' : '' ?>"><?= csrf_field() ?><input type="hidden" name="tid" value="<?= $tid ?>"><input type="hidden" name="do" value="buy_buff"><input type="hidden" name="code" value="<?= e($code) ?>">

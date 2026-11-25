@@ -188,7 +188,7 @@ if (is_post()) {
             if ($sat + 2 * 86400 <= time()) {
                 $sat = strtotime('+7 days', $sat);
             }
-            if ($p === 'double') { [$title, $desc, $kind, $pct, $target, $reward, $s, $e2] = ['Double XP weekend', 'Every workout from Saturday to Sunday night pays double.', 'boost', 100, 0, 0, $sat, $sat + 2 * 86400]; }
+            if ($p === 'double') { [$title, $desc, $kind, $pct, $target, $reward, $s, $e2] = ['Double points weekend', 'Every workout from Saturday to Sunday night pays double.', 'boost', 100, 0, 0, $sat, $sat + 2 * 86400]; }
             elseif ($p === 'bonusweek') { [$title, $desc, $kind, $pct, $target, $reward, $s, $e2] = ['Bonus week', 'A whole week of +50% points.', 'boost', 50, 0, 0, strtotime('today 00:00'), strtotime('+7 days 00:00')]; }
             elseif (in_array($p, ['xmas', 'newyear', 'bossweekend'], true)) {
                 $yr = (int)date('Y');
@@ -433,7 +433,7 @@ layout_header('Admin');
   <h3>Quick events</h3>
   <div class="evtiles">
     <form method="post" class="evtile"><?= csrf_field() ?><input type="hidden" name="do" value="ev_preset"><input type="hidden" name="preset" value="double">
-      <span class="ev-ic">⚡</span><b>Double XP weekend</b><small>Next Sat–Sun</small><small class="ev-b">+100% points</small><button class="btn small" type="submit">Create</button></form>
+      <span class="ev-ic">⚡</span><b>Double points weekend</b><small>Next Sat–Sun</small><small class="ev-b">+100% points</small><button class="btn small" type="submit">Create</button></form>
     <form method="post" class="evtile"><?= csrf_field() ?><input type="hidden" name="do" value="ev_preset"><input type="hidden" name="preset" value="bonusweek">
       <span class="ev-ic">🔥</span><b>Bonus week</b><small>7 days from today</small><small class="ev-b">+50% points</small><button class="btn small" type="submit">Create</button></form>
     <form method="post" class="evtile"><?= csrf_field() ?><input type="hidden" name="do" value="ev_preset"><input type="hidden" name="preset" value="bossweekend">

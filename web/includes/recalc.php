@@ -245,7 +245,7 @@ function recalc_user(int $uid, bool $notify = false): array
     $changed = $after !== $before;
     if ($changed && $notify && $before['xp'] > 0) {
         q('INSERT INTO notifications (user_id, type, text, created_at) VALUES (?,?,?,?)',
-          [$uid, 'level', 'We fine-tuned how XP is calculated, so your totals were updated: ' . number_format($after['xp']) . ' XP, level ' . $after['level'] . '.', now()]);
+          [$uid, 'level', 'We fine-tuned how points are calculated, so your totals were updated: ' . number_format($after['xp']) . ' points, level ' . $after['level'] . '.', now()]);
     }
     return ['changed' => $changed, 'before' => $before, 'after' => $after];
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView android:id="@+id/w_bg" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY" android:src="@drawable/w_bg_m" />
+    <LinearLayout android:id="@+id/w_content" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="12dp">
+        <LinearLayout android:id="@+id/b_row" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:id="@+id/b_emoji" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="36sp" android:textColor="#FFFFFF" android:text="👺" android:maxLines="1" android:ellipsize="end" />
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:layout_marginEnd="30dp" android:orientation="vertical">
+                <TextView android:id="@+id/b_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#FFFFFF" android:text="Goblin Warlord" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                <TextView android:id="@+id/b_kind" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="10sp" android:textColor="#FFFFFF" android:text="Weekly boss · Tier 2" android:maxLines="1" android:ellipsize="end" />
+            </LinearLayout>
+        </LinearLayout>
+        <ImageView android:id="@+id/b_bar" android:layout_width="match_parent" android:layout_height="12dp" android:scaleType="fitXY" android:layout_marginTop="8dp"/>
+        <TextView android:id="@+id/b_hp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#FFFFFF" android:text="2,008 / 6,612 HP" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" android:layout_marginTop="4dp"/>
+        <TextView android:id="@+id/b_meta" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#FFFFFF" android:text="⏳ 6d 3h left · your damage 284" android:maxLines="1" android:ellipsize="end" />
+    </LinearLayout>
+    <TextView android:id="@+id/w_msg" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:padding="12dp" android:textSize="13sp" android:textStyle="bold" android:textColor="#FFFFFF" android:visibility="gone" />
+    <LinearLayout android:id="@+id/w_tools" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="top|end" android:layout_margin="4dp" android:orientation="horizontal">
+        <TextView android:id="@+id/w_updated" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:textSize="9sp" android:textColor="#99FFFFFF" android:text="⟳" />
+        <TextView android:id="@+id/w_cfg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:padding="4dp" android:textSize="10sp" android:textColor="#99FFFFFF" android:text="⚙" />
+    </LinearLayout>
+</FrameLayout>

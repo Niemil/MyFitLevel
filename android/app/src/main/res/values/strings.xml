@@ -1,4 +1,30 @@
 <resources>
     <string name="app_name">MyFitLevel</string>
     <string name="sync_title">Step sync</string>
+    <string name="wl_level">Level</string>
+    <string name="wd_level">Your level, progress ring and how far to the next level.</string>
+    <string name="wl_steps">Steps</string>
+    <string name="wd_steps">Steps today with a progress bar, distance and sync status.</string>
+    <string name="wl_boss">Boss</string>
+    <string name="wd_boss">The weekly boss or your team raid: HP bar, time left, your damage.</string>
+    <string name="wl_week">Week and streak</string>
+    <string name="wd_week">Workout days this week against your goal, plus your streak.</string>
+    <string name="wl_chest">Daily chest</string>
+    <string name="wd_chest">Is your daily chest ready? Streak reward and coin balance.</string>
+    <string name="wl_actions">Quick buttons</string>
+    <string name="wd_actions">Five shortcuts: log, feed, boss, steps and chest.</string>
+    <string name="wl_log">Log workout</string>
+    <string name="wd_log">One big button that opens the workout logger.</string>
+    <string name="wl_feed">Feed</string>
+    <string name="wd_feed">Latest from everyone, or only you. Tap to open the feed.</string>
+    <string name="wl_feedsmall">Feed ticker</string>
+    <string name="wd_feedsmall">The two newest feed lines, small and quiet.</string>
+    <string name="wl_mini">Minimal stats</string>
+    <string name="wd_mini">Level, steps and streak as three clean numbers. Looks great see-through.</string>
+    <string name="wl_bundle">Everything</string>
+    <string name="wd_bundle">Big dashboard: level, steps, boss, week, chest and quick buttons.</string>
+    <string name="sc_log">Log workout</string>
+    <string name="sc_steps">Steps</string>
+    <string name="sc_boss">Boss</string>
+    <string name="sc_feed">Feed</string>
 </resources>

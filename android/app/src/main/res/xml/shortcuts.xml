@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="log" android:enabled="true" android:icon="@drawable/ic_launcher" android:shortcutShortLabel="@string/sc_log">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.myfitlevel.app" android:targetClass="com.myfitlevel.app.MainActivity">
+            <extra android:name="url" android:value="https://myfitlevel.com/track" />
+        </intent>
+    </shortcut>
+    <shortcut android:shortcutId="steps" android:enabled="true" android:icon="@drawable/ic_launcher" android:shortcutShortLabel="@string/sc_steps">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.myfitlevel.app" android:targetClass="com.myfitlevel.app.MainActivity">
+            <extra android:name="url" android:value="https://myfitlevel.com/steps" />
+        </intent>
+    </shortcut>
+    <shortcut android:shortcutId="boss" android:enabled="true" android:icon="@drawable/ic_launcher" android:shortcutShortLabel="@string/sc_boss">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.myfitlevel.app" android:targetClass="com.myfitlevel.app.MainActivity">
+            <extra android:name="url" android:value="https://myfitlevel.com/boss" />
+        </intent>
+    </shortcut>
+    <shortcut android:shortcutId="feed" android:enabled="true" android:icon="@drawable/ic_launcher" android:shortcutShortLabel="@string/sc_feed">
+        <intent android:action="android.intent.action.VIEW" android:targetPackage="com.myfitlevel.app" android:targetClass="com.myfitlevel.app.MainActivity">
+            <extra android:name="url" android:value="https://myfitlevel.com/feed" />
+        </intent>
+    </shortcut>
+</shortcuts>

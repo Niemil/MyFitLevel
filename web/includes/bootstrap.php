@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('APP_VERSION', '3.35.3');
+define('APP_VERSION', '3.36.0');
 const SCHEMA_VERSION = 16;
 
 if (!defined('APP_ROOT')) {
@@ -70,6 +70,7 @@ require __DIR__ . '/routines.php';
 require __DIR__ . '/skins.php';
 require __DIR__ . '/questlines.php';
 require __DIR__ . '/strength.php';
+require __DIR__ . '/blog.php';
 require __DIR__ . '/challenges.php';
 require __DIR__ . '/tiers.php';
 require __DIR__ . '/webhook.php';

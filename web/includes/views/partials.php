@@ -102,7 +102,7 @@ function layout_header(string $title, string $active = '', array $meta = []): vo
     if (isset($meta['path'])) {
         $canon = site_url((string)$meta['path']);
     }
-    $img = site_url('assets/og-image.png');
+    $img = (string)($meta['image'] ?? site_url('assets/og-image.png'));
     ?><!DOCTYPE html>
 <html lang="en" data-theme="dark" data-skin="<?= e(active_skin($u ?? null)) ?>">
 <head>
@@ -243,6 +243,7 @@ function layout_footer(string $active = '', array $scripts = []): void
     <a href="<?= e(url('gyms')) ?>">Gyms</a>
     <a href="<?= e(url('exercises')) ?>">Exercise library</a>
     <a href="<?= e(url('fitocracy-alternative')) ?>">Fitocracy alternative</a>
+    <a href="<?= e(url('blog')) ?>">Blog</a>
     <a href="<?= e(url('updates')) ?>">Updates</a>
     <a href="<?= e(url('about')) ?>">About</a>
     <a href="<?= e(url('api-docs')) ?>">API</a>

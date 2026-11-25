@@ -156,6 +156,17 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
   </div>
 </section>
 
+<?php $latest = blog_latest(3); if ($latest): ?>
+<section class="sect rv">
+  <h2>From the blog</h2>
+  <div class="steps">
+    <?php foreach ($latest as $bp): ?>
+      <a class="card" href="<?= e(url('blog/' . $bp['slug'])) ?>"><h3><?= e($bp['title']) ?></h3><p><?= e($bp['excerpt']) ?></p></a>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
+
 <section class="sect faq rv">
   <h2>Questions</h2>
   <?php foreach ($faq as $f): ?>

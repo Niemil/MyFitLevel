@@ -298,6 +298,7 @@ layout_header('Admin');
   <a class="<?= $tab === 'site' ? 'on' : '' ?>" href="<?= e(url('admin?tab=site')) ?>">Site</a>
   <a class="<?= $tab === 'fito' ? 'on' : '' ?>" href="<?= e(url('admin?tab=fito')) ?>">Fitocracy data</a>
  <a class="<?= $tab === 'events' ? 'on' : '' ?>" href="<?= e(url('admin?tab=events')) ?>">Events</a>
+  <a href="<?= e(url('blog/admin')) ?>">Blog</a>
   <a class="<?= $tab === 'stats' ? 'on' : '' ?>" href="<?= e(url('admin?tab=stats')) ?>">Stats</a>
   <a class="<?= $tab === 'game' ? 'on' : '' ?>" href="<?= e(url('admin?tab=game')) ?>">Game</a>
   <a class="<?= $tab === 'email' ? 'on' : '' ?>" href="<?= e(url('admin?tab=email')) ?>">Email</a>

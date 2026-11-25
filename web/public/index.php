@@ -94,6 +94,8 @@ $routes = [
     '#^exercises/([a-z0-9-]{1,80})$#' => 'exercise',
     '#^robots\.txt$#'              => 'robots',
     '#^sitemap\.xml$#'             => 'sitemap',
+    '#^blog/admin$#'               => 'blog_admin',
+    '#^blog(?:/(feed\.xml|[a-z0-9-]{1,120}))?$#' => 'blog',
 ];
 
 foreach ($routes as $re => $page) {

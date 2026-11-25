@@ -48,6 +48,24 @@
     } else go();
   });
 
+  /* kg <-> lb swap card */
+  var wt = document.getElementById('wt'), wtu = document.getElementById('wtu');
+  if (wt) {
+    var wsw = document.querySelectorAll('.sc-sw button'), cur = 'kg', timer = null;
+    var setUnit = function (u, anim) {
+      cur = u; var to = Number(wt.getAttribute('data-' + u)) || 0;
+      wtu.textContent = u;
+      for (var i = 0; i < wsw.length; i++) wsw[i].classList.toggle('on', wsw[i].getAttribute('data-u') === u);
+      if (calm || !anim) { wt.textContent = compact(to); return; }
+      wt.classList.remove('flip'); void wt.offsetWidth; wt.classList.add('flip');
+      var t0 = null;
+      (function st(t) { if (t0 === null) t0 = t; var k = Math.min(1, (t - t0) / 900); wt.textContent = compact(Math.round(to * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(st); })(performance.now());
+    };
+    var cycle = function () { timer = setInterval(function () { setUnit(cur === 'kg' ? 'lb' : 'kg', true); }, 3800); };
+    for (var q = 0; q < wsw.length; q++) wsw[q].addEventListener('click', function () { clearInterval(timer); setUnit(this.getAttribute('data-u'), true); cycle(); });
+    if (!calm) { setUnit('kg', true); cycle(); }
+  }
+
   /* demo workout loop */
   var demo = document.getElementById('demo');
   if (!demo) return;

@@ -9,8 +9,11 @@ $members = (int)val('SELECT COUNT(*) FROM users');
 $workouts = (int)val('SELECT COUNT(*) FROM workouts');
 $lifted = (float)val('SELECT COALESCE(SUM(volume_kg),0) FROM workouts');
 $liftedLb = $lifted * LB_PER_KG;
-$setsN = (int)val('SELECT COUNT(*) FROM workout_sets WHERE is_warmup = 0');
-$repsN = (int)val('SELECT COALESCE(SUM(reps),0) FROM workout_sets WHERE is_warmup = 0');
+$setsN = (int)val("SELECT COUNT(*) FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.is_warmup = 0 AND e.kind IN ('weight','bodyweight')");
+$repsN = (int)val("SELECT COALESCE(SUM(s.reps),0) FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.is_warmup = 0 AND e.kind IN ('weight','bodyweight')");
+$stepsN = (int)val('SELECT COALESCE(SUM(steps),0) FROM daily_steps');
+$stepKm = (int)round(((float)val('SELECT COALESCE(SUM(distance_m),0) FROM daily_steps')) / 1000);
+$popular = rows("SELECT e.name, COUNT(DISTINCT s.workout_id) n FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE e.kind IN ('cardio','duration') GROUP BY e.id, e.name HAVING n >= 3 ORDER BY n DESC LIMIT 4");
 $lifters = (int)val('SELECT COUNT(DISTINCT user_id) FROM workouts');
 $avgW = $lifters > 0 ? round($workouts / $lifters, 1) : 0;
 $open = setting('registration', '1') === '1';
@@ -66,15 +69,25 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
       <a href="<?= e(url('api-docs')) ?>"><b>Open API</b><small>Docs &amp; API keys</small></a>
     </div>
     <?php if ($members > 0): ?>
-    <div class="h2-stats">
-      <div><b data-count="<?= $members ?>" data-fmt="c"><?= e(fmt_big($members)) ?></b><span><?= $members === 1 ? 'member' : 'members' ?></span></div>
-      <div><b data-count="<?= $lifters ?>" data-fmt="c"><?= e(fmt_big($lifters)) ?></b><span><?= $lifters === 1 ? 'lifter logging' : 'lifters logging' ?></span></div>
-      <div><b data-count="<?= $workouts ?>" data-fmt="c"><?= e(fmt_big($workouts)) ?></b><span><?= $workouts === 1 ? 'workout' : 'workouts' ?> logged</span></div>
-      <div><b data-count="<?= (int)round($lifted) ?>" data-fmt="c"><?= e(fmt_big($lifted)) ?></b><span>kg lifted</span></div>
-      <div><b data-count="<?= (int)round($liftedLb) ?>" data-fmt="c"><?= e(fmt_big($liftedLb)) ?></b><span>lb lifted</span></div>
-      <div><b data-count="<?= $setsN ?>" data-fmt="c"><?= e(fmt_big($setsN)) ?></b><span><?= $setsN === 1 ? 'set' : 'sets' ?></span></div>
-      <div><b data-count="<?= $repsN ?>" data-fmt="c"><?= e(fmt_big($repsN)) ?></b><span><?= $repsN === 1 ? 'rep' : 'reps' ?></span></div>
-      <div><b data-count="<?= (int)round($avgW * 10) ?>" data-fmt="d1"><?= e(number_format($avgW, 1)) ?></b><span>workouts per lifter</span></div>
+    <div class="stx">
+      <div class="sc sc-wide sc-w">
+        <i class="sc-ic">🏋️</i>
+        <b class="sc-num" id="wt" data-kg="<?= (int)round($lifted) ?>" data-lb="<?= (int)round($liftedLb) ?>"><?= e(fmt_big($lifted)) ?></b>
+        <span class="sc-lab"><u id="wtu">kg</u> lifted in total</span>
+        <em class="sc-sw"><button type="button" class="on" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></em>
+      </div>
+      <div class="sc"><i class="sc-ic">👥</i><b data-count="<?= $members ?>" data-fmt="c"><?= e(fmt_big($members)) ?></b><span class="sc-lab"><?= $members === 1 ? 'member' : 'members' ?></span></div>
+      <div class="sc"><i class="sc-ic">💪</i><b data-count="<?= $lifters ?>" data-fmt="c"><?= e(fmt_big($lifters)) ?></b><span class="sc-lab"><?= $lifters === 1 ? 'lifter logging' : 'lifters logging' ?></span></div>
+      <div class="sc"><i class="sc-ic">📋</i><b data-count="<?= $workouts ?>" data-fmt="c"><?= e(fmt_big($workouts)) ?></b><span class="sc-lab"><?= $workouts === 1 ? 'workout' : 'workouts' ?> logged</span></div>
+      <div class="sc"><i class="sc-ic">🔁</i><b data-count="<?= $setsN ?>" data-fmt="c"><?= e(fmt_big($setsN)) ?></b><span class="sc-lab">gym sets</span></div>
+      <div class="sc"><i class="sc-ic">🔥</i><b data-count="<?= $repsN ?>" data-fmt="c"><?= e(fmt_big($repsN)) ?></b><span class="sc-lab">gym reps</span></div>
+      <?php if ($stepsN > 0): ?><div class="sc"><i class="sc-ic">👟</i><b data-count="<?= $stepsN ?>" data-fmt="c"><?= e(fmt_big($stepsN)) ?></b><span class="sc-lab">steps walked<?= $stepKm > 0 ? ' · ' . e(fmt_big($stepKm)) . ' km' : '' ?></span></div><?php endif; ?>
+      <div class="sc"><i class="sc-ic">📈</i><b data-count="<?= (int)round($avgW * 10) ?>" data-fmt="d1"><?= e(number_format($avgW, 1)) ?></b><span class="sc-lab">workouts per lifter</span></div>
+      <?php if ($popular): ?>
+      <div class="sc sc-wide sc-pop"><span class="sc-lab">Popular beyond the gym</span>
+        <div><?php foreach ($popular as $pp): ?><a><?= e($pp['name']) ?> <small><?= (int)$pp['n'] ?>×</small></a><?php endforeach; ?></div>
+      </div>
+      <?php endif; ?>
     </div>
     <?php endif; ?>
   </div>

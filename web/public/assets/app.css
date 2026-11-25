@@ -1003,3 +1003,24 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 .sx-t th{text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 @media(prefers-reduced-motion:reduce){.kp,.hbt i,.sx-chart .col{animation:none}}
 .hero2 .h2-stats span{color:var(--muted,#6b7280);font-weight:500}
+
+/* v3.34.1 landing stat cards */
+.stx{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:26px;max-width:680px}
+.stx .sc{position:relative;overflow:hidden;background:linear-gradient(155deg,rgba(255,255,255,.09),rgba(255,255,255,.03));border:1px solid var(--line,rgba(255,255,255,.14));border-radius:18px;padding:14px 14px 12px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.18);transition:transform .25s,border-color .25s}
+.stx .sc:hover{transform:translateY(-3px);border-color:var(--accent)}
+.stx .sc-ic{position:absolute;right:10px;top:8px;font-style:normal;font-size:1.15rem;opacity:.9}
+.stx .sc b{display:block;font-size:1.9rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums;background:linear-gradient(90deg,var(--text),var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stx .sc-lab{display:block;margin-top:5px;font-size:.8rem;color:var(--muted);line-height:1.25}
+.stx .sc-wide{grid-column:span 2}
+.stx .sc-w{background:linear-gradient(135deg,rgba(124,92,255,.35),rgba(255,92,170,.18));border-color:rgba(160,130,255,.5);padding:16px 18px}
+.stx .sc-w .sc-num{font-size:3rem}
+.stx .sc-w .sc-lab u{text-decoration:none;font-weight:800;color:var(--text)}
+.stx .sc-num.flip{animation:scflip .5s both}
+@keyframes scflip{0%{transform:translateY(-40%) rotateX(70deg);opacity:0}100%{transform:none;opacity:1}}
+.stx .sc-sw{position:absolute;right:12px;bottom:12px;display:flex;background:rgba(0,0,0,.25);border-radius:999px;padding:3px;font-style:normal}
+.stx .sc-sw button{border:0;background:none;color:var(--muted);font:inherit;font-size:.75rem;font-weight:700;padding:3px 10px;border-radius:999px;cursor:pointer}
+.stx .sc-sw button.on{background:var(--accent);color:#fff}
+.stx .sc-pop div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.stx .sc-pop a{background:rgba(255,255,255,.08);border-radius:999px;padding:4px 11px;font-size:.82rem;font-weight:600}
+.stx .sc-pop small{opacity:.7}
+@media(max-width:560px){.stx{grid-template-columns:repeat(2,minmax(0,1fr))}.stx .sc b{font-size:1.7rem}.stx .sc-w .sc-num{font-size:2.5rem}}

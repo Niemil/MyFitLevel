@@ -38,9 +38,9 @@ class WidgetsActivity : AppCompatActivity() {
             Triple(MiniWidget::class.java, R.drawable.prev_mini, "Minimal stats" to "Level, steps and streak. Looks best see-through."),
         )
         val mgr = AppWidgetManager.getInstance(this)
-        for ((cls, img, text) in items) {
-            col.addView(label(text.first, 16f, true).apply { setPadding(0, dp(20), 0, dp(2)) })
-            col.addView(label(text.second, 12f, false, 0xFF9AA5B5.toInt()))
+        for ((cls, img, info) in items) {
+            col.addView(label(info.first, 16f, true).apply { setPadding(0, dp(20), 0, dp(2)) })
+            col.addView(label(info.second, 12f, false, 0xFF9AA5B5.toInt()))
             col.addView(ImageView(this).apply { setImageResource(img); adjustViewBounds = true }, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
             col.addView(Button(this).apply {
                 text = "Add to home screen"

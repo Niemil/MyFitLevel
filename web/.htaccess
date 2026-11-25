@@ -1,0 +1,12 @@
+# Root .htaccess: lets you drop this whole folder into public_html/ (e.g. public_html/fitness)
+# and serve only the public/ folder. If your domain's document root points straight at
+# public/, this file is not used.
+Options -Indexes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # never serve internals
+  RewriteRule ^(includes|config|data|storage)(/|$) - [F,L]
+  # send everything else into public/
+  RewriteCond %{REQUEST_URI} !/public/
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

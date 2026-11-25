@@ -3,3 +3,11 @@
 build/
 local.properties
 .idea/
+
+# Website (web/): never commit secrets or runtime files
+web/config/config.php
+web/config/installed.lock
+web/config/*.log
+web/**/errors.log
+*.log
+.env

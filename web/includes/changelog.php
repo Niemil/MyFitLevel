@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.36.1', '2026-11-25 17:10', 'Researched Fitocracy history post', ['Improve The post on what happened to Fitocracy now covers the documented timeline, what is not known, and a first-hand account, with sources.'], 'improve'],
     ['3.36.0', '2026-11-25 16:05', 'A blog', ['New A blog at /blog with an editor for admins (Admin > Blog): drafts, scheduling, SEO checklist, RSS feed, sitemap entries and article markup for Google.', 'New Three launch posts are waiting as drafts: why MyFitLevel exists, what happened to Fitocracy, and a guide to Fitocracy alternatives.', 'New Latest posts show on the landing page and a Blog link was added to the footer.'], 'new'],
     ['3.35.3', '2026-11-25 13:50', 'Step sync status in the menu', ['New The menu now shows your steps today and when they were last updated, right under your level. It turns amber if nothing has synced for a few hours. Tap it for details.'], 'new'],
     ['3.35.2', '2026-11-25 13:35', 'Steps connect card shows up in the app', ['Fix The Connect / Reconnect this phone card on the Steps page is now shown whenever the page is opened in the Android app (recognised by user agent, app cookie or Android WebView), so it no longer depends on one header.'], 'fix'],

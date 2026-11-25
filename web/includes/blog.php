@@ -6,6 +6,7 @@ declare(strict_types=1);
 function blog_ensure(): void
 {
     if (setting('blog_tables_ok', '') === '1') {
+        blog_reseed();
         return;
     }
     q("CREATE TABLE IF NOT EXISTS blog_posts (
@@ -113,4 +114,23 @@ function blog_latest(int $n = 3): array
 {
     blog_ensure();
     return rows("SELECT slug, title, excerpt, published_at FROM blog_posts WHERE status = 'published' AND published_at <= ? ORDER BY published_at DESC LIMIT " . (int)$n, [now()]);
+}
+
+/** A launch post that has a newer revision is replaced only if it is still exactly the old seeded text (never overwrites the admin's own edits). */
+function blog_reseed(): void
+{
+    $rev = 2;
+    if ((int)setting('blog_seed_rev', '1') >= $rev || !is_file(__DIR__ . '/blog_seed.php')) {
+        return;
+    }
+    foreach ((require __DIR__ . '/blog_seed.php') as $p) {
+        if (empty($p['prev'])) {
+            continue;
+        }
+        $cur = row('SELECT id, body FROM blog_posts WHERE slug = ?', [$p['slug']]);
+        if ($cur && md5(str_replace("\r\n", "\n", trim((string)$cur['body']))) === $p['prev']) {
+            q('UPDATE blog_posts SET title = ?, excerpt = ?, body = ?, tags = ?, updated_at = ? WHERE id = ?', [$p['title'], $p['excerpt'], $p['body'], $p['tags'], now(), $cur['id']]);
+        }
+    }
+    set_setting('blog_seed_rev', (string)$rev);
 }

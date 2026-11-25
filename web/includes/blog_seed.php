@@ -51,40 +51,43 @@ MD,
 ],
 [
 'slug' => 'what-happened-to-fitocracy',
-'title' => 'What happened to Fitocracy? A short history of the gamified workout site',
-'excerpt' => 'Fitocracy turned lifting into a game, grew to millions of users, was sold in 2016 and was offline by 2024. Here is the timeline and what people still miss.',
+'rev' => 2, 'prev' => 'f391e6bbc318807bcd5cb565c6e16cc5',
+'title' => 'What happened to Fitocracy? What we know, and what we do not',
+'excerpt' => 'Fitocracy launched in 2011, was sold in 2016 and was offline by 2024. Here is the documented timeline, what I saw as a user, and what nobody has explained.',
 'tags' => 'fitocracy,history',
 'body' => <<<'MD'
-If you are searching for what happened to Fitocracy, here is the short version: it was one of the best-known gamified fitness communities of the 2010s, it changed hands, it slowly stopped working, and as of 2024 the website is offline. Here is the timeline as it is publicly documented.
+I get asked, and I ask it myself: what actually happened to Fitocracy? I used it for years, and then one day it was just gone. So I went digging. Here is what I could confirm, what I could not, and what I saw as a user.
 
-## The timeline
+## The short version
 
-- **February 2011:** Fitocracy launches, using an invite system to control signups.
-- **Late 2011:** it introduces advertising and a paid ad-free option called Fitocracy Hero.
-- **2012:** the iOS app arrives, followed by an Android app in early 2013.
-- **2014:** it is named one of TIME's best websites of the year.
-- **2016:** the company is acquired by a buyer that was not publicly named.
-- **2017:** the company announces 12.5 million active users.
-- **2024:** the website is reported to be offline.
+Fitocracy was a gamified workout log and social network that launched in 2011. It was sold in 2016, got very little attention after that, and by 2024 the website was offline. I could not find any official announcement explaining why, or the exact day it closed, so I will not pretend to know the reasons.
 
-## Why people loved it
+## What is documented
 
-The idea was simple and it worked. You earned **points for every set**, heavier lifts and harder work paid more, and points turned into **levels**. On top of that came achievements, quests, and **props**, the friendly thumbs-up other members gave you for a good workout. The social layer mattered as much as the game: beginners could ask questions, veterans shared programs, and a streak felt like a promise you made to people who would notice if you broke it.
+- **Founders:** Dick Talens and Brian Wang, two self-described computer nerds from New York who had got fit themselves and believed game mechanics could help other people do the same.
+- **February 2011:** the site launches with an invite system to control signups.
+- **November 2011:** it adds advertising and a paid, ad-free option called Fitocracy Hero.
+- **2012 and 2013:** an iPhone app arrives in March 2012 and an Android app in January 2013. In March 2013 the site passes one million users and runs a challenge with Arnold Schwarzenegger.
+- **2014:** TIME lists it among the best websites of the year.
+- **February 2016:** the company is acquired by a buyer that was never publicly named. Brian Wang announced the deal himself and mentioned that he was joining 500 Startups.
+- **2017:** the company announces 12.5 million active users, and a deal with a company called MyFiziq is reported. I could not find the terms.
+- **August 2024:** the website is offline.
 
-## Why it faded
+## What I saw as a user
 
-Nobody outside the company can say exactly why, and it is not fair to guess at internal reasons. What many users noticed is easier to describe: after the sale, updates became rare, the mobile app and some features stopped working one after another, and the community thinned out. When a service depends on an active team to keep it running, it is hard for it to survive without one.
+I was an active member for years and built up a few hundred thousand points. What I remember is a slow fade, not a sudden shutdown. The mobile app stopped working first, so I used the website. Then more and more things on the site broke, and I never saw a clear explanation. Other people noticed the same thing: back in 2019, one person asked on Ask MetaFilter why the Android app had vanished from Google Play. The best answer was that the site was sold in 2016 and had mostly petered out after that. That matches my own memory.
 
-## What people still miss
+## What I could not confirm
 
-- Points and levels that make progress visible
-- A feed where friends react to your workouts
-- Groups, challenges and quests
-- A workout log that is fast enough to use between sets
+You will find pages online that give a precise closing date or a dramatic reason. I could not trace any of those back to an official statement, so I would treat them with caution. What can be said safely: the 2016 sale is documented, the app and site were barely maintained afterwards, and the site is offline now.
 
-## Where to go now
+## Why people still miss it
 
-Several trackers cover the logging part well. Fewer recreate the game and the community. If that is what you miss, [MyFitLevel](/fitocracy-alternative) is a free, community-run project built around the same idea, with its own point system and no affiliation with the original. You can also read [how points work](/points) before you decide.
+It was never just a logbook. Points for every set, levels, quests, achievements and props from other members turned training into something you wanted to show up for. And the community was the real engine. That combination is rare, and it is the reason this project exists.
+
+If you want to see where the idea went next, read [why I built MyFitLevel](/blog/why-i-built-myfitlevel) or the page about [Fitocracy alternatives](/fitocracy-alternative). Do you remember when your own Fitocracy stopped working? Tell me, I am collecting these stories.
+
+Sources: the Fitocracy article on Wikipedia, TechCrunch's coverage from 2012 and 2013, TIME's 2014 list, a 2019 thread on Ask MetaFilter, and public deal listings.
 MD,
 ],
 [

@@ -30,7 +30,7 @@ object Updater {
 
     fun check(a: Activity, force: Boolean = false) {
         val sp = a.getSharedPreferences("mfl", Context.MODE_PRIVATE)
-        if (!force && System.currentTimeMillis() - sp.getLong("upd_check", 0L) < 6 * 3600_000L) return
+        if (!force && System.currentTimeMillis() - sp.getLong("upd_check", 0L) < 15 * 60_000L) return
         sp.edit().putLong("upd_check", System.currentTimeMillis()).apply()
         thread {
             try {

@@ -55,6 +55,11 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
       <?php if ($open): ?><a class="btn big" href="<?= e(url('register')) ?>">Create a free account</a><?php endif; ?>
       <a class="btn ghost big" href="<?= e(url('login')) ?>">Log in</a>
     </div>
+    <div class="trustbar">
+      <a href="https://github.com/Niemil/myfitlevel" target="_blank" rel="noopener"><b>Open source</b><small>Code on GitHub</small></a>
+      <a href="<?= e(url('android')) ?>"><b>Android app</b><small>Steps via Health Connect</small></a>
+      <a href="<?= e(url('api-docs')) ?>"><b>Open API</b><small>Docs &amp; API keys</small></a>
+    </div>
     <?php if ($members > 0): ?>
     <div class="h2-stats">
       <div><b data-count="<?= $members ?>"><?= number_format($members) ?></b><span><?= $members === 1 ? 'member' : 'members' ?></span></div>

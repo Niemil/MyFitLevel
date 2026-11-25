@@ -58,6 +58,7 @@ $routes = [
     '#^quests$#'                   => 'quests',
     '#^boss(?:/state)?$#'          => 'boss',
     '#^shop$#'                     => 'shop',
+    '#^android$#'                  => 'android',
     '#^messages$#'                 => 'messages',
     '#^messages/([A-Za-z0-9_]{3,20})$#' => 'messages',
     '#^steps$#'                    => 'steps',

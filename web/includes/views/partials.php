@@ -238,6 +238,7 @@ function layout_footer(string $active = '', array $scripts = []): void
     <a href="<?= e(url('updates')) ?>">Updates</a>
     <a href="<?= e(url('about')) ?>">About</a>
     <a href="<?= e(url('api-docs')) ?>">API</a>
+    <a href="<?= e(url('android')) ?>">Android app</a>
     <a href="https://github.com/Niemil/myfitlevel" target="_blank" rel="noopener">Open source</a>
     <a href="<?= e(url('widgets')) ?>">Widgets</a>
     <a href="<?= e(url('connect')) ?>">Connect</a>
@@ -258,6 +259,7 @@ function layout_footer(string $active = '', array $scripts = []): void
 <script src="<?= e(asset('app.js')) ?>" defer></script>
 <script src="<?= e(asset('photos.js')) ?>" defer></script>
 <script src="<?= e(asset('fx.js')) ?>" defer></script>
+<script src="<?= e(asset('android.js')) ?>" defer data-apk="https://github.com/Niemil/myfitlevel/releases/latest/download/MyFitLevel.apk" data-page="<?= e(url('android')) ?>"></script>
 <script src="<?= e(asset('stats.js')) ?>" defer></script>
 <?php foreach ($scripts as $sj): ?>
 <script src="<?= e(asset($sj)) ?>" defer></script>

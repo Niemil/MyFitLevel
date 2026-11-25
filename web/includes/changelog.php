@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.33.0', '2026-11-25 08:30', 'Android app page and open-source badges', ['New Landing page now shows Open source, Android app and Open API right under the buttons.', 'New An Android app page with a direct download from GitHub and simple install steps. Android visitors get a one-time offer of the app (not inside the app itself, and never again after Not now).'], 'new'],
     ['3.32.0', '2026-11-25 08:10', 'Open source', ['New MyFitLevel is now open source (AGPL-3.0). The website and the Android app live on GitHub, with install instructions and a way to contribute. There is an Open source link in the footer and on the About page.'], 'new'],
     ['3.31.1', '2026-11-25 06:36', 'Update times fixed', ['Fix The times shown on this Updates page were a couple of hours ahead. They are correct now.'], 'fix'],
     ['3.31.0', '2026-11-25 06:32', 'New level curve', ['Improve Levels are retuned now that steps, seasons and daily rewards add points. The start is a bit slower (your first workout is level 2, a first week lands around level 4-5), and the climb gets steadily harder.', 'Improve Active members (3-4 sessions a week, daily steps, quests and boosts) reach level 50 in about a year and level 100 in about three. Relaxed members get there later. Levels are recalculated automatically for everyone.'], 'improve'],

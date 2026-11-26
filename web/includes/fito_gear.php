@@ -21,8 +21,7 @@ function fito_look(int $uid): array
     $gear = [];
     foreach ($g['by_slot'] as $slot => $key) {
         $i = $cat[$key];
-        $s = $i[3] + $i[4];
-        $tier = $s <= 2 ? 0 : ($s <= 5 ? 1 : ($s <= 9 ? 2 : ($s <= 14 ? 3 : 4)));
+        $tier = game_item_tier($key);
         $gear[$slot] = ['key' => $key, 'name' => $i[0], 'tier' => $tier];
     }
     return ['species' => $r['species'], 'eye' => $r['eye'], 'picks' => (int)$r['picks'], 'gear' => $gear];
@@ -141,7 +140,7 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
     }
     if (isset($gear['weapon'])) {
         $t = $gear['weapon']['tier'];
-        $k = $gear['weapon']['key'];
+        $k = strtolower($gear['weapon']['name']);
         $a = 'url(#ga' . $t . ')';
         $wood = 'url(#ga0)';
         if ($t === 0) {
@@ -184,4 +183,68 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
         $svg = preg_replace('/viewBox="0 0 240 300"/', 'viewBox="-40 -10 320 310"', $svg, 1);
     }
     return $svg;
+}
+
+/** Look tier of an item: sets say so themselves, other gear is judged by its strength. */
+function game_item_tier(string $key): int
+{
+    $i = game_items()[$key] ?? null;
+    if (!$i) {
+        return 0;
+    }
+    if (isset($i[7])) {
+        return (int)$i[7];
+    }
+    $s = $i[3] + $i[4];
+    return $s <= 2 ? 0 : ($s <= 5 ? 1 : ($s <= 9 ? 2 : ($s <= 14 ? 3 : 4)));
+}
+
+/** Small drawn icon of a piece of gear, in the same colours Fito wears it in. */
+function gear_icon(string $key, int $size = 56): string
+{
+    $i = game_items()[$key] ?? null;
+    if (!$i) {
+        return '';
+    }
+    $slot = $i[2];
+    [$a, $b] = fito_ramp(game_item_tier($key));
+    $f = 'fill="' . $a . '" stroke="' . $b . '" stroke-width="2.5" stroke-linejoin="round"';
+    $dk = 'fill="#1d2233"';
+    $n = strtolower($i[0]);
+    switch ($slot) {
+        case 'weapon':
+            if (game_item_tier($key) === 0) {
+                $g = '<path d="M28 58L30 14Q31 6 36 4L38 8Q35 16 35 58Z" ' . $f . '/>';
+            } elseif (strpos($n, 'axe') !== false) {
+                $g = '<rect x="29" y="8" width="6" height="52" rx="3" fill="#8a6a45"/><path d="M35 8Q58 4 58 28Q44 24 35 30Z" ' . $f . '/>';
+            } elseif (preg_match('/maul|hammer/', $n)) {
+                $g = '<rect x="29" y="14" width="6" height="46" rx="3" fill="#8a6a45"/><rect x="14" y="4" width="36" height="20" rx="4" ' . $f . '/>';
+            } elseif (strpos($n, 'spear') !== false) {
+                $g = '<rect x="30" y="14" width="4" height="48" rx="2" fill="#8a6a45"/><path d="M22 18L32 2L42 18Z" ' . $f . '/>';
+            } else {
+                $g = '<path d="M28 44V12L32 4L36 12V44Z" ' . $f . '/><rect x="21" y="43" width="22" height="6" rx="3" ' . $dk . '/><rect x="29" y="48" width="6" height="12" rx="3" ' . $dk . '/>';
+            }
+            break;
+        case 'armor':
+            $g = '<path d="M12 16Q32 8 52 16L48 54Q32 60 16 54Z" ' . $f . '/><path d="M32 14V56" stroke="' . $b . '" stroke-width="2" opacity=".6"/><ellipse cx="12" cy="18" rx="7" ry="5" ' . $f . '/><ellipse cx="52" cy="18" rx="7" ry="5" ' . $f . '/>';
+            break;
+        case 'helmet':
+            $g = '<path d="M10 40Q8 10 32 8Q56 10 54 40Q44 30 32 30Q20 30 10 40Z" ' . $f . '/><path d="M29 28V48H35V28Z" ' . $f . '/>';
+            break;
+        case 'gloves':
+            $g = '<rect x="16" y="14" width="32" height="16" rx="6" ' . $f . '/><rect x="14" y="30" width="36" height="22" rx="10" ' . $f . '/><path d="M24 32V44M32 32V46M40 32V44" stroke="' . $b . '" stroke-width="2" opacity=".6"/>';
+            break;
+        case 'boots':
+            $g = '<path d="M16 10H36V34Q52 36 56 46V54H12V10Z" ' . $f . '/><path d="M12 50H56" stroke="#1d2233" stroke-width="4"/>';
+            break;
+        case 'wings':
+            $g = '<path d="M30 52Q2 36 6 8Q22 22 30 20Z" ' . $f . '/><path d="M34 52Q62 36 58 8Q42 22 34 20Z" ' . $f . '/>';
+            break;
+        case 'aura':
+            $g = '<circle cx="32" cy="32" r="24" ' . $f . ' opacity=".55"/><circle cx="32" cy="32" r="12" fill="' . $a . '" opacity=".85"/>';
+            break;
+        default: // charm and everything else
+            $g = '<path d="M16 8Q32 40 48 8" stroke="#d9deea" stroke-width="2.5" fill="none"/><circle cx="32" cy="42" r="12" ' . $f . '/>';
+    }
+    return '<svg class="gearico" width="' . $size . '" height="' . $size . '" viewBox="0 0 64 64" aria-hidden="true">' . $g . '</svg>';
 }

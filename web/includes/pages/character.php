@@ -86,4 +86,5 @@ layout_header('Character', 'me');
     <?php endforeach; ?>
   </div>
 </div>
+<script src="<?= e(asset('keepscroll.js')) ?>" defer></script>
 <?php layout_footer('me'); ?>

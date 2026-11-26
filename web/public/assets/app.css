@@ -1112,3 +1112,12 @@ html.fx-calm .nfx,html.fx-calm .frm,.nomotion .nfx,.nomotion .frm{animation:none
 @keyframes fAura{50%{opacity:.5}}
 html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 @media(prefers-reduced-motion:reduce){.f-aura{animation:none}}
+
+/* Equipment */
+.eqgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+@media(min-width:620px){.eqgrid{grid-template-columns:repeat(4,1fr)}}
+.eqslot{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;padding:10px 6px;border:1px solid var(--line);border-radius:12px;min-height:104px}
+.eqslot.empty{border-style:dashed;opacity:.65}
+.eqic{height:44px;display:flex;align-items:center}
+.eqslot b{font-size:.85rem;line-height:1.15}
+.gi-ic .gearico{display:block;margin:0 auto}

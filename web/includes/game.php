@@ -183,7 +183,7 @@ function game_ensure_v1(): void
 /** key => [name, icon, slot, dmg %, coin %, price (0 = boss drop), flavour] */
 function game_items(): array
 {
-    return [
+    return game_set_items() + [
         'iron_blade'     => ['Iron Blade', '⚔️', 'weapon', 3, 0, 150, 'A plain, honest sword.'],
         'steel_axe'      => ['Steel Axe', '🪓', 'weapon', 6, 0, 400, 'Heavy and well balanced.'],
         'rune_hammer'    => ['Rune Hammer', '🔨', 'weapon', 10, 0, 900, 'Glows when you hit a PR.'],
@@ -905,10 +905,24 @@ function game_gear(int $uid): array
         [$n, $ic, $slot, $d, $c] = $cat[$r['item']];
         $out['dmg'] += $d;
         $out['coin'] += $c;
-        if ($ic !== '') {
+        if ($ic !== '' && $ic !== '@') {
             $out['icons'][] = $ic;
         }
         $out['by_slot'][$slot] = $r['item'];
+    }
+    // Set bonuses: wearing 3 or 5 pieces of one set
+    $out['set_bonus'] = [];
+    foreach (game_set_defs() as $sid => $s) {
+        $n = 0;
+        foreach ($out['by_slot'] as $slot => $key) {
+            if (strpos($key, 'set_' . $sid . '_') === 0) { $n++; }
+        }
+        $b = $n >= 5 ? $s['b5'] : ($n >= 3 ? $s['b3'] : null);
+        if ($b && ($b[0] || $b[1])) {
+            $out['dmg'] += $b[0];
+            $out['coin'] += $b[1];
+            $out['set_bonus'][] = ['set' => $s['name'], 'n' => $n, 'dmg' => $b[0], 'coin' => $b[1]];
+        }
     }
     return $out;
 }
@@ -949,6 +963,55 @@ function cosm_preview(string $key, string $slot): string
         return '<span class="cpv"><span class="frm frm-' . e($id) . '"><span class="cpv-av"></span></span></span>';
     }
     return '<span class="cpv"><span class="cpv-bn bn-' . e($id) . '"></span></span>';
+}
+
+/**
+ * Gear sets: five matching pieces (weapon, helmet, armor, gloves, boots) that look alike on Fito.
+ * Wearing 3 pieces gives a small bonus and all 5 a bigger one. tier sets the look: 0 rags, 1 leather, 2 steel, 3 gold, 4 mythic.
+ * pieces: slot => [name, damage %, coin %, price]
+ */
+function game_set_defs(): array
+{
+    return [
+        'wan' => ['name' => 'Wanderer', 'theme' => 'Starter', 'tier' => 0, 'b3' => [0, 0], 'b5' => [1, 2], 'pieces' => [
+            'weapon' => ['Wanderer\'s Stick', 1, 0, 40], 'helmet' => ['Wanderer\'s Cap', 1, 0, 30], 'armor' => ['Wanderer\'s Rags', 1, 1, 60],
+            'gloves' => ['Wanderer\'s Wraps', 0, 1, 30], 'boots' => ['Wanderer\'s Sandals', 0, 1, 30]]],
+        'sco' => ['name' => 'Scout', 'theme' => 'Balanced', 'tier' => 1, 'b3' => [1, 1], 'b5' => [3, 3], 'pieces' => [
+            'weapon' => ['Scout\'s Shortsword', 3, 1, 120], 'helmet' => ['Scout\'s Cap', 2, 1, 90], 'armor' => ['Scout\'s Jerkin', 3, 2, 150],
+            'gloves' => ['Scout\'s Gloves', 1, 2, 80], 'boots' => ['Scout\'s Boots', 2, 2, 90]]],
+        'iro' => ['name' => 'Ironclad', 'theme' => 'Damage', 'tier' => 2, 'b3' => [4, 0], 'b5' => [10, 0], 'pieces' => [
+            'weapon' => ['Ironclad Axe', 8, 0, 350], 'helmet' => ['Ironclad Helm', 6, 0, 300], 'armor' => ['Ironclad Mail', 8, 0, 450],
+            'gloves' => ['Ironclad Gauntlets', 5, 0, 250], 'boots' => ['Ironclad Greaves', 6, 0, 300]]],
+        'mer' => ['name' => 'Merchant', 'theme' => 'Coins', 'tier' => 3, 'b3' => [0, 5], 'b5' => [0, 14], 'pieces' => [
+            'weapon' => ['Merchant\'s Cutlass', 2, 8, 450], 'helmet' => ['Merchant\'s Hat', 1, 6, 350], 'armor' => ['Merchant\'s Coat', 2, 9, 550],
+            'gloves' => ['Merchant\'s Gloves', 1, 5, 300], 'boots' => ['Merchant\'s Boots', 1, 6, 350]]],
+        'cha' => ['name' => 'Champion', 'theme' => 'Damage', 'tier' => 3, 'b3' => [6, 0], 'b5' => [15, 0], 'pieces' => [
+            'weapon' => ['Champion\'s Blade', 12, 0, 1000], 'helmet' => ['Champion\'s Helm', 9, 0, 900], 'armor' => ['Champion\'s Plate', 12, 0, 1300],
+            'gloves' => ['Champion\'s Gauntlets', 8, 0, 700], 'boots' => ['Champion\'s Greaves', 9, 0, 800]]],
+        'myt' => ['name' => 'Mythril', 'theme' => 'Balanced', 'tier' => 4, 'b3' => [5, 5], 'b5' => [12, 12], 'pieces' => [
+            'weapon' => ['Mythril Sword', 10, 6, 2500], 'helmet' => ['Mythril Helm', 8, 5, 2200], 'armor' => ['Mythril Hauberk', 10, 7, 3200],
+            'gloves' => ['Mythril Gauntlets', 6, 5, 1800], 'boots' => ['Mythril Greaves', 7, 5, 2000]]],
+        'sto' => ['name' => 'Stormforged', 'theme' => 'Damage', 'tier' => 4, 'b3' => [8, 0], 'b5' => [20, 0], 'pieces' => [
+            'weapon' => ['Stormforged Maul', 16, 0, 3000], 'helmet' => ['Stormforged Helm', 12, 0, 2600], 'armor' => ['Stormforged Plate', 16, 0, 3800],
+            'gloves' => ['Stormforged Gauntlets', 10, 0, 2200], 'boots' => ['Stormforged Greaves', 12, 0, 2400]]],
+    ];
+}
+
+/** The set pieces as shop items: key set_<id>_<w|h|a|g|b> => [name, '@', slot, dmg, coin, price, flavour, tier]. */
+function game_set_items(): array
+{
+    static $c = null;
+    if ($c !== null) {
+        return $c;
+    }
+    $suf = ['weapon' => 'w', 'helmet' => 'h', 'armor' => 'a', 'gloves' => 'g', 'boots' => 'b'];
+    $c = [];
+    foreach (game_set_defs() as $id => $s) {
+        foreach ($s['pieces'] as $slot => [$n, $d, $co, $price]) {
+            $c['set_' . $id . '_' . $suf[$slot]] = [$n, '@', $slot, $d, $co, $price, $s['name'] . ' set (' . strtolower($s['theme']) . ')', $s['tier']];
+        }
+    }
+    return $c;
 }
 
 /** Level needed to buy or wear an item: cheap gear is open to everyone, the best gear is for long-term members. */
@@ -1649,7 +1712,7 @@ function game_icons_for(array $uids): array
     $cat = game_items();
     $out = [];
     foreach (rows('SELECT user_id, item FROM game_items WHERE equipped = 1 AND user_id IN (' . in_clause($uids) . ')', array_values($uids)) as $r) {
-        $out[(int)$r['user_id']] = ($out[(int)$r['user_id']] ?? '') . ($cat[$r['item']][1] ?? '');
+        $out[(int)$r['user_id']] = ($out[(int)$r['user_id']] ?? '') . (($cat[$r['item']][1] ?? '') === '@' ? '' : ($cat[$r['item']][1] ?? ''));
     }
     return $out;
 }

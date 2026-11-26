@@ -107,27 +107,78 @@ layout_header('Shop', 'quests');
 </div>
 
 <?php game_advent_card($uid, 'shop'); ?>
-<?php foreach ($slots as $slot => $label):
-    $any = false;
-    foreach ($cat as $k2 => $i2) { if ($i2[2] === $slot && ($i2[5] > 0 || isset($owned[$k2]))) { $any = true; break; } }
-    if (!$any) { continue; } ?>
+<?php
+$cosSlots = ['namefx', 'frame', 'banner'];
+$gearSlots = ['weapon' => 'Weapon', 'helmet' => 'Helmet', 'armor' => 'Armor', 'gloves' => 'Gloves', 'boots' => 'Boots', 'charm' => 'Charm', 'wings' => 'Wings', 'aura' => 'Aura'];
+$wearing = $gear['by_slot'];
+$setKeys = array_keys(game_set_items());
+
+/** One item as a card with its button. */
+$piece = function (string $k) use ($cat, $owned, $ownedBy, $wearing, $u, $w): void {
+    [$n, $ic, $sl, $dm, $cn, $price, $fl] = $cat[$k];
+    $has = isset($owned[$k]);
+    $cur = $wearing[$sl] ?? null;
+    $req = game_item_req($k);
+    $locked = (int)$u['level'] < $req;
+    ?>
+    <form method="post" class="gitem<?= $has && $owned[$k] ? ' on' : '' ?><?= $price === 0 ? ' rare' : '' ?>"><?= csrf_field() ?><input type="hidden" name="item" value="<?= e($k) ?>">
+      <span class="gi-ic"><?= $ic === '' ? cosm_preview($k, $sl) : (in_array($sl, ['weapon', 'helmet', 'armor', 'gloves', 'boots', 'charm', 'wings', 'aura'], true) ? gear_icon($k, 52) : e($ic)) ?></span><b><?= e($n) ?></b>
+      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?><?= $req > 1 ? ' · level ' . $req : '' ?></small>
+      <?php if (!$has && $cur && $cur !== $k && $ic !== ''):
+          $cd = $cat[$cur][3]; $cc = $cat[$cur][4]; $dd = $dm - $cd; $dc = $cn - $cc; ?>
+        <small class="muted">If worn instead of <?= e($cat[$cur][0]) ?>: <?= ($dd >= 0 ? '+' : '') . $dd ?>% damage, <?= ($dc >= 0 ? '+' : '') . $dc ?>% coins</small>
+      <?php endif; ?>
+      <?php if ($has): ?>
+        <?php if ($owned[$k]): ?><input type="hidden" name="do" value="unequip"><button class="btn ghost small" type="submit">Worn ✔</button>
+        <?php else: ?><input type="hidden" name="do" value="equip"><button class="btn small" type="submit" <?= $locked ? 'disabled' : '' ?>><?= $cur ? 'Swap in' : 'Wear' ?></button><?php endif; ?>
+        <?php if (($ownedBy[$k]['source'] ?? '') === 'shop' && $price > 0): $sv = (int)game_sell_value($k, (string)$ownedBy[$k]['got_at']); ?><button class="btn ghost small" type="submit" name="do" value="sell" onclick="return confirm('Sell for <?= $sv ?> coins?')">Sell <?= $sv ?></button><?php endif; ?>
+      <?php else: ?><input type="hidden" name="do" value="buy"><button class="btn small" type="submit" <?= (int)$w['coins'] < $price || $locked ? 'disabled' : '' ?>>🪙 <?= $price ?></button><?php endif; ?>
+    </form>
+    <?php
+};
+?>
+<div class="card">
+  <h3>Equipment</h3>
+  <div class="eqgrid">
+    <?php foreach ($gearSlots as $sl => $label): $k = $wearing[$sl] ?? null; ?>
+      <div class="eqslot<?= $k ? '' : ' empty' ?>">
+        <span class="eqic"><?= $k ? gear_icon($k, 44) : '' ?></span>
+        <small class="muted"><?= e($label) ?></small>
+        <b><?= $k ? e($cat[$k][0]) : 'Empty' ?></b>
+      </div>
+    <?php endforeach; ?>
+  </div>
+  <p style="margin-bottom:4px"><b>+<?= (int)$gear['dmg'] ?>% damage · +<?= (int)$gear['coin'] ?>% coins</b> <span class="muted small">from everything you wear</span></p>
+  <?php foreach ($gear['set_bonus'] as $sb): ?><p class="small ok" style="margin:2px 0"><?= e($sb['set']) ?> set (<?= (int)$sb['n'] ?>/5 worn): <?= $sb['dmg'] ? '+' . (int)$sb['dmg'] . '% damage ' : '' ?><?= $sb['coin'] ? '+' . (int)$sb['coin'] . '% coins' : '' ?></p><?php endforeach; ?>
+  <p class="muted small" style="margin-bottom:0">One item per slot, so items never stack. Matching set pieces give a bonus: 3 pieces a little, all 5 a lot.</p>
+</div>
+
+<?php foreach (game_set_defs() as $sid => $sdef):
+    $cnt = 0; $wornN = 0;
+    foreach ($sdef['pieces'] as $slot => $pp) { $kk = 'set_' . $sid . '_' . ['weapon' => 'w', 'helmet' => 'h', 'armor' => 'a', 'gloves' => 'g', 'boots' => 'b'][$slot]; if (isset($owned[$kk])) { $cnt++; } if (!empty($owned[$kk])) { $wornN++; } } ?>
+<div class="card">
+  <h3><?= e($sdef['name']) ?> set <small class="muted">· <?= e($sdef['theme']) ?> · <?= $cnt ?>/5 owned</small></h3>
+  <p class="muted small" style="margin-top:0">3 pieces worn: <?= $sdef['b3'][0] || $sdef['b3'][1] ? ($sdef['b3'][0] ? '+' . $sdef['b3'][0] . '% damage ' : '') . ($sdef['b3'][1] ? '+' . $sdef['b3'][1] . '% coins' : '') : 'no bonus' ?> · all 5 worn: <?= ($sdef['b5'][0] ? '+' . $sdef['b5'][0] . '% damage ' : '') . ($sdef['b5'][1] ? '+' . $sdef['b5'][1] . '% coins' : '') ?></p>
+  <div class="gshop">
+    <?php foreach (['weapon' => 'w', 'armor' => 'a', 'helmet' => 'h', 'gloves' => 'g', 'boots' => 'b'] as $slot => $suf) { $piece('set_' . $sid . '_' . $suf); } ?>
+  </div>
+</div>
+<?php endforeach; ?>
+
+<?php
+// Other gear you own: older items, boss drops and achievement items
+$otherOwned = array_filter(array_keys($owned), fn($k) => isset($cat[$k]) && !in_array($cat[$k][2], $cosSlots, true) && !in_array($k, $setKeys, true));
+if ($otherOwned): ?>
+<div class="card">
+  <h3>Other gear you own</h3>
+  <div class="gshop"><?php foreach ($otherOwned as $k) { $piece($k); } ?></div>
+</div>
+<?php endif; ?>
+
+<?php foreach ($cosSlots as $slot): $label = $slots[$slot]; ?>
 <div class="card">
   <h3><?= e($label) ?></h3>
-  <?php if (!in_array($slot, ['namefx', 'frame', 'banner'], true)): ?><p class="muted small" style="margin-top:0">You wear one item per slot, so they do not stack. Equipping a new one swaps the old one out, and you can sell bought items back.</p><?php endif; ?>
-  <div class="gshop">
-  <?php foreach ($cat as $k => [$n, $ic, $sl, $dm, $cn, $price, $fl]): if ($sl !== $slot) { continue; }
-      $has = isset($owned[$k]); if (!$has && $price === 0) { continue; } ?>
-    <form method="post" class="gitem<?= $has && $owned[$k] ? ' on' : '' ?><?= $price === 0 ? ' rare' : '' ?>"><?= csrf_field() ?><input type="hidden" name="item" value="<?= e($k) ?>">
-      <?php if ($ic === ''): ?><?= cosm_preview($k, $sl) ?><?php else: ?><span class="gi-ic"><?= e($ic) ?></span><?php endif; ?><b><?= e($n) ?></b>
-      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?><?= game_item_req($k) > 1 ? ' · level ' . game_item_req($k) : '' ?></small>
-      <?php if ($has): ?>
-        <?php if ($owned[$k]): ?><input type="hidden" name="do" value="unequip"><button class="btn ghost small" type="submit">Equipped ✔</button>
-        <?php else: ?><input type="hidden" name="do" value="equip"><button class="btn small" type="submit" <?= (int)$u['level'] < game_item_req($k) ? 'disabled' : '' ?>>Equip</button><?php endif; ?>
-        <?php if (($ownedBy[$k]['source'] ?? '') === 'shop' && $price > 0): ?><button class="btn ghost small" type="submit" name="do" value="sell" onclick="return confirm('Sell for <?= (int)game_sell_value($k, (string)$ownedBy[$k]['got_at']) ?> coins?')">Sell <?= (int)game_sell_value($k, (string)$ownedBy[$k]['got_at']) ?></button><?php endif; ?>
-      <?php else: ?><input type="hidden" name="do" value="buy"><button class="btn small" type="submit" <?= (int)$w['coins'] < $price || (int)$u['level'] < game_item_req($k) ? 'disabled' : '' ?>>🪙 <?= $price ?></button><?php endif; ?>
-    </form>
-  <?php endforeach; ?>
-  </div>
+  <div class="gshop"><?php foreach ($cat as $k => $i2) { if ($i2[2] === $slot) { $piece($k); } } ?></div>
 </div>
 <?php endforeach; ?>
 <p class="muted small">Rare boss drops, relics and advent treasures show up here once you win them, and they cannot be bought.</p>
@@ -137,4 +188,5 @@ layout_header('Shop', 'quests');
   <?php foreach ($hist as $h): ?><div class="gb-row"><span class="grow small"><?= e($h['note'] ?: $h['kind']) ?></span><b class="<?= (int)$h['amount'] >= 0 ? 'ok' : '' ?>"><?= (int)$h['amount'] >= 0 ? '+' : '' ?><?= (int)$h['amount'] ?></b><span class="muted small"><?= e(rel_time((string)$h['created_at'])) ?></span></div><?php endforeach; ?>
 </div>
 <?php endif; ?>
+<script src="<?= e(asset('keepscroll.js')) ?>" defer></script>
 <?php layout_footer(); ?>

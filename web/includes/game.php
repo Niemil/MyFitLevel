@@ -951,6 +951,26 @@ function cosm_preview(string $key, string $slot): string
     return '<span class="cpv"><span class="cpv-bn bn-' . e($id) . '"></span></span>';
 }
 
+/** Level needed to buy or wear an item: cheap gear is open to everyone, the best gear is for long-term members. */
+function game_item_req(string $key): int
+{
+    $price = (int)(game_items()[$key][5] ?? 0);
+    if ($price >= 3000) { return 30; }
+    if ($price >= 1800) { return 20; }
+    if ($price >= 900) { return 10; }
+    if ($price >= 400) { return 5; }
+    return 1;
+}
+
+/** Coins you get when selling a bought item back: 80% of the price when new, falling to 30% after about two months. */
+function game_sell_value(string $key, string $gotAt): int
+{
+    $price = (int)(game_items()[$key][5] ?? 0);
+    $days = max(0, (time() - strtotime($gotAt)) / 86400);
+    $f = max(0.30, 0.80 - 0.50 * min(1.0, $days / 60));
+    return (int)floor($price * $f);
+}
+
 function game_coin_boost_active(array $wallet): int
 {
     return (!empty($wallet['coin_boost_until']) && strtotime((string)$wallet['coin_boost_until']) > time()) ? (int)$wallet['coin_boost_pct'] : 0;

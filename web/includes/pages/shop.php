@@ -16,6 +16,8 @@ if (is_post()) {
         $own = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key]);
         if ($own) {
             flash('You already own that.', 'err');
+        } elseif ((int)$u['level'] < game_item_req($key)) {
+            flash('You need level ' . game_item_req($key) . ' for that.', 'err');
         } elseif ((int)$w['coins'] < $cat[$key][5]) {
             flash('Not enough coins yet. Keep training!', 'err');
         } else {
@@ -24,12 +26,24 @@ if (is_post()) {
             flash('Bought ' . trim($cat[$key][1] . ' ' . $cat[$key][0]) . '.');
         }
     } elseif ($do === 'equip' && isset($cat[$key])) {
-        if ((int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key])) {
+        if ((int)$u['level'] < game_item_req($key)) {
+            flash('You need level ' . game_item_req($key) . ' to wear that.', 'err');
+        } elseif ((int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key])) {
             $slot = $cat[$key][2];
             $same = array_keys(array_filter($cat, fn($i) => $i[2] === $slot));
             q('UPDATE game_items SET equipped = 0 WHERE user_id = ? AND item IN (' . in_clause($same) . ')', array_merge([$uid], $same));
             q('UPDATE game_items SET equipped = 1 WHERE user_id = ? AND item = ?', [$uid, $key]);
             flash('Equipped ' . $cat[$key][0] . '.');
+        }
+    } elseif ($do === 'sell' && isset($cat[$key])) {
+        $r = row('SELECT got_at, source FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key]);
+        if ($r && $r['source'] === 'shop' && $cat[$key][5] > 0) {
+            $v = game_sell_value($key, (string)$r['got_at']);
+            q('DELETE FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key]);
+            game_coins_add($uid, $v, 'shop', 'Sold ' . $cat[$key][0]);
+            flash('Sold ' . $cat[$key][0] . ' for ' . $v . ' coins.');
+        } else {
+            flash('Only items you bought can be sold.', 'err');
         }
     } elseif ($do === 'unequip' && isset($cat[$key])) {
         q('UPDATE game_items SET equipped = 0 WHERE user_id = ? AND item = ?', [$uid, $key]);
@@ -57,7 +71,9 @@ if (is_post()) {
 }
 
 $w = game_wallet($uid);
-$owned = array_column(rows('SELECT item, equipped FROM game_items WHERE user_id = ?', [$uid]), 'equipped', 'item');
+$ownedRows = rows('SELECT item, equipped, source, got_at FROM game_items WHERE user_id = ?', [$uid]);
+$owned = array_column($ownedRows, 'equipped', 'item');
+$ownedBy = array_column($ownedRows, null, 'item');
 $gear = game_gear($uid);
 $boostPct = game_boost_active($w);
 $hist = rows('SELECT * FROM game_ledger WHERE user_id = ? ORDER BY id DESC LIMIT 8', [$uid]);
@@ -97,16 +113,18 @@ layout_header('Shop', 'quests');
     if (!$any) { continue; } ?>
 <div class="card">
   <h3><?= e($label) ?></h3>
+  <?php if (!in_array($slot, ['namefx', 'frame', 'banner'], true)): ?><p class="muted small" style="margin-top:0">You wear one item per slot, so they do not stack. Equipping a new one swaps the old one out, and you can sell bought items back.</p><?php endif; ?>
   <div class="gshop">
   <?php foreach ($cat as $k => [$n, $ic, $sl, $dm, $cn, $price, $fl]): if ($sl !== $slot) { continue; }
       $has = isset($owned[$k]); if (!$has && $price === 0) { continue; } ?>
     <form method="post" class="gitem<?= $has && $owned[$k] ? ' on' : '' ?><?= $price === 0 ? ' rare' : '' ?>"><?= csrf_field() ?><input type="hidden" name="item" value="<?= e($k) ?>">
       <?php if ($ic === ''): ?><?= cosm_preview($k, $sl) ?><?php else: ?><span class="gi-ic"><?= e($ic) ?></span><?php endif; ?><b><?= e($n) ?></b>
-      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?></small>
+      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?><?= game_item_req($k) > 1 ? ' · level ' . game_item_req($k) : '' ?></small>
       <?php if ($has): ?>
         <?php if ($owned[$k]): ?><input type="hidden" name="do" value="unequip"><button class="btn ghost small" type="submit">Equipped ✔</button>
-        <?php else: ?><input type="hidden" name="do" value="equip"><button class="btn small" type="submit">Equip</button><?php endif; ?>
-      <?php else: ?><input type="hidden" name="do" value="buy"><button class="btn small" type="submit" <?= (int)$w['coins'] < $price ? 'disabled' : '' ?>>🪙 <?= $price ?></button><?php endif; ?>
+        <?php else: ?><input type="hidden" name="do" value="equip"><button class="btn small" type="submit" <?= (int)$u['level'] < game_item_req($k) ? 'disabled' : '' ?>>Equip</button><?php endif; ?>
+        <?php if (($ownedBy[$k]['source'] ?? '') === 'shop' && $price > 0): ?><button class="btn ghost small" type="submit" name="do" value="sell" onclick="return confirm('Sell for <?= (int)game_sell_value($k, (string)$ownedBy[$k]['got_at']) ?> coins?')">Sell <?= (int)game_sell_value($k, (string)$ownedBy[$k]['got_at']) ?></button><?php endif; ?>
+      <?php else: ?><input type="hidden" name="do" value="buy"><button class="btn small" type="submit" <?= (int)$w['coins'] < $price || (int)$u['level'] < game_item_req($k) ? 'disabled' : '' ?>>🪙 <?= $price ?></button><?php endif; ?>
     </form>
   <?php endforeach; ?>
   </div>

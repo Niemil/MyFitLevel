@@ -10,6 +10,7 @@ $unit = ($u['unit'] ?? 'kg') === 'lb' ? 'lb' : 'kg';
 $k = $unit === 'lb' ? LB_PER_KG : 1.0;
 
 $t = row("SELECT COUNT(*) w, COALESCE(SUM(volume_kg),0) v, COALESCE(SUM(points),0) p, COUNT(DISTINCT DATE(performed_at)) d FROM workouts WHERE user_id = ?", [$uid]) ?: ['w' => 0, 'v' => 0, 'p' => 0, 'd' => 0];
+$gt = row('SELECT COALESCE(SUM(duration_sec),0) s, COUNT(duration_sec) c, MIN(performed_at) f FROM workouts WHERE user_id = ? AND duration_sec > 0', [$uid]) ?: ['s' => 0, 'c' => 0];
 $sr = row("SELECT COUNT(*) s, COALESCE(SUM(reps),0) r FROM workout_sets WHERE user_id = ? AND is_warmup = 0", [$uid]) ?: ['s' => 0, 'r' => 0];
 
 // streaks (days in a row with at least one workout)
@@ -92,6 +93,8 @@ layout_header('Insights', 'me');
     <div><b><?= $cur ?></b><span>day streak</span></div>
     <div><b><?= $best ?></b><span>best streak</span></div>
     <div><b><?= number_format((int)$t['p']) ?></b><span>points from lifting</span></div>
+    <div><b><?= e(fmt_duration((int)$gt['s'])) ?></b><span>time training</span></div>
+    <div><b><?= (int)$gt['c'] ? e(fmt_duration((int)round($gt['s'] / $gt['c']))) : '-' ?></b><span>average workout</span></div>
   </div>
 </div>
 

@@ -7,7 +7,7 @@ const APP_NAME_DEFAULT = 'MyFitLevel';
 const LOAD_EXP         = 1.3;   // points grow a little faster than linearly with estimated 1RM (strong lifters level faster)
 const POINTS_SCALE     = 0.2085; // points = coef x e1RM(kg)^1.3 x scale; barbell bench 100 lb x 1 = 31 pts;  // global scale: points = coef x e1RM x sqrt(reps) x scale (barbell squat 60 kg x 5 = 61 pts)
 const PR_BONUS         = 40;    // bonus XP for a personal record
-const WARMUP_FACTOR    = 0.5;   // warm-up sets earn this share of a normal set's points (and never count as PRs)
+const WARMUP_FACTOR    = 1.0;   // warm-up sets earn full points (a light set pays little anyway) but never count as PRs or working sets
 const LB_PER_KG        = 2.2046226218;
 
 $GLOBALS['CFG'] = [];

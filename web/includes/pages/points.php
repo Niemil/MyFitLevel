@@ -21,7 +21,7 @@ layout_header('How points (points) work', '', [
     <li><b>Coefficient = movement × equipment.</b> The barbell squat and deadlift count 1.15, other big compound lifts (bench and overhead press, rows, pull-ups, dips, lunges) 1.00, other compound moves 0.80, isolation moves (curls, raises, extensions, calves) 0.60. Free weights keep that value; cables ×0.90, Smith machine ×0.90 and fixed machines ×0.80, since a guided path asks less of your stabilising muscles.</li>
     <li><b>Dumbbells: log one dumbbell.</b> The site counts both hands for you, so 20 kg per hand is scored as 40 kg of work.</li>
     <li><b>Bodyweight moves</b> (push-ups, pull-ups, dips) use a share of your bodyweight plus any weight you add.</li>
-    <li><b>Warm-up sets</b> (mark a set with W) earn half points and never count as a personal record or a working set.</li>
+    <li><b>Warm-up sets</b> (mark a set with W) earn the same points as any set (a light set is worth little anyway) but never count as a personal record or a working set.</li>
     <li><b>Personal records</b> give a bonus of <?= (int)PR_BONUS ?> pts when you beat your best estimated one-rep max for that exercise.</li>
   </ul>
 

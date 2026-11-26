@@ -229,6 +229,19 @@ function user_stats(int $uid): array
         $st['steps_total'] = (int)($sr['t'] ?? 0); $st['steps_best'] = (int)($sr['b'] ?? 0); $st['steps_10k_days'] = (int)($sr['d'] ?? 0);
     }
     $st['level'] = (int)val('SELECT level FROM users WHERE id = ?', [$uid]);
+    $st['gym_hours'] = (float)val('SELECT COALESCE(SUM(duration_sec),0)/3600 FROM workouts WHERE user_id = ?', [$uid]);
+    // Strength relative to bodyweight (estimated 1RM as a percent of bodyweight)
+    foreach (['bench_pct', 'squat_pct', 'dead_pct', 'ohp_pct', 'row_pct'] as $k) {
+        $st[$k] = 0;
+    }
+    $bwKg = (float)val('SELECT bodyweight_kg FROM users WHERE id = ?', [$uid]);
+    if ($bwKg > 20) {
+        $map = ['Barbell Bench Press' => 'bench_pct', 'Back Squat' => 'squat_pct', 'Deadlift' => 'dead_pct', 'Overhead Press' => 'ohp_pct', 'Barbell Row' => 'row_pct'];
+        foreach (rows('SELECT e.name n, MAX(s.weight_kg * (1 + LEAST(s.reps, 12) / 30)) b FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id
+                       WHERE s.user_id = ? AND s.is_warmup = 0 AND s.weight_kg > 0 AND s.reps > 0 AND e.name IN (?,?,?,?,?) GROUP BY e.name', array_merge([$uid], array_keys($map))) as $r) {
+            $st[$map[$r['n']]] = (int)round((float)$r['b'] / $bwKg * 100);
+        }
+    }
 
     // Day streak (consecutive days with a workout, ending today or yesterday)
     $days = array_column(rows('SELECT DISTINCT DATE(performed_at) d FROM workouts WHERE user_id = ? ORDER BY d DESC LIMIT 400', [$uid]), 'd');
@@ -341,6 +354,24 @@ function quest_defs_base(): array
         'ten_workouts' => ['Getting Serious', 'Log 10 workouts', 'workouts', 10, 150],
         'fifty_workouts'=> ['Regular', 'Log 50 workouts', 'workouts', 50, 500],
         'volume_100k'  => ['Hundred Tonnes', 'Lift 100,000 kg in total', 'volume_kg', 100000, 1000],
+        'hundred_workouts' => ['Centurion', 'Log 100 workouts', 'workouts', 100, 1000],
+        'streak_30'    => ['Unbreakable', 'Work out 30 days in a row', 'streak', 30, 1500],
+        'gym_10h'      => ['Regular at the Gym', 'Spend 10 hours training (timed workouts)', 'gym_hours', 10, 150],
+        'gym_50h'      => ['Gym Resident', 'Spend 50 hours training (timed workouts)', 'gym_hours', 50, 600],
+        'gym_100h'     => ['Iron Home', 'Spend 100 hours training (timed workouts)', 'gym_hours', 100, 1200],
+        'bench_75'     => ['Bench: Three Quarters', 'Bench press an estimated 0.75x your bodyweight', 'bench_pct', 75, 150],
+        'bench_100'    => ['Bench: Your Bodyweight', 'Bench press an estimated 1x your bodyweight', 'bench_pct', 100, 300],
+        'bench_150'    => ['Bench: One and a Half', 'Bench press an estimated 1.5x your bodyweight', 'bench_pct', 150, 700],
+        'squat_100'    => ['Squat: Your Bodyweight', 'Squat an estimated 1x your bodyweight', 'squat_pct', 100, 200],
+        'squat_150'    => ['Squat: One and a Half', 'Squat an estimated 1.5x your bodyweight', 'squat_pct', 150, 450],
+        'squat_200'    => ['Squat: Double', 'Squat an estimated 2x your bodyweight', 'squat_pct', 200, 900],
+        'dead_150'     => ['Deadlift: One and a Half', 'Deadlift an estimated 1.5x your bodyweight', 'dead_pct', 150, 250],
+        'dead_200'     => ['Deadlift: Double', 'Deadlift an estimated 2x your bodyweight', 'dead_pct', 200, 500],
+        'dead_250'     => ['Deadlift: Two and a Half', 'Deadlift an estimated 2.5x your bodyweight', 'dead_pct', 250, 1000],
+        'ohp_50'       => ['Press: Half Your Bodyweight', 'Overhead press an estimated 0.5x your bodyweight', 'ohp_pct', 50, 250],
+        'ohp_75'       => ['Press: Three Quarters', 'Overhead press an estimated 0.75x your bodyweight', 'ohp_pct', 75, 600],
+        'row_75'       => ['Row: Three Quarters', 'Barbell row an estimated 0.75x your bodyweight', 'row_pct', 75, 200],
+        'row_100'      => ['Row: Your Bodyweight', 'Barbell row an estimated 1x your bodyweight', 'row_pct', 100, 400],
     ];
 }
 

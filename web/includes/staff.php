@@ -14,6 +14,7 @@ function staff_ensure(): void
     }
     $done = true;
     if (setting('staff_v') === '1') {
+        staff_once();
         return;
     }
     q('CREATE TABLE IF NOT EXISTS workout_flags (
@@ -40,6 +41,17 @@ function staff_ensure(): void
         q('ALTER TABLE users ADD COLUMN xp_adjust INT NOT NULL DEFAULT 0');
     }
     set_setting('staff_v', '1');
+    staff_once();
+}
+
+/** One-time balance changes, applied automatically. */
+function staff_once(): void
+{
+    if (setting('bal_v1') !== '1') {
+        set_setting('bal_v1', '1');
+        set_setting('level_scale', '0.5');   // levels came too slowly: level 50 needed 210,000 points
+        rules_mark();   // everyone's levels are recalculated by themselves
+    }
 }
 
 /**

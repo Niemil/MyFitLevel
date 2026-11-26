@@ -34,6 +34,7 @@ function rules_mark(): void
 
 function recalc_pending(): bool
 {
+    staff_ensure();
     return (string)setting('recalc_target', '') !== (string)setting('recalc_done', '');
 }
 

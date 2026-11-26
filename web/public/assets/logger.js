@@ -798,3 +798,13 @@
     document.getElementById('cancelun').addEventListener('click', function () { dlg.close(); });
   }
 })();
+
+/* Close the "Title, gym & time" panel with a Done button or Enter in the title. */
+(function () {
+  var d = document.querySelector('.sessdet'), b = document.getElementById('sessdone'), t = document.getElementById('f_title');
+  if (!d) return;
+  function close() { d.open = false; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }
+  if (b) b.addEventListener('click', close);
+  if (t) t.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); close(); } });
+  var g = document.getElementById('f_gym'); if (g) g.addEventListener('change', function () { setTimeout(close, 150); });
+})();

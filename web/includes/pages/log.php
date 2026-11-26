@@ -254,6 +254,7 @@ layout_header('Track workout', 'log');
           </select>
         </label>
         <a class="small muted" href="<?= e(url('gyms')) ?>">Manage or find gyms</a>
+        <button type="button" class="btn small wide" id="sessdone" style="margin-top:10px">Done</button>
       </details>
     </div>
 

@@ -105,11 +105,13 @@ function level_progress(int $xp): array
 
 function recalc_xp(int $uid): array
 {
+    staff_ensure();
     $w = (int)val('SELECT COALESCE(SUM(points),0) FROM workouts WHERE user_id = ?', [$uid]);
     $q = (int)val('SELECT COALESCE(SUM(reward),0) FROM user_quests WHERE user_id = ?', [$uid]);
     $qs = (int)val('SELECT COALESCE(SUM(reward),0) FROM quest_steps WHERE user_id = ?', [$uid]);
     $ev = event_bonus_total($uid);   // boost events: derived from the workouts inside each event window
-    $xp = $w + $q + $qs + $ev + game_steps_points($uid);
+    $xp = $w + $q + $qs + $ev + game_steps_points($uid) + (int)val('SELECT xp_adjust FROM users WHERE id = ?', [$uid]);
+    $xp = max(0, $xp);
     $lvl = level_from_xp($xp);
     q('UPDATE users SET xp = ?, level = ? WHERE id = ?', [$xp, $lvl, $uid]);
     return ['xp' => $xp, 'level' => $lvl];
@@ -432,6 +434,7 @@ function save_workout(array $user, array $input): array
     $notes = clean_text((string)($input['notes'] ?? ''), 1000);
 
     $exercises = [];
+    $flagList = [];
     foreach ((array)($input['ex'] ?? []) as $exIn) {
         $exId = (int)($exIn['id'] ?? 0);
         $ex = $exId ? row('SELECT * FROM exercises WHERE id = ? AND active = 1', [$exId]) : null;
@@ -454,6 +457,14 @@ function save_workout(array $user, array $input): array
             if (in_array($ex['kind'], ['weight', 'bodyweight'], true)) {
                 if ($r < 1) {
                     continue;
+                }
+                $loadChk = $kg * (((int)($ex['per_side'] ?? 0) === 1 || ($ex['equipment'] ?? '') === 'dumbbell') ? 2.0 : 1.0);
+                [$rej, $fl] = staff_check_set($ex, $loadChk, $r);
+                if ($rej !== null) {
+                    return ['ok' => false, 'error' => $rej];
+                }
+                if ($fl !== null) {
+                    $flagList[] = [(string)$ex['name'], $fl];
                 }
                 $sets[] = ['weight_kg' => $kg ?: null, 'reps' => min($r, 500), 'duration_sec' => null, 'distance_m' => null, 'wu' => $wu];
             } else {
@@ -479,6 +490,7 @@ function save_workout(array $user, array $input): array
         return ['ok' => false, 'error' => 'Tick at least one set before finishing.'];
     }
 
+    staff_ensure();   // DDL must run before the transaction
     $pdo = db();
     $pdo->beginTransaction();
     try {
@@ -514,6 +526,9 @@ function save_workout(array $user, array $input): array
             q('UPDATE users SET default_gym_id = ? WHERE id = ?', [$gymId, $uid]);
         }
 
+        foreach ($flagList as [$fx, $fd]) {
+            staff_flag($uid, $wid, $fx, $fd);
+        }
         $total = 0;
         $volume = 0.0;
         $count = 0;
@@ -530,6 +545,9 @@ function save_workout(array $user, array $input): array
                     $c = ['points' => (int)round($c['points'] * WARMUP_FACTOR), 'score' => 0.0];   // warm-ups earn half points, never PRs
                 }
                 $calc[$i] = $c;
+                if (empty($s['wu']) && $hasPrior && $c['score'] > 60 && $c['score'] > 2 * (float)$prior && in_array($ex['kind'], ['weight', 'bodyweight'], true)) {
+                    staff_flag($uid, $wid, (string)$ex['name'], 'estimated 1RM ' . round($c['score']) . ' kg is more than double their previous best (' . round((float)$prior) . ' kg)');
+                }
                 if (empty($s['wu']) && in_array($ex['kind'], ['weight', 'bodyweight'], true)
                     && ($bestIdx === null || $c['score'] > $calc[$bestIdx]['score'])) {
                     $bestIdx = $i;

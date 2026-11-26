@@ -343,7 +343,7 @@
         panel.hidden = false;
       });
       card.appendChild(panel);
-      if (ex.per_side === 1) card.appendChild(el('div', { class: 'sidehint', text: '⚖ Log the weight of ONE dumbbell (per hand)' }));
+      if (ex.per_side === 1 || (ex.equipment === 'dumbbell' && !ex.per_side)) card.appendChild(el('div', { class: 'sidehint', text: '⚖ Log ONE dumbbell and count reps once. We count both hands for you.' }));
       if (ex.per_side === 2) card.appendChild(el('div', { class: 'sidehint', text: '⚖ Log the weight on ONE side (one stack), not both added together' }));
       it.fresh = false;
       var cols = el('div', { class: 'setcols' }, [

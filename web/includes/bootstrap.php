@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('APP_VERSION', '3.42.1');
+define('APP_VERSION', '3.43.0');
 const SCHEMA_VERSION = 16;
 
 if (!defined('APP_ROOT')) {
@@ -79,6 +79,7 @@ require __DIR__ . '/programs.php';
 require __DIR__ . '/stats.php';
 require __DIR__ . '/fito.php';
 require __DIR__ . '/fito_coach.php';
+require __DIR__ . '/staff.php';
 require __DIR__ . '/fito_reference.php';
 require __DIR__ . '/game.php';
 

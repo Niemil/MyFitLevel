@@ -8,7 +8,7 @@ if (is_file($calibFile)) {
     require_once $calibFile;
 }
 require_once __DIR__ . '/admin_stats.php';
-$tab = in_array($_GET['tab'] ?? '', ['users', 'exercises', 'site', 'fito', 'email', 'feedback', 'events', 'stats', 'game'] + (function_exists('calib_view') ? [9 => 'calib'] : []), true) ? $_GET['tab'] : 'users';
+$tab = in_array($_GET['tab'] ?? '', ['users', 'exercises', 'site', 'fito', 'email', 'feedback', 'events', 'stats', 'game', 'tools'] + (function_exists('calib_view') ? [9 => 'calib'] : []), true) ? $_GET['tab'] : 'users';
 $newPass = null;
 $fitoDir = APP_ROOT . '/config/fito';
 if (($_GET['tab'] ?? '') === 'fito' && isset($_GET['dl'])) {
@@ -55,6 +55,9 @@ if (is_post()) {
         set_setting('fito_share', ($_POST['on'] ?? '') === '1' ? bin2hex(random_bytes(10)) : '');
         flash(($_POST['on'] ?? '') === '1' ? 'Share link created.' : 'Share link turned off.');
         redirect('admin?tab=fito');
+    }
+    if (staff_admin_post($do, $admin)) {
+        redirect('admin?tab=tools');
     }
     if (game_admin_post($do)) {
         redirect('admin?tab=game');
@@ -301,6 +304,7 @@ layout_header('Admin');
   <a href="<?= e(url('blog/admin')) ?>">Blog</a>
   <a class="<?= $tab === 'stats' ? 'on' : '' ?>" href="<?= e(url('admin?tab=stats')) ?>">Stats</a>
   <a class="<?= $tab === 'game' ? 'on' : '' ?>" href="<?= e(url('admin?tab=game')) ?>">Game</a>
+  <a class="<?= $tab === 'tools' ? 'on' : '' ?>" href="<?= e(url('admin?tab=tools')) ?>">Tools</a>
   <a class="<?= $tab === 'email' ? 'on' : '' ?>" href="<?= e(url('admin?tab=email')) ?>">Email</a>
   <?php ql_ensure_tables(); $fbNew = (int)val("SELECT COUNT(*) FROM feedback WHERE status = 'new'"); ?>
   <a class="<?= $tab === 'feedback' ? 'on' : '' ?>" href="<?= e(url('admin?tab=feedback')) ?>">Feedback<?= $fbNew ? ' · ' . $fbNew : '' ?></a>
@@ -404,6 +408,7 @@ layout_header('Admin');
 
 <?php elseif ($tab === 'stats'): stats_admin_view(); ?>
 <?php elseif ($tab === 'game'): game_admin_view(); ?>
+<?php elseif ($tab === 'tools'): staff_admin_view(); ?>
 
 <?php elseif ($tab === 'calib' && function_exists('calib_view')): calib_view(); ?>
 

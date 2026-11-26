@@ -133,6 +133,7 @@ function layout_header(string $title, string $active = '', array $meta = []): vo
 <link rel="stylesheet" href="<?= e(asset('app.css')) ?>">
 <?php if (defined('GAME_CSS')): ?><link rel="stylesheet" href="<?= e(asset('game.css')) ?>">
 <?php endif; ?>
+<link rel="stylesheet" href="<?= e(asset('fx2.css')) ?>">
 <meta name="csrf" content="<?= e(csrf_token()) ?>">
 <meta name="app-base" content="<?= e(base()) ?>">
 <?php $sv = stats_track(); $svc = stats_consent_state(); if ($sv): ?><meta name="sv" content="<?= (int)$sv[0] . '.' . e($sv[1]) ?>">
@@ -268,6 +269,7 @@ function layout_footer(string $active = '', array $scripts = []): void
 <script src="<?= e(asset('app.js')) ?>" defer></script>
 <script src="<?= e(asset('photos.js')) ?>" defer></script>
 <script src="<?= e(asset('fx.js')) ?>" defer></script>
+<script src="<?= e(asset('fx2.js')) ?>" defer></script>
 <script src="<?= e(asset('android.js')) ?>" defer data-apk="https://github.com/Niemil/myfitlevel/releases/latest/download/MyFitLevel.apk" data-page="<?= e(url('android')) ?>"></script>
 <script src="<?= e(asset('stats.js')) ?>" defer></script>
 <?php foreach ($scripts as $sj): ?>

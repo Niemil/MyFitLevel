@@ -3,6 +3,8 @@
   'use strict';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var fine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+  /* the logger and routine editor get a still background so nothing moves while you train */
+  if (/\/(log|routines)(\/|$)/.test(location.pathname)) reduce = true;
   var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   var mx = -9999, my = -9999, gx = -9999, gy = -9999, tick = 0, running = false;
   var cv = document.createElement('canvas');

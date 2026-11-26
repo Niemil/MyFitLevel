@@ -1,0 +1,78 @@
+/* MyFitLevel motion layer 2 (loaded after app.css). Everything here is decoration on top of the existing look.
+   Switched off for reduced-motion, kept minimal on the logger (html.fx-calm) and on weak devices (html.fx-lite). */
+
+::selection{background:color-mix(in srgb,var(--accent) 70%,transparent);color:#fff}
+
+/* scroll progress bar */
+#fxprog{position:fixed;left:0;top:0;height:3px;width:100%;z-index:300;transform-origin:left center;transform:scaleX(var(--p,0));
+  background:linear-gradient(90deg,var(--accent2),var(--accent),#ff7ac8);box-shadow:0 0 14px var(--glow);pointer-events:none;will-change:transform}
+
+/* soft reveal: elements slide up and unblur as they scroll into view */
+html.fx2 .fx-r{opacity:0;transform:translateY(22px) scale(.985);filter:blur(5px)}
+html.fx2 .fx-r.in{opacity:1;transform:none;filter:none;
+  transition:opacity .7s cubic-bezier(.2,.8,.2,1) var(--fd,0s),transform .7s cubic-bezier(.2,.8,.2,1) var(--fd,0s),filter .7s ease var(--fd,0s)}
+
+/* header gets glassy once you scroll */
+header.top{transition:box-shadow .3s,background-color .3s}
+html.fx-scrolled header.top{box-shadow:0 10px 34px -14px rgba(0,0,0,.6)}
+
+/* cards and link tiles */
+html.fx2 .card{transition:border-color .25s,box-shadow .35s,transform .2s}
+html.fx2 a.card:hover{box-shadow:0 0 0 1px var(--accent),0 18px 46px -16px var(--glow)}
+html.fx2 .fx-tilt{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .25s}
+html.fx2 .fx-tilt.fx-hot{transition:transform .08s linear,box-shadow .35s,border-color .25s}
+html.fx2 .fx-tilt.fx-hot:hover{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-3px)}
+
+/* buttons: light sweep on hover, slow idle sweep on the main call to action, tap ripple */
+html.fx2 .btn:not(.ghost){position:relative;overflow:hidden;isolation:isolate}
+html.fx2 .btn:not(.ghost)::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.38) 50%,transparent 65%);transform:translateX(-130%)}
+html.fx2 .btn:not(.ghost):hover::after{animation:fxshine .75s ease}
+html.fx2 .hero .cta .btn:not(.ghost):first-child::after,html.fx2 .hero2 .cta .btn:not(.ghost):first-child::after,html.fx2 .band .btn:not(.ghost)::after{animation:fxshine 5.5s ease-in-out 1.8s infinite}
+@keyframes fxshine{0%{transform:translateX(-130%)}35%,100%{transform:translateX(130%)}}
+html.fx2 .btn{transition:transform .15s,box-shadow .25s,filter .2s}
+html.fx2 .btn:not(.ghost):hover{transform:translateY(-2px);filter:brightness(1.08)}
+html.fx2 .btn:active{transform:scale(.96)}
+.fx-rip{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);transform:scale(0);animation:fxrip .6s ease-out forwards;pointer-events:none;z-index:-1}
+@keyframes fxrip{to{transform:scale(1);opacity:0}}
+
+/* small touches */
+html.fx2 .bottomnav a.on:not(.fab) .ic{animation:fxpop .5s cubic-bezier(.3,1.7,.5,1)}
+@keyframes fxpop{0%{transform:scale(.7)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+html.fx2 .badge{transition:transform .25s cubic-bezier(.3,1.7,.5,1),box-shadow .25s}
+html.fx2 .badge:hover{transform:scale(1.18) rotate(-6deg);box-shadow:0 8px 22px -6px var(--glow)}
+html.fx2 .tabs a,html.fx2 .chip{transition:transform .15s,background-color .2s,border-color .2s,color .2s}
+html.fx2 .tabs a:hover,html.fx2 .chip:hover{transform:translateY(-2px)}
+html.fx2 .xpbar i{box-shadow:0 0 12px var(--glow)}
+html.fx2 .reward,html.fx2 .bigpts{text-shadow:0 0 18px color-mix(in srgb,var(--accent2) 55%,transparent)}
+html.fx2 .logo .mascot{transition:transform .3s cubic-bezier(.3,1.7,.5,1)}
+html.fx2 .logo:hover .mascot{transform:rotate(-10deg) scale(1.12)}
+
+/* smooth page-to-page crossfade (Chrome and the Android app) */
+@media (prefers-reduced-motion:no-preference){
+  @view-transition{navigation:auto}
+  ::view-transition-old(root){animation:fxvo .16s ease both}
+  ::view-transition-new(root){animation:fxvi .3s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes fxvo{to{opacity:0}}
+  @keyframes fxvi{from{opacity:0;transform:translateY(8px)}}
+  html:not(.fx-calm){scroll-behavior:smooth}
+}
+
+/* logger and routines: keep it calm and cheap so nothing distracts or drains the battery mid-set */
+html.fx-calm body::before,html.fx-calm body::after{animation:none!important;filter:blur(70px)}
+html.fx-calm #fxglow{display:none!important}
+html.fx-calm .bottomnav a.fab,html.fx-calm .xpbar i{animation:none!important}
+html.fx-calm .btn::after{display:none!important}
+html.fx-calm #fxprog{display:none}
+
+/* weak devices: drop the heavy bits */
+html.fx-lite body::before{animation:none!important}
+html.fx-lite body::after{display:none!important}
+html.fx-lite .btn::after{display:none!important}
+html.fx-lite .fx-tilt{transform:none!important}
+
+@media (prefers-reduced-motion:reduce){
+  html.fx2 .fx-r{opacity:1!important;transform:none!important;filter:none!important}
+  #fxprog{display:none}
+  html.fx2 *,html.fx2 *::before,html.fx2 *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

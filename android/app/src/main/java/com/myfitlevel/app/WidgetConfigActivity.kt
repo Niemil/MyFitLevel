@@ -37,7 +37,7 @@ class WidgetConfigActivity : AppCompatActivity() {
         if (wid == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return }
         val cn = AppWidgetManager.getInstance(this).getAppWidgetInfo(wid)?.provider?.className ?: ""
         val prov = try { Class.forName(cn).getDeclaredConstructor().newInstance() as BaseWidget } catch (e: Exception) { null }
-        val s0 = Cfg.get(this, wid, prov?.defaultStyle ?: Style(0, 0, 92, 1, 0, 0))
+        val s0 = Cfg.get(this, wid, prov?.defaultStyle ?: Style(6, 7, 94, 2, 0, 0))
         theme = s0.theme; accent = s0.accent; opacity = s0.opacity; radius = s0.radius; feed = s0.feed; boss = s0.boss
         val showFeed = cn.endsWith("FeedWidget") || cn.endsWith("FeedSmallWidget")
         val showBoss = cn.endsWith("BossWidget") || cn.endsWith("BundleWidget")

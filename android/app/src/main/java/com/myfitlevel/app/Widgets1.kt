@@ -35,7 +35,7 @@ class StepsWidget : BaseWidget() {
 
 class BossWidget : BaseWidget() {
     override val layout = R.layout.w_boss
-    override val defaultStyle = Style(0, 2, 92, 1, 0, 0)
+    override val defaultStyle = Style(6, 7, 94, 2, 0, 0)
     override fun render(ctx: Context, v: RemoteViews, d: JSONObject, s: Style, id: Int) {
         val b = (if (s.boss == 1) d.optJSONObject("raid") else d.optJSONObject("boss")) ?: d.optJSONObject("boss")
         if (b == null) {
@@ -68,7 +68,7 @@ class WeekWidget : BaseWidget() {
 
 class ChestWidget : BaseWidget() {
     override val layout = R.layout.w_chest
-    override val defaultStyle = Style(3, 3, 92, 1, 0, 0)
+    override val defaultStyle = Style(6, 7, 94, 2, 0, 0)
     override fun render(ctx: Context, v: RemoteViews, d: JSONObject, s: Style, id: Int) {
         val ready = d.optBoolean("chest_ready")
         v.txt(R.id.c_emoji, if (ready) "🎁" else "✅", s.text)
@@ -96,7 +96,7 @@ class ActionsWidget : BaseWidget() {
 class LogWidget : BaseWidget() {
     override val layout = R.layout.w_log
     override val tools = false
-    override val defaultStyle = Style(0, 0, 100, 2, 0, 0)
+    override val defaultStyle = Style(6, 7, 100, 2, 0, 0)
     override fun render(ctx: Context, v: RemoteViews, d: JSONObject, s: Style, id: Int) {
         v.txt(R.id.g_label, "Log workout", s.text)
         v.setOnClickPendingIntent(R.id.w_content, open(ctx, id, 1, "/track"))

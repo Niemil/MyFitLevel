@@ -91,7 +91,7 @@ class WidgetWorker(ctx: Context, p: WorkerParameters) : CoroutineWorker(ctx, p) 
 
 abstract class BaseWidget : AppWidgetProvider() {
     abstract val layout: Int
-    open val defaultStyle = Style(0, 0, 92, 1, 0, 0)
+    open val defaultStyle = Style(6, 7, 94, 2, 0, 0)
     open val tools = true
     abstract fun render(ctx: Context, v: RemoteViews, d: JSONObject, s: Style, id: Int)
 

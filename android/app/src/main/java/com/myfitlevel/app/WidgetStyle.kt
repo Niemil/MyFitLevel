@@ -13,9 +13,10 @@ object Themes {
         Theme("Violet", 0xFF1E1442.toInt(), 0xFFFFFFFF.toInt(), 0xFFB7A9E6.toInt()),
         Theme("Forest", 0xFF0F2A22.toInt(), 0xFFEFFBF5.toInt(), 0xFF8FC4AE.toInt()),
         Theme("See-through", 0xFF0B1020.toInt(), 0xFFFFFFFF.toInt(), 0xFFD0D6E2.toInt()),
+        Theme("Wolf", 0xFF11162A.toInt(), 0xFFF2F6FF.toInt(), 0xFF9BB0D0.toInt()),
     )
-    val accents = intArrayOf(0xFF7C6BFF.toInt(), 0xFF22D3C5.toInt(), 0xFFFF5CAA.toInt(), 0xFFFF9F43.toInt(), 0xFF4ADE80.toInt(), 0xFF4EA1FF.toInt(), 0xFFFFC53D.toInt())
-    val accentNames = listOf("Indigo", "Teal", "Pink", "Orange", "Green", "Blue", "Yellow")
+    val accents = intArrayOf(0xFF7C6BFF.toInt(), 0xFF22D3C5.toInt(), 0xFFFF5CAA.toInt(), 0xFFFF9F43.toInt(), 0xFF4ADE80.toInt(), 0xFF4EA1FF.toInt(), 0xFFFFC53D.toInt(), 0xFF62CCFF.toInt())
+    val accentNames = listOf("Indigo", "Teal", "Pink", "Orange", "Green", "Blue", "Yellow", "Ice")
     val corners = listOf("Small", "Medium", "Large")
 }
 

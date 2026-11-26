@@ -13,7 +13,7 @@ function staff_ensure(): void
         return;
     }
     $done = true;
-    if (setting('staff_v') === '1') {
+    if (setting('staff_v') === '2') {
         staff_once();
         return;
     }
@@ -37,16 +37,33 @@ function staff_ensure(): void
         created_at DATETIME NOT NULL,
         KEY idx_al_time (created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    q('CREATE TABLE IF NOT EXISTS daily_visits (
+        user_id INT UNSIGNED NOT NULL, day DATE NOT NULL, PRIMARY KEY (user_id, day)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
     if (!row("SHOW COLUMNS FROM users LIKE 'xp_adjust'")) {
         q('ALTER TABLE users ADD COLUMN xp_adjust INT NOT NULL DEFAULT 0');
     }
-    set_setting('staff_v', '1');
+    set_setting('staff_v', '2');
     staff_once();
 }
 
 /** One-time balance changes, applied automatically. */
 function staff_once(): void
 {
+    if (setting('bal_v2') !== '1') {
+        set_setting('bal_v2', '1');
+        set_setting('level_scale', '1');             // the new curve is set directly in level_anchors()
+        set_setting('game_steps_per_point', '80');   // 3,000 steps is about one solid set, 10,000 about 125 points
+        // Members who already finished an achievement get its item too
+        game_ensure();
+        $cat = game_items();
+        foreach (quest_item_rewards() as $code => $item) {
+            if (isset($cat[$item])) {
+                q("INSERT IGNORE INTO game_items (user_id, item, source, got_at, equipped) SELECT user_id, ?, 'quest', ?, 0 FROM user_quests WHERE code = ?", [$item, now(), $code]);
+            }
+        }
+        rules_mark();
+    }
     if (setting('bal_v1') !== '1') {
         set_setting('bal_v1', '1');
         set_setting('level_scale', '0.5');   // levels came too slowly: level 50 needed 210,000 points
@@ -205,4 +222,16 @@ function staff_admin_view(): void
   <?php endforeach; ?>
 </div>
 <?php
+}
+
+/** Counts a visit once per day per member (used for consistency achievements). One cheap insert, remembered in the session. */
+function staff_visit(int $uid): void
+{
+    $d = date('Y-m-d');
+    if (($_SESSION['visit_day'] ?? '') === $d) {
+        return;
+    }
+    $_SESSION['visit_day'] = $d;
+    staff_ensure();
+    q('INSERT IGNORE INTO daily_visits (user_id, day) VALUES (?,?)', [$uid, $d]);
 }

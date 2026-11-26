@@ -40,6 +40,7 @@ function require_login(): array
         $_SESSION['after_login'] = $_SERVER['REQUEST_URI'] ?? '';
         redirect('login');
     }
+    staff_visit((int)$u['id']);
     return $u;
 }
 

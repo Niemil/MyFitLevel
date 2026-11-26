@@ -17,7 +17,9 @@ const LEVEL_MAX = 100;
 function level_anchors(): array
 {
     // level => total points needed
-    return [1 => 0.0, 2 => 250.0, 10 => 7000.0, 20 => 30000.0, 30 => 70000.0, 50 => 210000.0, 75 => 470000.0, 100 => 850000.0];
+    // Tuned for ~3.5 workouts a week plus ~6k steps a day (about 7,400 points a month):
+    // level 20 in ~1.4 months, 30 in ~2.5, 40 in ~4, 50 in ~6, 60 in ~9, 70 in ~13, 80 in ~17, 90 in ~24, 100 in ~31 months.
+    return [1 => 0.0, 2 => 150.0, 10 => 3500.0, 20 => 10000.0, 30 => 18500.0, 40 => 30000.0, 50 => 45000.0, 60 => 66000.0, 70 => 94000.0, 80 => 130000.0, 90 => 175000.0, 100 => 230000.0];
 }
 
 function level_base(int $l): float
@@ -263,6 +265,25 @@ function user_stats(int $uid): array
         }
     }
     $st['streak'] = $streak;
+    // Consistency: distinct training days, busy weeks in a row, site visits, days with a post
+    $st['train_days'] = (int)val('SELECT COUNT(DISTINCT DATE(performed_at)) FROM workouts WHERE user_id = ?', [$uid]);
+    $st['train_days_30'] = (int)val('SELECT COUNT(DISTINCT DATE(performed_at)) FROM workouts WHERE user_id = ? AND performed_at >= ?', [$uid, date('Y-m-d', time() - 30 * 86400)]);
+    $wk = [];
+    foreach ($days as $d) {
+        $m = date('Y-m-d', strtotime('monday this week', strtotime($d)));
+        $wk[$m] = ($wk[$m] ?? 0) + 1;
+    }
+    ksort($wk);
+    $bestW = 0; $runW = 0; $prevW = null;
+    foreach ($wk as $m => $c) {
+        if ($c < 3) { $runW = 0; $prevW = null; continue; }
+        $runW = ($prevW !== null && strtotime($m) - strtotime($prevW) <= 8 * 86400) ? $runW + 1 : 1;
+        $bestW = max($bestW, $runW); $prevW = $m;
+    }
+    $st['weeks_3x'] = $bestW;
+    staff_ensure();
+    $st['visit_days'] = (int)val('SELECT COUNT(*) FROM daily_visits WHERE user_id = ?', [$uid]);
+    $st['post_days'] = (int)val('SELECT COUNT(DISTINCT DATE(created_at)) FROM posts WHERE user_id = ?', [$uid]);
     return $st;
 }
 
@@ -354,6 +375,27 @@ function quest_defs_base(): array
         'ten_workouts' => ['Getting Serious', 'Log 10 workouts', 'workouts', 10, 150],
         'fifty_workouts'=> ['Regular', 'Log 50 workouts', 'workouts', 50, 500],
         'volume_100k'  => ['Hundred Tonnes', 'Lift 100,000 kg in total', 'volume_kg', 100000, 1000],
+        'bench_40'     => ['Bench: Getting Started', 'Bench press an estimated 0.4x your bodyweight', 'bench_pct', 40, 40],
+        'bench_50'     => ['Bench: Half Your Bodyweight', 'Bench press an estimated 0.5x your bodyweight', 'bench_pct', 50, 70],
+        'squat_50'     => ['Squat: Half Your Bodyweight', 'Squat an estimated 0.5x your bodyweight', 'squat_pct', 50, 50],
+        'squat_75'     => ['Squat: Three Quarters', 'Squat an estimated 0.75x your bodyweight', 'squat_pct', 75, 100],
+        'dead_50'      => ['Deadlift: Half Your Bodyweight', 'Deadlift an estimated 0.5x your bodyweight', 'dead_pct', 50, 40],
+        'dead_75'      => ['Deadlift: Three Quarters', 'Deadlift an estimated 0.75x your bodyweight', 'dead_pct', 75, 80],
+        'dead_100'     => ['Deadlift: Your Bodyweight', 'Deadlift an estimated 1x your bodyweight', 'dead_pct', 100, 150],
+        'ohp_30'       => ['Press: Getting Started', 'Overhead press an estimated 0.3x your bodyweight', 'ohp_pct', 30, 50],
+        'ohp_40'       => ['Press: Four Tenths', 'Overhead press an estimated 0.4x your bodyweight', 'ohp_pct', 40, 100],
+        'row_50'       => ['Row: Half Your Bodyweight', 'Barbell row an estimated 0.5x your bodyweight', 'row_pct', 50, 60],
+        'visit_7'      => ['Showing Up', 'Visit the site on 7 different days', 'visit_days', 7, 40],
+        'visit_30'     => ['Familiar Face', 'Visit the site on 30 different days', 'visit_days', 30, 150],
+        'visit_100'    => ['Part of the Pack', 'Visit the site on 100 different days', 'visit_days', 100, 400],
+        'train_25'     => ['Twenty-five Sessions', 'Train on 25 different days', 'train_days', 25, 150],
+        'train_100'    => ['Hundred Training Days', 'Train on 100 different days', 'train_days', 100, 600],
+        'month_12'     => ['Monthly Regular', 'Train on 12 different days within 30 days', 'train_days_30', 12, 200],
+        'month_16'     => ['Machine', 'Train on 16 different days within 30 days', 'train_days_30', 16, 400],
+        'weeks_4'      => ['Four Strong Weeks', 'Train 3 or more days a week, 4 weeks in a row', 'weeks_3x', 4, 300],
+        'weeks_12'     => ['Twelve Strong Weeks', 'Train 3 or more days a week, 12 weeks in a row', 'weeks_3x', 12, 1000],
+        'posts_10'     => ['Storyteller', 'Write a post on 10 different days', 'post_days', 10, 100],
+        'posts_30'     => ['Regular Voice', 'Write a post on 30 different days', 'post_days', 30, 300],
         'hundred_workouts' => ['Centurion', 'Log 100 workouts', 'workouts', 100, 1000],
         'streak_30'    => ['Unbreakable', 'Work out 30 days in a row', 'streak', 30, 1500],
         'gym_10h'      => ['Regular at the Gym', 'Spend 10 hours training (timed workouts)', 'gym_hours', 10, 150],
@@ -372,6 +414,18 @@ function quest_defs_base(): array
         'ohp_75'       => ['Press: Three Quarters', 'Overhead press an estimated 0.75x your bodyweight', 'ohp_pct', 75, 600],
         'row_75'       => ['Row: Three Quarters', 'Barbell row an estimated 0.75x your bodyweight', 'row_pct', 75, 200],
         'row_100'      => ['Row: Your Bodyweight', 'Barbell row an estimated 1x your bodyweight', 'row_pct', 100, 400],
+    ];
+}
+
+/** Achievement code => item the member receives (permanent). */
+function quest_item_rewards(): array
+{
+    return [
+        'ten_workouts' => 'a_trainer', 'fifty_workouts' => 'a_regular', 'hundred_workouts' => 'a_centurion',
+        'week_streak' => 'a_swift', 'streak_30' => 'a_unbroken', 'bench_100' => 'a_benchbar', 'squat_150' => 'a_quad',
+        'dead_200' => 'a_grip', 'visit_30' => 'a_wolf', 'visit_100' => 'a_pack', 'posts_10' => 'a_voice',
+        'walker_20' => 'a_wings', 'gym_100h' => 'a_gym', 'gym_50h' => 'c_fr_steel', 'posts_30' => 'c_nm_frost',
+        'train_100' => 'c_fr_gold', 'bench_150' => 'c_nm_gold', 'weeks_12' => 'c_bn_summit', 'month_16' => 'c_nm_ember',
     ];
 }
 
@@ -395,7 +449,13 @@ function check_awards(int $uid): array
             q('INSERT IGNORE INTO user_quests (user_id, code, reward, completed_at) VALUES (?,?,?,?)', [$uid, $code, $reward, now()]);
             q("INSERT INTO notifications (user_id, type, text, created_at) VALUES (?,?,?,?)",
               [$uid, 'quest', "Quest complete: $name (+$reward pts)", now()]);
-            $out['quests'][] = ['name' => $name, 'reward' => $reward];
+            $itemKey = quest_item_rewards()[$code] ?? '';
+            if ($itemKey !== '' && isset(game_items()[$itemKey])) {
+                game_ensure();
+                game_give_item($uid, $itemKey, 'quest');
+                q('INSERT INTO notifications (user_id, type, text, created_at) VALUES (?,?,?,?)', [$uid, 'quest', 'New item unlocked: ' . game_items()[$itemKey][0] . ' (see the Shop)', now()]);
+            }
+            $out['quests'][] = ['name' => $name, 'reward' => $reward . ($itemKey !== '' && isset(game_items()[$itemKey]) ? ' pts + ' . game_items()[$itemKey][0] : '')];
         }
     }
 

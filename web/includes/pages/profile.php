@@ -117,6 +117,7 @@ $back = 'u/' . $p['username'];
     <div><b><?= $stats['streak'] ?></b><span>Day streak</span></div>
   </div>
 </section>
+<div class="card charcard" style="padding:6px 0"><div class="charstage" style="min-height:220px"><?= fito_dressed(fito_look((int)$p['id']), 210) ?></div></div>
 <nav class="ptabs">
   <a href="#feed">Feed</a><a href="#photos">Photos</a><a href="#ach">Achievements</a><a href="#stats">Stats</a>
 </nav>

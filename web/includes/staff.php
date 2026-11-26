@@ -13,7 +13,7 @@ function staff_ensure(): void
         return;
     }
     $done = true;
-    if (setting('staff_v') === '2') {
+    if (setting('staff_v') === '3') {
         staff_once();
         return;
     }
@@ -40,10 +40,14 @@ function staff_ensure(): void
     q('CREATE TABLE IF NOT EXISTS daily_visits (
         user_id INT UNSIGNED NOT NULL, day DATE NOT NULL, PRIMARY KEY (user_id, day)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    q('CREATE TABLE IF NOT EXISTS char_look (
+        user_id INT UNSIGNED NOT NULL PRIMARY KEY, species VARCHAR(10) NOT NULL DEFAULT "wolf", eye VARCHAR(10) NOT NULL DEFAULT "ice",
+        picks INT NOT NULL DEFAULT 0, updated_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
     if (!row("SHOW COLUMNS FROM users LIKE 'xp_adjust'")) {
         q('ALTER TABLE users ADD COLUMN xp_adjust INT NOT NULL DEFAULT 0');
     }
-    set_setting('staff_v', '2');
+    set_setting('staff_v', '3');
     staff_once();
 }
 

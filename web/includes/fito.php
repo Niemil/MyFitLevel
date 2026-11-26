@@ -26,6 +26,13 @@ SVG;
  */
 function fito(string $pose = 'idle', int $size = 120, string $class = '', bool $face = false): string
 {
+    $svg = fito_build($pose, $size, $class, $face);
+    $d = $GLOBALS['fito_dress'] ?? null;
+    return $d ? fito_dressup($svg, $pose, $face, $d) : $svg;
+}
+
+function fito_build(string $pose = 'idle', int $size = 120, string $class = '', bool $face = false): string
+{
     $poses = ['idle', 'cheer', 'flex', 'lift', 'oops', 'squat', 'curl'];
     if (!in_array($pose, $poses, true)) $pose = 'idle';
 

@@ -64,6 +64,7 @@ $routes = [
     '#^steps$#'                    => 'steps',
     '#^insights$#'                 => 'insights',
     '#^boosts$#'                   => 'boosts',
+    '#^character$#'                => 'character',
     '#^history$#'                  => 'history',
     '#^teams$#'                    => 'teams',
     '#^team/(\d+)$#'               => 'teams',

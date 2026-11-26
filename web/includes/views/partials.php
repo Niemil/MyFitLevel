@@ -177,6 +177,7 @@ function layout_header(string $title, string $active = '', array $meta = []): vo
           <a href="<?= e(url('routines')) ?>" style="--c:#66d9e8"><?= icon('dumbbell') ?><span>Routines</span></a>
           <a href="<?= e(url('routines#schedule')) ?>" style="--c:#e599f7"><?= icon('cal') ?><span>Schedule</span></a>
           <a href="<?= e(url('insights')) ?>" style="--c:#63e6be"><?= icon('chart') ?><span>Insights</span></a>
+          <a href="<?= e(url('character')) ?>" style="--c:#62ccff"><?= icon('user') ?><span>Character</span></a>
           <a href="<?= e(url('boosts')) ?>" style="--c:#ffd35e"><?= icon('sparkle') ?><span>Boosts</span></a>
           <a href="<?= e(url('levels')) ?>" style="--c:#ff8787"><?= icon('chart') ?><span>Levels</span></a>
           <a href="<?= e(url('settings')) ?>" style="--c:#adb5bd"><?= icon('cog') ?><span>Settings</span></a>

@@ -1096,3 +1096,19 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 @keyframes cGlitch{0%,92%,100%{transform:none}93%{transform:translateX(-1px) skewX(-6deg)}95%{transform:translateX(1px)}97%{transform:none}}
 html.fx-calm .nfx,html.fx-calm .frm,.nomotion .nfx,.nomotion .frm{animation:none}
 @media(prefers-reduced-motion:reduce){.nfx,.frm{animation:none}}
+
+/* Character */
+.charcard{text-align:center}
+.charstage{display:flex;justify-content:center;padding:10px 0;min-height:320px;align-items:center;background:radial-gradient(circle at 50% 60%,rgba(98,204,255,.16),transparent 62%)}
+.charmood{max-width:320px;margin:8px auto 0}
+.spgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:620px){.spgrid{grid-template-columns:repeat(4,1fr)}}
+.spbtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px;border:1px solid var(--line);border-radius:14px}
+.spbtn.on{border-color:var(--accent,#62ccff);box-shadow:0 0 0 1px var(--accent,#62ccff) inset}
+.eyegrid{display:flex;gap:12px;flex-wrap:wrap}
+.eyeb{width:42px;height:42px;border-radius:50%;border:3px solid transparent;background:var(--c);cursor:pointer;box-shadow:0 0 12px var(--c)}
+.eyeb.on{border-color:#fff}
+.f-aura{animation:fAura 3.4s ease-in-out infinite}
+@keyframes fAura{50%{opacity:.5}}
+html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
+@media(prefers-reduced-motion:reduce){.f-aura{animation:none}}

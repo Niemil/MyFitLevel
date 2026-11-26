@@ -32,7 +32,7 @@ layout_header('Feed', 'feed');
     <a class="<?= $tab === 'everyone' ? 'on' : '' ?>" href="<?= e(url('feed?tab=everyone')) ?>">Everyone</a>
   </div>
 
-  <?php if (!$before) { verify_banner($u); game_today_card($u); onboard_card($u); week_card($u); game_feed_card($u); game_steps_bar($u); today_card($u); } ?>
+  <?php if (!$before) { verify_banner($u); game_today_card($u); fito_coach_card($u); onboard_card($u); week_card($u); game_feed_card($u); game_steps_bar($u); today_card($u); } ?>
   <?php if (!$before) { post_composer($u, 'feed?tab=' . $tab); } ?>
 
   <?php if (!$list): ?>

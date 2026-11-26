@@ -1052,3 +1052,6 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 .insform select{width:100%;margin:6px 0 10px}
 .sharebox{display:flex;flex-direction:column;gap:6px;align-items:flex-start}.sharebox p{margin:0}
 .sharebox img{max-width:100%;width:260px;border-radius:14px;margin-top:8px;border:1px solid var(--line)}
+.fcoach{display:flex;align-items:center;gap:12px;padding:12px 14px!important;flex-wrap:wrap}.fcoach .grow{flex:1 1 0;min-width:180px}
+.fcoach .mascot{flex:none;width:48px;height:48px}.fcoach p{margin:2px 0 0;color:var(--muted);font-size:.92rem}
+@media(max-width:520px){.fcoach .grow{flex-basis:calc(100% - 64px)}.fcoach .btn{margin-left:60px}}

@@ -59,7 +59,7 @@ function chart_line(array $pts, string $unit = ''): string
 }
 
 /** $bars: list of [label, value]. */
-function chart_bars(array $bars): string
+function chart_bars(array $bars, string $unit = ' pts'): string
 {
     $n = count($bars);
     if (!$n) { return ''; }
@@ -69,7 +69,7 @@ function chart_bars(array $bars): string
     $svg = '<svg class="lchart" viewBox="0 0 ' . $W . ' ' . $H . '" role="img">';
     foreach ($bars as $i => $p) {
         $h = ($H - $t - $b) * ($p[1] / $max);
-        $svg .= '<rect x="' . round($l + $i * $bw + 1, 1) . '" y="' . round($H - $b - $h, 1) . '" width="' . round($bw - 2, 1) . '" height="' . round(max(0, $h), 1) . '" rx="2" class="bar"><title>' . e((string)$p[0]) . ': ' . number_format((int)$p[1]) . ' pts</title></rect>';
+        $svg .= '<rect x="' . round($l + $i * $bw + 1, 1) . '" y="' . round($H - $b - $h, 1) . '" width="' . round($bw - 2, 1) . '" height="' . round(max(0, $h), 1) . '" rx="2" class="bar"><title>' . e((string)$p[0]) . ': ' . number_format((int)$p[1]) . $unit . '</title></rect>';
     }
     $svg .= '<text x="' . $l . '" y="' . ($H - 6) . '" class="cl">' . e((string)$bars[0][0]) . '</text><text x="' . ($W - $l) . '" y="' . ($H - 6) . '" class="cl" text-anchor="end">' . e((string)$bars[$n - 1][0]) . '</text>';
     return $svg . '</svg>';

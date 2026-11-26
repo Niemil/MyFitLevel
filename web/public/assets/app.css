@@ -1035,3 +1035,18 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 
 .blogcard{display:block;text-decoration:none;color:inherit;margin:12px 0}.blogcard h2{margin:0 0 6px;font-size:1.25rem}.blogcard:hover{border-color:rgba(124,92,255,.6)}
 .blogpost h2{margin-top:1.6em}.blogpost p,.blogpost li{line-height:1.7}.blogpost blockquote{border-left:3px solid rgba(124,92,255,.7);margin:1em 0;padding:.2em 1em;opacity:.9}.blogpost img{max-width:100%;border-radius:12px}.blogpost hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:1.6em 0}
+
+/* Insights page */
+.statgrid.ins4{grid-template-columns:repeat(2,1fr)}@media(min-width:640px){.statgrid.ins4{grid-template-columns:repeat(4,1fr)}}
+.b-push{background:#ff8a5c}.b-pull{background:#5cc8ff}.b-legs{background:#7be08a}.b-core{background:#c9a6ff}
+.insbal{display:flex;height:14px;border-radius:8px;overflow:hidden;gap:2px;margin:10px 0 8px}.insbal i{display:block;min-width:4px}
+.insleg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;margin-bottom:12px}.insleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.insrow{display:grid;grid-template-columns:84px 1fr 34px;align-items:center;gap:10px;margin:6px 0;font-size:.9rem}
+.insrow>div{height:8px;border-radius:5px;background:rgba(127,127,127,.18);overflow:hidden}.insrow>div i{display:block;height:100%;border-radius:5px}
+.insrow b{text-align:right}
+.insdow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center;margin-top:8px}
+.insdow .col{height:90px;display:flex;align-items:flex-end;border-radius:8px;background:rgba(127,127,127,.12);overflow:hidden}
+.insdow .col i{display:block;width:100%;min-height:3px;background:linear-gradient(180deg,var(--accent2),var(--accent));border-radius:8px 8px 0 0}
+.insdow small{display:block;margin-top:4px;color:var(--muted)}.insdow b{font-size:.85rem}
+.insprow{text-decoration:none;color:inherit}.insprow:hover{text-decoration:none;background:rgba(127,127,127,.08)}
+.insform select{width:100%;margin:6px 0 10px}

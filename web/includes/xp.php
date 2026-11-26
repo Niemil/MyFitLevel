@@ -117,6 +117,7 @@ function recalc_xp(int $uid): array
 
 /* ================= Points ================= */
 
+const DURATION_SCALE = 3.0;  // timed holds were far below everything else: a 2-minute plank paid 6 pts, a set of curls 15
 const CARDIO_SCALE = 6.6;   // points per old-style cardio unit; anchored so a 10:00/mile run for 1 mile = ~82 pts
 const CARDIO_DIST_EXP  = 1.2;   // long distances are disproportionately hard: 2x the distance = 2.3x the points
 const CARDIO_SPEED_EXP = 1.3;   // faster than the reference pace pays extra, slower pays less
@@ -179,7 +180,7 @@ function set_points(array $ex, array $s, float $bodyweightKg): array
             $pts = cardio_points($ex, $dur, $dist);
             break;
         case 'duration':
-            $pts = $coef * ($dur / 60);
+            $pts = $coef * DURATION_SCALE * ($dur / 60);
             break;
     }
     return ['points' => max(1, (int)round($pts)), 'score' => round($score, 2)];

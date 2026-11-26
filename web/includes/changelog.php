@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.42.1', '2026-11-26 17:50', 'Fairer points for timed holds', ['Fix Planks, wall sits, L-sits and other timed holds paid far too little compared with lifting and cardio (a 2 minute plank gave 6 points). They now pay three times as much, in line with other exercises per minute of effort. Workouts you already saved keep their points.'], 'fix'],
     ['3.42.0', '2026-11-26 17:20', 'Style your profile', ['New Three new kinds of shop items, bought with coins: name effects (Ember, Frost, Gold, Neon, Aurora, Glitch), avatar frames and profile banners. They are cosmetic only, so they do not change damage or coins.', 'New Your name effect shows everywhere your name does, your frame around your photo, and your banner on your profile. Equip them in the Shop.'], 'new'],
     ['3.41.1', '2026-11-26 16:35', 'A friendlier first workout', ['New New members see a short guide from Fito above the logger: start, add an exercise, tick the sets, finish. It disappears after the first saved workout.'], 'new'],
     ['3.41.0', '2026-11-26 16:10', 'Fito coaches you', ['New A short note from Fito at the top of the feed, based on your own training: nudges after a few days off, a shout-out for a new record, or a hint when you push much more than you pull or skip legs. It is rule based, so it costs nothing and is private to you.'], 'new'],

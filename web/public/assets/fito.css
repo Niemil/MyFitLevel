@@ -54,3 +54,35 @@ html.fx-calm .fito:not(.fsv) .f-head{transform:none}
 @keyframes fsFill{to{width:94%}}
 @keyframes fsGlow{50%{transform:scale(1.15);opacity:.7}}
 @media (prefers-reduced-motion:reduce){.fsave .fsv-glow,.fsave.on .fsv-bar i{animation:none}.fsave.on .fsv-bar i{width:94%}}
+
+/* exercise moves */
+.fito.p-squat .f-sq{animation:fSquat 2.6s ease-in-out infinite}
+.fito.p-squat .f-legs{transform-origin:120px 272px;animation:fSquatLegs 2.6s ease-in-out infinite}
+.fito.p-squat .f-torso,.fito.p-squat .f-tail{animation:none}
+.fito.p-curl .f-fore{transform-origin:42px 208px;animation:fCurl 2.4s ease-in-out infinite}
+.fito.p-curl .f-armR .f-fore{animation-delay:1.2s}
+.fito.p-curl .f-bicep{transform-origin:52px 190px;animation:fBicep 2.4s ease-in-out infinite}
+.fito.p-curl .f-armR .f-bicep{animation-delay:1.2s}
+.fito.p-bench .b-arm{transform-origin:118px 104px;animation:fBArm 2.2s ease-in-out infinite}
+.fito.p-bench .b-bar,.fito.p-bench .b-hand{animation:fBBar 2.2s ease-in-out infinite}
+.fito.p-bench .f-head{transform:none}
+@keyframes fSquat{0%,100%{transform:translateY(0)}45%,60%{transform:translateY(24px)}}
+@keyframes fSquatLegs{0%,100%{transform:scale(1,1)}45%,60%{transform:scale(1.14,.55)}}
+@keyframes fCurl{0%,100%{transform:rotate(0)}45%,60%{transform:rotate(-148deg)}}
+@keyframes fBicep{0%,100%{transform:scale(1)}45%,60%{transform:scale(1.5,1.35)}}
+@keyframes fBArm{0%,100%{transform:scaleY(.5)}45%,60%{transform:scaleY(1)}}
+@keyframes fBBar{0%,100%{transform:translateY(37px)}45%,60%{transform:translateY(0)}}
+.fito.f-face{overflow:visible}
+
+/* exercise stage (landing demo and save screen) */
+.mvstage{position:relative;display:flex;justify-content:center;align-items:flex-end}
+.mvstage .mv{display:none}
+.mvstage .mv.on{display:block}
+
+/* landing demo: Fito trains above the card instead of covering it */
+.h2-demo{margin-top:6px}
+.h2-demo .mvstage{margin-bottom:-4px}
+.h2-demo .mvstage .mascot{position:static;right:auto;top:auto;width:auto;height:150px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35))}
+@media(min-width:860px){.h2-demo{margin-top:0}}
+/* header logo: head only */
+.logo .mascot{width:34px;height:34px}

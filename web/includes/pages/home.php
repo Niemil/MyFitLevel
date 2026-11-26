@@ -91,7 +91,7 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
     <?php endif; ?>
   </div>
   <div class="h2-demo" id="demo" aria-hidden="true">
-    <?= mascot('cheer', 96) ?>
+    <div class="mvstage" id="dstage"><?php foreach (['bench', 'squat', 'curl'] as $i => $m) echo fito_move($m, 150, 'mv' . ($i ? '' : ' on')); ?></div>
     <div class="dcard">
       <div class="dhead"><span>Push day</span><span class="dpts">+<b id="dpts">0</b> pts</span></div>
       <div class="dex">Bench Press</div>

@@ -293,7 +293,7 @@ layout_header('Track workout', 'log');
 
 <div class="fsave" id="fsave" aria-live="polite" hidden>
   <span class="fsv-glow"></span>
-  <?= fito('lift', 200, 'fsv') ?>
+  <div class="mvstage" id="fsstage"><?php foreach (['press', 'squat', 'curl', 'bench'] as $m) echo fito_move($m, 190, 'fsv mv'); ?></div>
   <div class="fsv-pts"><span id="fsvpts">0</span><small>points</small></div>
   <div class="fsv-msg">Saving your workout…</div>
   <div class="fsv-bar"><i></i></div>

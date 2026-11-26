@@ -82,7 +82,19 @@
     }
     requestAnimationFrame(s);
   }
+  var MOVES = [
+    { k: 'bench', name: 'Bench Press', sets: ['60 kg × 8', '70 kg × 6', '75 kg × 5'] },
+    { k: 'squat', name: 'Back Squat', sets: ['80 kg × 8', '90 kg × 6', '100 kg × 5'] },
+    { k: 'curl', name: 'Dumbbell Curl', sets: ['14 kg × 10', '16 kg × 8', '18 kg × 6'] }
+  ], mi = 0, exEl = demo.querySelector('.dex'), figs = demo.querySelectorAll('.mv');
+  function showMove() {
+    var m = MOVES[mi % MOVES.length];
+    if (exEl) exEl.textContent = m.name;
+    for (var a = 0; a < rows.length; a++) { var sp = rows[a].querySelector('span'); if (sp) sp.textContent = m.sets[a]; }
+    for (var b = 0; b < figs.length; b++) figs[b].classList.toggle('on', figs[b].classList.contains('p-' + m.k));
+  }
   function reset() {
+    mi++; showMove();
     for (var i = 0; i < rows.length; i++) rows[i].classList.remove('done');
     total = 0; stage = 0; pts.textContent = '0'; bar.style.width = '30%'; up.classList.remove('show');
   }

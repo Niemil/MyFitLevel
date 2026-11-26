@@ -64,8 +64,12 @@
     }
   }
 
+  var lastScroll = 0, skip = 0;
+  window.addEventListener('scroll', function () { lastScroll = Date.now(); }, { passive: true });
   function frame() {
     if (!running) return;
+    /* stand still while scrolling, and run at half rate on touch screens: keeps scrolling smooth */
+    if (Date.now() - lastScroll < 160 || (!fine && (skip ^= 1))) { requestAnimationFrame(frame); return; }
     tick++;
     ctx.clearRect(0, 0, W, H);
     var light = document.documentElement.getAttribute('data-theme') === 'light';
@@ -88,7 +92,7 @@
       var tw = .55 + .45 * Math.sin(tick * .03 + o.ph);
       ctx.globalAlpha = (light ? .45 : .75) * tw * Math.min(1, o.d);
       ctx.fillStyle = o.c;
-      if (!light) { ctx.shadowColor = o.c; ctx.shadowBlur = 10; }
+      if (!light && fine) { ctx.shadowColor = o.c; ctx.shadowBlur = 10; }
       ctx.beginPath(); ctx.arc(o.x + o.ox, o.y + o.oy, o.s, 0, 6.28); ctx.fill();
       ctx.shadowBlur = 0;
     }

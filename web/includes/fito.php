@@ -1,21 +1,13 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Fito, the MyFitLevel wolf mascot (inline SVG, drawn in code, no image files).
- * Parts carry classes (f-head, f-eyes, f-tail, f-armL ...) so CSS can animate them separately.
- * Poses: idle | cheer | flex | lift | oops.  $face = head only (small logos).
- */
-function fito(string $pose = 'idle', int $size = 120, string $class = '', bool $face = false): string
+/** Shared gradients and filters, emitted once per page. */
+function fito_defs(): string
 {
-    static $defs = false;
-    $poses = ['idle', 'cheer', 'flex', 'lift', 'oops'];
-    if (!in_array($pose, $poses, true)) $pose = 'idle';
-
-    $g = '';
-    if (!$defs) {
-        $defs = true;
-        $g = <<<'SVG'
+    static $done = false;
+    if ($done) return '';
+    $done = true;
+    return <<<'SVG'
 <defs>
 <linearGradient id="ftFur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9b1c1"/><stop offset="1" stop-color="#727a8c"/></linearGradient>
 <linearGradient id="ftFurL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cdd3df"/><stop offset="1" stop-color="#9aa2b3"/></linearGradient>
@@ -25,7 +17,19 @@ function fito(string $pose = 'idle', int $size = 120, string $class = '', bool $
 <filter id="ftGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>
 SVG;
-    }
+}
+
+/**
+ * Fito, the MyFitLevel wolf mascot (inline SVG, drawn in code, no image files).
+ * Parts carry classes (f-head, f-eyes, f-tail, f-armL ...) so CSS can animate them separately.
+ * Poses: idle | cheer | flex | lift | oops.  $face = head only (small logos).
+ */
+function fito(string $pose = 'idle', int $size = 120, string $class = '', bool $face = false): string
+{
+    $poses = ['idle', 'cheer', 'flex', 'lift', 'oops', 'squat', 'curl'];
+    if (!in_array($pose, $poses, true)) $pose = 'idle';
+
+    $g = fito_defs();
 
     $limb = 'stroke="url(#ftFur)" stroke-linecap="round" fill="none"';
     $fistTxt = 'stroke="#343a48" stroke-width="2.4" stroke-linecap="round" opacity=".6"';
@@ -50,6 +54,18 @@ SVG;
                 . '<ellipse cx="46" cy="140" rx="17" ry="12" fill="#dfe3ec" opacity=".5" transform="rotate(-52 46 140)"/>'
                 . $wrap('transform="translate(24 78)"')
                 . '<circle cx="38" cy="22" r="17" fill="url(#ftFurL)"/>';
+            break;
+        case 'squat':
+            $arm = '<path d="M58 160L28 184" ' . $limb . ' stroke-width="34"/><path d="M28 184L32 148" ' . $limb . ' stroke-width="28"/>'
+                . '<ellipse cx="42" cy="172" rx="16" ry="12" fill="#dfe3ec" opacity=".5" transform="rotate(-40 42 172)"/>'
+                . '<circle cx="32" cy="142" r="17" fill="url(#ftFurL)"/><path d="M23 134V146M32 132V145M41 134V146" ' . $fistTxt . '/>';
+            break;
+        case 'curl':
+            $arm = '<path d="M56 160L42 208" ' . $limb . ' stroke-width="34"/>'
+                . '<ellipse class="f-bicep" cx="52" cy="186" rx="13" ry="20" fill="#dfe3ec" opacity=".55"/>'
+                . '<g class="f-fore"><path d="M42 208L38 246" ' . $limb . ' stroke-width="28"/>'
+                . '<rect x="30" y="240" width="40" height="7" rx="3" fill="#cfd5e2"/><rect x="18" y="226" width="12" height="36" rx="4" fill="#1d2233"/><rect x="70" y="226" width="12" height="36" rx="4" fill="#1d2233"/>'
+                . '<circle cx="42" cy="246" r="15" fill="url(#ftFurL)"/></g>';
             break;
         case 'oops':
             $arm = '<path d="M58 160L30 178" ' . $limb . ' stroke-width="34"/><path d="M30 178L16 148" ' . $limb . ' stroke-width="28"/>'
@@ -115,13 +131,14 @@ SVG;
 
     $sweat = $pose === 'oops' ? '<path class="f-sweat" d="M182 52Q191 68 182 76Q173 68 182 52Z" fill="#7fd6ff"/>' : '';
 
-    $body = '<ellipse class="f-shadow" cx="120" cy="290" rx="70" ry="7" fill="#000" opacity=".3"/>'
-        . '<g class="f-tail"><path d="M168 238Q240 236 232 156Q226 214 160 214Z" fill="url(#ftFur)"/><path d="M232 156Q238 190 222 214Q216 188 232 156Z" fill="url(#ftLight)"/></g>'
-        . '<path d="M80 240L116 240L114 272L78 272Z" fill="url(#ftFur)"/><path d="M124 240L160 240L162 272L126 272Z" fill="url(#ftFur)"/>'
+    $shadow = '<ellipse class="f-shadow" cx="120" cy="290" rx="70" ry="7" fill="#000" opacity=".3"/>';
+    $tail = '<g class="f-tail"><path d="M168 238Q240 236 232 156Q226 214 160 214Z" fill="url(#ftFur)"/><path d="M232 156Q238 190 222 214Q216 188 232 156Z" fill="url(#ftLight)"/></g>';
+    $legs = '<g class="f-legs"><path d="M80 240L116 240L114 272L78 272Z" fill="url(#ftFur)"/><path d="M124 240L160 240L162 272L126 272Z" fill="url(#ftFur)"/>'
         . '<path d="M66 268Q94 256 118 268L120 285Q92 292 64 285Z" fill="#1d2233"/><path d="M174 268Q146 256 122 268L120 285Q148 292 176 285Z" fill="#1d2233"/>'
         . '<path d="M64 280Q92 287 120 281L120 286Q92 293 64 286Z" fill="#e9ecf3"/><path d="M176 280Q148 287 120 281L120 286Q148 293 176 286Z" fill="#e9ecf3"/>'
         . '<path d="M82 262L112 262M128 262L158 262" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>'
-        . '<path d="M70 218L170 218L174 252L124 256L120 242L116 256L66 252Z" fill="#232838"/>'
+        . '</g>';
+    $upper = '<path d="M70 218L170 218L174 252L124 256L120 242L116 256L66 252Z" fill="#232838"/>'
         . '<path d="M68 220L64 250M172 220L176 250" stroke="#e9ecf3" stroke-width="4" stroke-linecap="round"/>'
         . '<g class="f-torso"><path d="M44 148Q120 122 196 148Q186 196 172 226Q120 240 68 226Q54 196 44 148Z" fill="url(#ftFur)"/>'
         . '<path d="M96 138Q120 150 144 138L140 160Q120 170 100 160Z" fill="url(#ftLight)" opacity=".85"/>'
@@ -129,10 +146,60 @@ SVG;
         . '<path d="M58 154Q84 140 112 160Q100 190 62 188Q54 172 58 154ZM182 154Q156 140 128 160Q140 190 178 188Q186 172 182 154Z" fill="url(#ftTank)"/>'
         . '<path d="M62 188Q78 196 96 190M178 188Q162 196 144 190" stroke="#1b2030" stroke-opacity=".5" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>';
 
-    $vb = $face ? '46 28 148 156' : ($pose === 'lift' ? '-14 -18 268 318' : '0 0 240 300');
-    [$w, $h] = $face ? [$size, $size] : ($pose === 'lift' ? [(int)round($size * 0.86), $size] : [(int)round($size * 0.8), $size]);
+    $wide = in_array($pose, ['lift', 'squat'], true);
+    $vb = $face ? '40 8 160 168' : ($wide ? '-14 -18 268 318' : '0 0 240 300');
+    [$w, $h] = $face ? [$size, $size] : ($wide ? [(int)round($size * 0.86), $size] : [(int)round($size * 0.8), $size]);
     $cls = trim('mascot fito p-' . $pose . ($face ? ' f-face' : '') . ' ' . $class);
+    $open = '<svg class="' . htmlspecialchars($cls, ENT_QUOTES) . '" width="' . $w . '" height="' . $h . '" viewBox="' . $vb . '" role="img" aria-label="Fito, the MyFitLevel wolf">';
 
-    return '<svg class="' . htmlspecialchars($cls, ENT_QUOTES) . '" width="' . $w . '" height="' . $h . '" viewBox="' . $vb . '" role="img" aria-label="Fito, the MyFitLevel wolf">'
-        . $g . $body . $armL . $armR . $head . $sweat . '</svg>';
+    if ($face) return $open . $g . $head . '</svg>';
+
+    if ($pose === 'squat') {
+        $sqbar = '<g class="f-bar"><rect x="-8" y="141" width="256" height="6" rx="3" fill="#cfd5e2"/>'
+            . '<rect x="-6" y="112" width="13" height="64" rx="4" fill="#1d2233"/><rect x="9" y="120" width="9" height="48" rx="3" fill="#2b3142"/>'
+            . '<rect x="233" y="112" width="13" height="64" rx="4" fill="#1d2233"/><rect x="222" y="120" width="9" height="48" rx="3" fill="#2b3142"/></g>';
+        return $open . $g . $shadow . $legs . '<g class="f-sq">' . $tail . $upper . $sqbar . $armL . $armR . $head . '</g></svg>';
+    }
+    return $open . $g . $shadow . $tail . $legs . $upper . $armL . $armR . $head . $sweat . '</svg>';
+}
+
+/** Side view: Fito on a bench doing a barbell press. */
+function fito_bench(int $size = 160, string $class = ''): string
+{
+    $cls = trim('mascot fito p-bench ' . $class);
+    $limb = 'stroke="url(#ftFur)" stroke-linecap="round" fill="none"';
+    return '<svg class="' . htmlspecialchars($cls, ENT_QUOTES) . '" width="' . round($size * 1.6) . '" height="' . $size . '" viewBox="0 0 320 200" role="img" aria-label="Fito doing a bench press">'
+        . fito_defs()
+        . '<ellipse cx="160" cy="192" rx="130" ry="6" fill="#000" opacity=".28"/>'
+        . '<rect x="70" y="136" width="12" height="56" rx="3" fill="#1d2233"/><rect x="222" y="136" width="12" height="56" rx="3" fill="#1d2233"/>'
+        . '<rect x="44" y="120" width="216" height="18" rx="8" fill="#2b3142"/><rect x="44" y="120" width="216" height="5" rx="2.5" fill="#46506a"/>'
+        /* far leg, then near leg, feet on the floor */
+        . '<path d="M212 112L252 94L262 168" ' . $limb . ' stroke-width="20" stroke-linejoin="round" opacity=".8"/>'
+        . '<path d="M206 114L244 96L254 170" ' . $limb . ' stroke-width="22" stroke-linejoin="round"/>'
+        . '<path d="M236 186Q256 176 276 184L276 190L236 190Z" fill="#1d2233"/><rect x="236" y="188" width="40" height="3" rx="1.5" fill="#e9ecf3"/>'
+        . '<g class="f-torso"><path d="M88 100Q130 92 200 100L214 122L92 122Q84 112 88 100Z" fill="url(#ftFur)"/>'
+        . '<path d="M96 104Q124 98 150 104L148 120L98 120Z" fill="#dfe3ec" opacity=".45"/>'
+        . '<path d="M196 98L222 100L224 124L196 122Z" fill="#232838"/></g>'
+        /* head, face up, snout toward the ceiling */
+        . '<g class="f-head"><path d="M52 92L26 84L38 112Z" fill="url(#ftFur)"/><path d="M48 96L36 90L42 106Z" fill="#2f3441"/>'
+        . '<circle cx="70" cy="108" r="27" fill="url(#ftFur)"/>'
+        . '<path d="M58 92Q66 70 82 64Q94 64 94 76Q92 92 84 106L74 112Z" fill="url(#ftLight)"/>'
+        . '<ellipse cx="90" cy="66" rx="7" ry="5" transform="rotate(-30 90 66)" fill="#10131d"/>'
+        . '<g class="f-eyes"><path d="M62 82L78 88Q75 96 65 94Z" fill="url(#ftEye)" filter="url(#ftGlow)"/><circle cx="69" cy="90" r="2" fill="#0a1220"/></g>'
+        . '<path d="M58 76L82 85" stroke="#252a38" stroke-width="4.5" stroke-linecap="round"/>'
+        . '<path d="M84 98Q92 92 96 84" stroke="#10131d" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+        . '<path d="M72 122L100 124L86 134Z" fill="url(#ftLight)"/></g>'
+        /* pressing arm and the bar seen end-on */
+        . '<g class="b-bar"><circle cx="118" cy="26" r="30" fill="#1d2233"/><circle cx="118" cy="26" r="30" fill="none" stroke="#cfd5e2" stroke-width="3"/>'
+        . '<circle cx="118" cy="26" r="20" fill="#2b3142"/><circle cx="118" cy="26" r="7" fill="#cfd5e2"/></g>'
+        . '<g class="b-arm"><rect x="108" y="30" width="20" height="74" rx="10" fill="url(#ftFur)"/><rect x="106" y="84" width="24" height="14" rx="6" fill="#e9ecf3"/></g>'
+        . '<g class="b-hand"><circle cx="118" cy="26" r="13" fill="url(#ftFurL)"/></g>'
+        . '</svg>';
+}
+
+/** One move by name: bench | squat | curl | press. */
+function fito_move(string $move, int $size = 150, string $class = ''): string
+{
+    if ($move === 'bench') return fito_bench($size, $class);
+    return fito($move === 'press' ? 'lift' : $move, $size, $class);
 }

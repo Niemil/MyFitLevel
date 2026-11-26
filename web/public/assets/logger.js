@@ -750,14 +750,30 @@
     var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!ov || D.edit || still) { form.submit(); return; }
     var target = parseInt((document.getElementById('estpts') || {}).textContent, 10) || 0;
-    var out = document.getElementById('fsvpts'), t0 = Date.now(), dur = 1800;
+    var out = document.getElementById('fsvpts'), t0 = Date.now();
+    var want = [];
+    items.forEach(function (it) {
+      var n = (byId[it.id] && byId[it.id].name || '').toLowerCase(), m = null;
+      if (/bench|chest press|push.?up|dip|fly/.test(n)) m = 'bench';
+      else if (/squat|leg press|lunge/.test(n)) m = 'squat';
+      else if (/curl/.test(n)) m = 'curl';
+      else if (/press|raise|overhead|shoulder|row|pull/.test(n)) m = 'press';
+      if (m && want.indexOf(m) < 0) want.push(m);
+    });
+    ['press', 'squat', 'curl'].forEach(function (m) { if (want.length < 3 && want.indexOf(m) < 0) want.push(m); });
+    want = want.slice(0, 3);
+    var each = 1500, dur = want.length * each, figs = ov.querySelectorAll('.mv');
+    function pick(i) { for (var k = 0; k < figs.length; k++) figs[k].classList.toggle('on', figs[k].classList.contains('p-' + (want[i] === 'press' ? 'lift' : want[i]))); }
+    pick(0);
+    var cur = 0, cyc = setInterval(function () { cur = (cur + 1) % want.length; pick(cur); }, each);
     ov.hidden = false; void ov.offsetWidth; ov.classList.add('on');
+    var bar = ov.querySelector('.fsv-bar i'); if (bar) bar.style.animationDuration = (dur / 1000) + 's';
     (function tick() {
-      var k = Math.min(1, (Date.now() - t0) / dur);
+      var k = Math.min(1, (Date.now() - t0) / (dur - 200));
       if (out) out.textContent = String(Math.round(target * (1 - Math.pow(1 - k, 3))));
       if (k < 1) requestAnimationFrame(tick);
     })();
-    setTimeout(function () { form.submit(); }, 2000);
+    setTimeout(function () { clearInterval(cyc); form.submit(); }, dur);
   }
   form.addEventListener('submit', function (e) {
     e.preventDefault();

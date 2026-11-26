@@ -176,6 +176,13 @@ function uavatar(array $r, int $size = 40): string
         }
         $tok = $cache[$k];
     }
+    $fr = !empty($r['username']) ? (cosm_all()[$r['username']]['frame'] ?? '') : '';
+    $o = uavatar_inner($name, $tok, $size);
+    return $fr !== '' ? '<span class="frm frm-' . e($fr) . '">' . $o . '</span>' : $o;
+}
+
+function uavatar_inner(string $name, $tok, int $size): string
+{
     if ($tok) {
         return '<img class="avatar" alt="' . e($name) . '" width="' . $size . '" height="' . $size . '" style="width:' . $size . 'px;height:' . $size . 'px" src="' . e(img_url($tok, true)) . '">';
     }

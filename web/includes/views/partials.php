@@ -360,7 +360,7 @@ function workout_card(array $w, ?array $viewer, bool $full = false): void
   <header class="whead">
     <a href="<?= e(url('u/' . $w['username'])) ?>"><?= uavatar($w, 42) ?></a>
     <div class="who">
-      <a class="uname" href="<?= e(url('u/' . $w['username'])) ?>"><?= e($name) ?></a> <?= level_chip((int)$w['level']) ?><?= role_badge($w) ?>
+      <a class="uname<?= uname_cls((string)$w['username']) ?>" href="<?= e(url('u/' . $w['username'])) ?>"><?= e($name) ?></a> <?= level_chip((int)$w['level']) ?><?= role_badge($w) ?>
       <div class="when"><a href="<?= e($href) ?>"><?= e(rel_time($w['performed_at'])) ?></a><?= gym_chip($w, $viewer) !== '' ? ' · ' . gym_chip($w, $viewer) : '' ?></div>
     </div>
     <div class="pts"><b>+<?= number_format((int)$w['points']) ?></b><small>pts</small></div>

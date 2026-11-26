@@ -67,8 +67,9 @@ $photoTok = $p['avatar_token'] ?: null;
 $gallery = $showWorkouts ? rows("SELECT id, token FROM images WHERE user_id = ? AND kind = 'gallery' ORDER BY id DESC LIMIT 24", [$pid]) : [];
 $back = 'u/' . $p['username'];
 ?>
+<?php $cs = cosm_all()[$p['username']] ?? []; ?>
 <section class="phero">
-  <div class="pphoto">
+  <div class="pphoto<?= !empty($cs['frame']) ? ' pfrm frm-' . e($cs['frame']) : '' ?>">
     <?php if ($photoTok): ?>
       <a href="<?= e(img_url($photoTok)) ?>" data-lightbox><img alt="<?= e(display_name($p)) ?>" src="<?= e(img_url($photoTok)) ?>"></a>
     <?php else: ?>
@@ -83,7 +84,8 @@ $back = 'u/' . $p['username'];
     <?php endif; ?>
   </div>
   <div class="pinfo">
-    <h1><?= e(display_name($p)) ?> <?= level_chip((int)$prog['level']) ?><?= role_badge($p) ?></h1>
+    <?php if (!empty($cs['banner'])): ?><div class="pbanner bn-<?= e($cs['banner']) ?>"></div><?php endif; ?>
+    <h1><span class="<?= !empty($cs['namefx']) ? 'nfx nfx-' . e($cs['namefx']) : '' ?>"><?= e(display_name($p)) ?></span> <?= level_chip((int)$prog['level']) ?><?= role_badge($p) ?></h1>
     <div class="muted">@<?= e($p['username']) ?> · joined <?= e(date('M Y', strtotime($p['created_at']))) ?></div>
     <?= xp_bar((int)$p['xp']) ?>
     <?php if ($p['bio']): ?><p class="pbio"><?= e($p['bio']) ?></p><?php endif; ?>

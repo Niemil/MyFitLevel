@@ -1058,3 +1058,41 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 .firstrun{display:flex;gap:14px;align-items:center}.firstrun .mascot{flex:none}
 .firstrun h3{margin:0 0 6px}.firstrun ol{margin:0 0 6px;padding-left:1.1rem;display:grid;gap:3px}.firstrun p{margin:0}
 @media(max-width:480px){.firstrun .mascot{width:70px;height:auto;align-self:flex-start}}
+
+/* Cosmetics: name effects, avatar frames, profile banners */
+.frm{display:inline-block;border-radius:50%;padding:2px;line-height:0;vertical-align:middle;background:var(--fc,transparent);box-shadow:0 0 var(--fg,0) var(--fc,transparent)}
+.frm .avatar,.frm>*{border-radius:50%;display:block}
+.frm-steel{--fc:linear-gradient(135deg,#d8dee8,#6b7385)}
+.frm-ember{--fc:linear-gradient(135deg,#ffb347,#e8431a);--fg:8px;animation:cPulse 2.4s ease-in-out infinite}
+.frm-ice{--fc:linear-gradient(135deg,#e9fbff,#4cb8ff)}
+.frm-gold{--fc:linear-gradient(135deg,#fff1a8,#d9a520,#fff1a8);--fg:6px}
+.frm-neon{--fc:#27e8ff;--fg:10px}
+.frm-prism{--fc:conic-gradient(#ff5e5e,#ffd35e,#5eff8a,#5ec8ff,#c55eff,#ff5e5e);animation:cSpin 6s linear infinite}
+.pphoto.pfrm{box-shadow:inset 0 0 0 5px transparent;padding:0;border-radius:0;display:block;background:var(--navy)}
+.pphoto.pfrm::after{content:"";position:absolute;inset:0;pointer-events:none;border:5px solid transparent;border-image:var(--fc,none) 1;box-shadow:inset 0 0 var(--fg,0) var(--fc,transparent)}
+.pphoto.frm-neon::after,.pphoto.frm-ember::after,.pphoto.frm-gold::after{box-shadow:none}
+.pphoto.frm-neon::after{border-color:#27e8ff;border-image:none}
+.pphoto.pfrm.frm-prism{animation:none}
+.nfx{font-weight:800}
+.nfx-ember{background:linear-gradient(90deg,#ff7a1a,#ffd35e,#ff7a1a);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:cShift 3s linear infinite}
+.nfx-frost{background:linear-gradient(90deg,#bfeaff,#3ba8ff,#bfeaff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:cShift 5s linear infinite}
+.nfx-gold{background:linear-gradient(100deg,#b98a12 20%,#fff0a0 45%,#b98a12 70%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:cShift 4s linear infinite}
+.nfx-neon{color:#00b7d4;text-shadow:0 0 8px rgba(39,232,255,.7)}
+.nfx-aurora{background:linear-gradient(90deg,#39f2a5,#6a7bff,#d36bff,#39f2a5);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:cShift 6s linear infinite}
+.nfx-glitch{position:relative;text-shadow:1px 0 #ff2d6f,-1px 0 #27e8ff;animation:cGlitch 3.2s steps(1) infinite}
+.pbanner{height:70px;margin:-16px -18px 12px;border-bottom:1px solid var(--line)}
+@media(min-width:820px){.pbanner{margin:-22px -26px 14px;height:84px}}
+.bn-dusk{background:linear-gradient(120deg,#26305e,#7b4b94 55%,#f08a5d)}
+.bn-forge{background:radial-gradient(circle at 20% 120%,#ffb347,transparent 55%),linear-gradient(120deg,#2a1a14,#7a2a12)}
+.bn-aurora{background:linear-gradient(120deg,#0b1d2e,#0f7a63 40%,#6a4bd6 75%,#0b1d2e)}
+.bn-grid{background:linear-gradient(transparent 60%,rgba(39,232,255,.35)),repeating-linear-gradient(90deg,rgba(39,232,255,.25) 0 1px,transparent 1px 22px),repeating-linear-gradient(0deg,rgba(39,232,255,.25) 0 1px,transparent 1px 14px),#120a2a}
+.bn-summit{background:linear-gradient(transparent 55%,#e9eef5 56%),linear-gradient(160deg,#3a5a8a,#9bc2e8);clip-path:none}
+.cpv{display:grid;place-items:center;height:46px;width:100%}
+.cpv-av{display:block;width:34px;height:34px;border-radius:50%;background:#6b7385}
+.cpv-bn{display:block;width:100%;height:34px;border-radius:6px}
+@keyframes cShift{to{background-position:200% 0}}
+@keyframes cSpin{to{filter:hue-rotate(360deg)}}
+@keyframes cPulse{50%{box-shadow:0 0 14px var(--fc)}}
+@keyframes cGlitch{0%,92%,100%{transform:none}93%{transform:translateX(-1px) skewX(-6deg)}95%{transform:translateX(1px)}97%{transform:none}}
+html.fx-calm .nfx,html.fx-calm .frm,.nomotion .nfx,.nomotion .frm{animation:none}
+@media(prefers-reduced-motion:reduce){.nfx,.frm{animation:none}}

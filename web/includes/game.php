@@ -223,6 +223,24 @@ function game_items(): array
         'drake_fang'     => ['Drake Fang', '🦷', 'weapon', 11, 0, 0, 'Dropped by the Fire Drake.'],
         'hydra_scale'    => ['Hydra Scale', '🐲', 'armor', 10, 0, 0, 'Dropped by the Hydra.'],
         'lich_charm'     => ['Lich Phylactery', '🔮', 'charm', 8, 8, 0, 'Dropped by the Lich Lord.'],
+        // Cosmetics (no stats): name effects, avatar frames, profile banners
+        'c_nm_ember'     => ['Ember Name', '', 'namefx', 0, 0, 600, 'Your name burns orange.'],
+        'c_nm_frost'     => ['Frost Name', '', 'namefx', 0, 0, 800, 'Cold, clean, icy.'],
+        'c_nm_gold'      => ['Gold Name', '', 'namefx', 0, 0, 1200, 'A slow golden shine.'],
+        'c_nm_neon'      => ['Neon Name', '', 'namefx', 0, 0, 1800, 'Glows in the dark.'],
+        'c_nm_aurora'    => ['Aurora Name', '', 'namefx', 0, 0, 2500, 'Northern lights, in text.'],
+        'c_nm_glitch'    => ['Glitch Name', '', 'namefx', 0, 0, 3500, 'Flickers like a bad signal.'],
+        'c_fr_steel'     => ['Steel Frame', '', 'frame', 0, 0, 500, 'A solid ring around your photo.'],
+        'c_fr_ember'     => ['Ember Frame', '', 'frame', 0, 0, 900, 'A warm, pulsing ring.'],
+        'c_fr_ice'       => ['Ice Frame', '', 'frame', 0, 0, 900, 'Sharp and frosty.'],
+        'c_fr_gold'      => ['Gold Frame', '', 'frame', 0, 0, 1600, 'For regulars.'],
+        'c_fr_neon'      => ['Neon Frame', '', 'frame', 0, 0, 2200, 'A glowing cyan ring.'],
+        'c_fr_prism'     => ['Prism Frame', '', 'frame', 0, 0, 3200, 'Slowly cycles through every colour.'],
+        'c_bn_dusk'      => ['Dusk Banner', '', 'banner', 0, 0, 500, 'A calm evening gradient.'],
+        'c_bn_forge'     => ['Forge Banner', '', 'banner', 0, 0, 1200, 'Hot metal and sparks.'],
+        'c_bn_aurora'    => ['Aurora Banner', '', 'banner', 0, 0, 2000, 'Green and violet sky.'],
+        'c_bn_grid'      => ['Neon Grid Banner', '', 'banner', 0, 0, 2800, 'Retro grid at night.'],
+        'c_bn_summit'    => ['Summit Banner', '', 'banner', 0, 0, 3500, 'Peaks above the clouds.'],
         // Advent calendar, doors 20-24 (permanent, once a year, not for sale)
         'adv_star'       => ['Yule Star', '🌟', 'charm', 5, 5, 0, 'Advent door 20. Shines brighter every winter.'],
         'adv_aura'       => ['Frostlight Aura', '❄️', 'aura', 6, 3, 0, 'Advent door 21. A cold glow around you.'],
@@ -859,10 +877,50 @@ function game_gear(int $uid): array
         [$n, $ic, $slot, $d, $c] = $cat[$r['item']];
         $out['dmg'] += $d;
         $out['coin'] += $c;
-        $out['icons'][] = $ic;
+        if ($ic !== '') {
+            $out['icons'][] = $ic;
+        }
         $out['by_slot'][$slot] = $r['item'];
     }
     return $out;
+}
+
+/** Equipped cosmetics for every user that has any: username => ['namefx'=>'ember','frame'=>'gold','banner'=>'dusk']. One small query per request. */
+function cosm_all(): array
+{
+    static $map = null;
+    if ($map !== null) {
+        return $map;
+    }
+    $map = [];
+    game_ensure();
+    $cat = game_items();
+    foreach (rows("SELECT u.username, i.item FROM game_items i JOIN users u ON u.id = i.user_id WHERE i.equipped = 1 AND i.item LIKE 'c\\_%' LIMIT 3000") as $r) {
+        if (isset($cat[$r['item']])) {
+            $map[$r['username']][$cat[$r['item']][2]] = substr($r['item'], 5);
+        }
+    }
+    return $map;
+}
+
+/** CSS class (with leading space) for a member's equipped name effect. */
+function uname_cls(string $username): string
+{
+    $c = cosm_all()[$username]['namefx'] ?? '';
+    return $c !== '' ? ' nfx nfx-' . $c : '';
+}
+
+/** Small CSS-only preview for a cosmetic shop item. */
+function cosm_preview(string $key, string $slot): string
+{
+    $id = substr($key, 5);
+    if ($slot === 'namefx') {
+        return '<span class="cpv"><b class="nfx nfx-' . e($id) . '">Your name</b></span>';
+    }
+    if ($slot === 'frame') {
+        return '<span class="cpv"><span class="frm frm-' . e($id) . '"><span class="cpv-av"></span></span></span>';
+    }
+    return '<span class="cpv"><span class="cpv-bn bn-' . e($id) . '"></span></span>';
 }
 
 function game_coin_boost_active(array $wallet): int

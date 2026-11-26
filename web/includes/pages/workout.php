@@ -89,7 +89,7 @@ layout_header('Workout', $u ? 'feed' : '');
     <div class="comment">
       <a href="<?= e(url('u/' . $c['username'])) ?>"><?= uavatar($c, 32) ?></a>
       <div class="grow">
-        <a class="uname" href="<?= e(url('u/' . $c['username'])) ?>"><?= e(display_name($c)) ?></a>
+        <a class="uname<?= uname_cls((string)$c['username']) ?>" href="<?= e(url('u/' . $c['username'])) ?>"><?= e(display_name($c)) ?></a>
         <span class="muted small"><?= e(rel_time($c['created_at'])) ?></span>
         <div><?= nl2br(e($c['body'])) ?></div>
       </div>

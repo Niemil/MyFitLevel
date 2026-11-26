@@ -150,7 +150,7 @@ function post_card(array $p, ?array $viewer, bool $full = false): void
   <header class="whead">
     <a href="<?= e(url('u/' . $p['username'])) ?>"><?= uavatar($p, 42) ?></a>
     <div class="who">
-      <a class="uname" href="<?= e(url('u/' . $p['username'])) ?>"><?= e($name) ?></a> <?= level_chip((int)$p['level']) ?><?= role_badge($p) ?>
+      <a class="uname<?= uname_cls((string)$p['username']) ?>" href="<?= e(url('u/' . $p['username'])) ?>"><?= e($name) ?></a> <?= level_chip((int)$p['level']) ?><?= role_badge($p) ?>
       <div class="when"><a href="<?= e($href) ?>"><?= e(rel_time($p['created_at'])) ?></a></div>
     </div>
   </header>
@@ -237,7 +237,7 @@ function event_card(array $it, ?array $viewer): void
   <a href="<?= e(url('u/' . $r['username'])) ?>"><?= uavatar($r, 42) ?></a>
   <div class="evbadge" aria-hidden="true"><?= $icon ?></div>
   <div class="grow">
-    <div class="small"><a class="uname" href="<?= e(url('u/' . $r['username'])) ?>"><?= e($name) ?></a> <span class="muted"><?= e(rel_time($it['time'])) ?></span></div>
+    <div class="small"><a class="uname<?= uname_cls((string)$r['username']) ?>" href="<?= e(url('u/' . $r['username'])) ?>"><?= e($name) ?></a> <span class="muted"><?= e(rel_time($it['time'])) ?></span></div>
     <div class="evhead"><?= $head ?></div>
     <b><?= e($title) ?></b>
     <div class="muted small"><?= e($desc) ?></div>
@@ -279,7 +279,7 @@ function activity_card(array $it): void
   <a href="<?= e(url('u/' . $r['username'])) ?>"><?= uavatar($r, 42) ?></a>
   <div class="evbadge" aria-hidden="true"><?= $icon ?></div>
   <div class="grow">
-    <div class="small"><a class="uname" href="<?= e(url('u/' . $r['username'])) ?>"><?= e($name) ?></a> <span class="muted"><?= e(rel_time($it['time'])) ?></span></div>
+    <div class="small"><a class="uname<?= uname_cls((string)$r['username']) ?>" href="<?= e(url('u/' . $r['username'])) ?>"><?= e($name) ?></a> <span class="muted"><?= e(rel_time($it['time'])) ?></span></div>
     <div class="evhead"><?= $head ?></div>
     <b><?= e($title) ?></b>
     <?php if ($desc !== ''): ?><div class="muted small"><?= e($desc) ?></div><?php endif; ?>

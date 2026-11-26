@@ -21,7 +21,7 @@ if (is_post()) {
         } else {
             game_coins_add($uid, -$cat[$key][5], 'shop', $cat[$key][0]);
             game_give_item($uid, $key, 'shop');
-            flash('Bought ' . $cat[$key][1] . ' ' . $cat[$key][0] . '.');
+            flash('Bought ' . trim($cat[$key][1] . ' ' . $cat[$key][0]) . '.');
         }
     } elseif ($do === 'equip' && isset($cat[$key])) {
         if ((int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key])) {
@@ -61,7 +61,7 @@ $owned = array_column(rows('SELECT item, equipped FROM game_items WHERE user_id 
 $gear = game_gear($uid);
 $boostPct = game_boost_active($w);
 $hist = rows('SELECT * FROM game_ledger WHERE user_id = ? ORDER BY id DESC LIMIT 8', [$uid]);
-$slots = ['weapon' => 'Weapons', 'helmet' => 'Helmets', 'armor' => 'Armor', 'gloves' => 'Gloves', 'boots' => 'Boots', 'charm' => 'Charms', 'wings' => 'Wings', 'aura' => 'Auras', 'relic' => 'Boss relics'];
+$slots = ['weapon' => 'Weapons', 'helmet' => 'Helmets', 'armor' => 'Armor', 'gloves' => 'Gloves', 'boots' => 'Boots', 'charm' => 'Charms', 'wings' => 'Wings', 'aura' => 'Auras', 'relic' => 'Boss relics', 'namefx' => 'Name effects', 'frame' => 'Avatar frames', 'banner' => 'Profile banners'];
 $coinBoost = game_coin_boost_active($w);
 
 define('GAME_CSS', true);
@@ -101,8 +101,8 @@ layout_header('Shop', 'quests');
   <?php foreach ($cat as $k => [$n, $ic, $sl, $dm, $cn, $price, $fl]): if ($sl !== $slot) { continue; }
       $has = isset($owned[$k]); if (!$has && $price === 0) { continue; } ?>
     <form method="post" class="gitem<?= $has && $owned[$k] ? ' on' : '' ?><?= $price === 0 ? ' rare' : '' ?>"><?= csrf_field() ?><input type="hidden" name="item" value="<?= e($k) ?>">
-      <span class="gi-ic"><?= e($ic) ?></span><b><?= e($n) ?></b>
-      <small><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?></small>
+      <?php if ($ic === ''): ?><?= cosm_preview($k, $sl) ?><?php else: ?><span class="gi-ic"><?= e($ic) ?></span><?php endif; ?><b><?= e($n) ?></b>
+      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?></small>
       <?php if ($has): ?>
         <?php if ($owned[$k]): ?><input type="hidden" name="do" value="unequip"><button class="btn ghost small" type="submit">Equipped ✔</button>
         <?php else: ?><input type="hidden" name="do" value="equip"><button class="btn small" type="submit">Equip</button><?php endif; ?>

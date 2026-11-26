@@ -2,10 +2,10 @@
 declare(strict_types=1);
 
 /** Shared gradients and filters, emitted once per page. */
-function fito_defs(): string
+function fito_defs(bool $force = false): string
 {
     static $done = false;
-    if ($done) return '';
+    if ($done && !$force) return '';
     $done = true;
     return <<<'SVG'
 <defs>

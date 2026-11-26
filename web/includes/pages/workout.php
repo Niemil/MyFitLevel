@@ -49,6 +49,33 @@ layout_header('Workout', $u ? 'feed' : '');
 </section>
 <?php endif; ?>
 <?php workout_card($w, $u, true); ?>
+<?php if ($u && (int)$w['user_id'] === $uid):
+    $unit = $u['unit'] ?? 'kg';
+    $shareEx = [];
+    foreach (array_slice($w['exercises'], 0, 5) as $ex) {
+        $bestS = null; $bestV = -1.0;
+        foreach ($ex['sets'] as $s0) {
+            if (!empty($s0['is_warmup'])) continue;
+            $v0 = (float)($s0['weight_kg'] ?? 0) * (int)($s0['reps'] ?? 1) + (int)($s0['points'] ?? 0) / 1000;
+            if ($v0 > $bestV) { $bestV = $v0; $bestS = $s0; }
+        }
+        if ($bestS === null) continue;
+        $bestS['kind'] = $ex['kind'];
+        $shareEx[] = ['n' => (string)$ex['name'], 's' => fmt_set($bestS, $unit, $w['unit'] ?? null) . ($unit !== 'kg' || $bestS['weight_kg'] === null ? '' : ' kg'), 'pr' => !empty($bestS['is_pr'])];
+    }
+    $shareData = ['title' => (string)($w['title'] ?: 'Workout'), 'pts' => (int)$w['points'], 'date' => date('j M Y', strtotime((string)$w['performed_at'])),
+        'vol' => fmt_big((float)$w['volume_kg'] * ($unit === 'lb' ? LB_PER_KG : 1)) . ' ' . $unit, 'sets' => (int)$w['set_count'], 'ex' => $shareEx, 'user' => (string)$w['username']];
+    $svgShare = preg_replace('/(<svg[^>]*>)/', '$1' . fito_defs(true), fito('cheer', 400, 'sh'), 1);
+    $svgShare = str_replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ', $svgShare);
+?>
+<div class="card sharebox" id="sharebox" data-share="<?= e(json_encode($shareData, JSON_UNESCAPED_UNICODE)) ?>">
+  <b>Share this workout</b>
+  <p class="muted small">Makes a picture you can post anywhere. Nothing is uploaded.</p>
+  <button type="button" class="btn" id="sharebtn">Make picture</button>
+  <img id="shareimg" alt="Workout picture" hidden>
+  <template id="sharefito"><?= $svgShare ?></template>
+</div>
+<?php endif; ?>
 
 <?php if ($propsBy): ?>
   <p class="muted small">Props from: <?php
@@ -92,4 +119,4 @@ layout_header('Workout', $u ? 'feed' : '');
 </form>
 <?php endif; ?>
 </div>
-<?php layout_footer('feed'); ?>
+<?php layout_footer('feed', ['sharecard.js']); ?>

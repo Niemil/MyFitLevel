@@ -2,19 +2,11 @@ package com.myfitlevel.app
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
-import android.os.Environment
-import android.provider.Settings
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import org.json.JSONObject
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.concurrent.thread
@@ -81,35 +73,17 @@ object Updater {
     private fun ask(a: Activity, name: String, url: String) {
         AlertDialog.Builder(a)
             .setTitle("New version available")
-            .setMessage("MyFitLevel app ${name.ifEmpty { "update" }} is ready. Tap Update to download and install it. Your login and settings stay.")
+            .setMessage("MyFitLevel app ${name.ifEmpty { "update" }} is ready. Tap Update to download it, then open the file to install. Your login and settings stay.")
             .setPositiveButton("Update") { _, _ -> download(a, url) }
             .setNegativeButton("Later", null)
             .show()
     }
 
+    /** Hands the APK link to the browser. The app itself no longer installs packages. */
     private fun download(a: Activity, url: String) {
-        if (android.os.Build.VERSION.SDK_INT >= 26 && !a.packageManager.canRequestPackageInstalls()) {
-            Toast.makeText(a, "Allow MyFitLevel to install apps, then tap Update again.", Toast.LENGTH_LONG).show()
-            a.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + a.packageName)))
-            return
+        Toast.makeText(a, "Opening the download. When it finishes, tap the file to install.", Toast.LENGTH_LONG).show()
+        try { a.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } catch (e: Exception) {
+            Toast.makeText(a, "Open myfitlevel.com/android in your browser to download the update.", Toast.LENGTH_LONG).show()
         }
-        val f = File(a.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "MyFitLevel.apk")
-        if (f.exists()) f.delete()
-        val dm = a.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val id = dm.enqueue(DownloadManager.Request(Uri.parse(url)).setTitle("MyFitLevel update")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            .setDestinationInExternalFilesDir(a, Environment.DIRECTORY_DOWNLOADS, "MyFitLevel.apk"))
-        Toast.makeText(a, "Downloading update...", Toast.LENGTH_SHORT).show()
-        val app = a.applicationContext
-        val r = object : BroadcastReceiver() {
-            override fun onReceive(c: Context, i: Intent) {
-                if (i.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) != id) return
-                try { app.unregisterReceiver(this) } catch (e: Exception) {}
-                val uri = FileProvider.getUriForFile(app, app.packageName + ".files", f)
-                app.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK))
-            }
-        }
-        ContextCompat.registerReceiver(app, r, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
     }
 }

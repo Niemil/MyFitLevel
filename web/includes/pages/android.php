@@ -14,6 +14,7 @@ layout_header('Android app', '', ['index' => true, 'path' => 'android', 'desc' =
   <ol>
     <li>Tap <b>Download for Android</b>. Your browser may warn that the file can harm your device. That is the standard warning for any app that is not from Google Play. Choose to keep it.</li>
     <li>Open the downloaded file. Android asks to allow installs from your browser. Allow it for this one install.</li>
+    <li>Google Play Protect may say the app is unrecognised or may be harmful, because it is new and not from Google Play. Tap <b>More details</b> (or <b>Install anyway</b>). The code is open for anyone to read on GitHub.</li>
     <li>Open the app and log in. Tap the link button once and the app connects itself to your account, so there is no API key to paste.</li>
     <li>Allow access to steps in Health Connect. Your steps then sync by themselves and become points, boss damage and coins.</li>
   </ol>

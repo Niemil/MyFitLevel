@@ -205,6 +205,21 @@ layout_header('Track workout', 'log');
   <div class="grow"><b>Welcome back!</b> <span id="resumetxt">Your unfinished workout is restored.</span></div>
   <button type="button" class="btn ghost small danger discardbtn" id="discardbtn">Discard</button>
 </div>
+<?php if (!$editData && !val('SELECT 1 FROM workouts WHERE user_id = ? LIMIT 1', [$uid])): ?>
+<section class="card firstrun">
+  <?= fito('idle', 110, 'nomotion') ?>
+  <div class="grow">
+    <h3>Your first workout</h3>
+    <ol>
+      <li><b>Start</b> the workout below.</li>
+      <li><b>Add an exercise</b>. Not sure? Try Push-Up, Squat or a Walk.</li>
+      <li>Enter weight and reps, then <b>tick each set</b> when you have done it.</li>
+      <li>Tap <b>Finish workout</b> and watch your points count up.</li>
+    </ol>
+    <p class="muted small">It saves as you go, so you can leave the page and come back.</p>
+  </div>
+</section>
+<?php endif; ?>
 <form method="post" id="logform" class="logform" autocomplete="off">
   <?= csrf_field() ?>
   <input type="hidden" name="nonce" value="<?= e(bin2hex(random_bytes(8))) ?>">

@@ -1055,3 +1055,6 @@ h1.pagetitle{background:linear-gradient(90deg,var(--text) 30%,var(--accent2),var
 .fcoach{display:flex;align-items:center;gap:12px;padding:12px 14px!important;flex-wrap:wrap}.fcoach .grow{flex:1 1 0;min-width:180px}
 .fcoach .mascot{flex:none;width:48px;height:48px}.fcoach p{margin:2px 0 0;color:var(--muted);font-size:.92rem}
 @media(max-width:520px){.fcoach .grow{flex-basis:calc(100% - 64px)}.fcoach .btn{margin-left:60px}}
+.firstrun{display:flex;gap:14px;align-items:center}.firstrun .mascot{flex:none}
+.firstrun h3{margin:0 0 6px}.firstrun ol{margin:0 0 6px;padding-left:1.1rem;display:grid;gap:3px}.firstrun p{margin:0}
+@media(max-width:480px){.firstrun .mascot{width:70px;height:auto;align-self:flex-start}}

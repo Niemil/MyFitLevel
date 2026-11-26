@@ -291,6 +291,14 @@ layout_header('Track workout', 'log');
   <div class="modalbtns"><button type="button" class="btn" id="guideclose">Got it</button></div>
 </dialog>
 
+<div class="fsave" id="fsave" aria-live="polite" hidden>
+  <span class="fsv-glow"></span>
+  <?= fito('lift', 200, 'fsv') ?>
+  <div class="fsv-pts"><span id="fsvpts">0</span><small>points</small></div>
+  <div class="fsv-msg">Saving your workout…</div>
+  <div class="fsv-bar"><i></i></div>
+</div>
+
 <dialog id="unticked" class="modal">
   <h3>Some sets aren't ticked</h3>
   <p class="muted"><b id="unn">0</b> planned sets (pre-filled from last time) are not ticked as done. Only ticked sets count.</p>

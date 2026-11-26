@@ -114,4 +114,24 @@
     b.appendChild(s);
     setTimeout(function () { s.remove(); }, 650);
   }, { passive: true });
+  /* Fito looks at the cursor (mouse only, not while logging) */
+  if (fine) {
+    var wolves = [].slice.call(document.querySelectorAll('.hero2 .fito, .hero .fito, .band .fito, .h2-demo .fito'));
+    wolves.forEach(function (w) { w.classList.add('f-live'); });
+    if (wolves.length) {
+      var ft = 0;
+      document.addEventListener('pointermove', function (e) {
+        if (ft) return;
+        ft = requestAnimationFrame(function () {
+          ft = 0;
+          wolves.forEach(function (w) {
+            var r = w.getBoundingClientRect();
+            var dx = (e.clientX - (r.left + r.width / 2)) / 400, dy = (e.clientY - (r.top + r.height / 3)) / 400;
+            dx = Math.max(-1, Math.min(1, dx)); dy = Math.max(-1, Math.min(1, dy));
+            w.style.setProperty('--lx', dx.toFixed(2)); w.style.setProperty('--ly', dy.toFixed(2));
+          });
+        });
+      }, { passive: true });
+    }
+  }
 })();

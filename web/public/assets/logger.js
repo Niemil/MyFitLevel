@@ -746,7 +746,18 @@
     if (!D.edit) { try { localStorage.removeItem(D.storeKey); } catch (e) {} }
     build();
     document.getElementById('savebtn').disabled = true;
-    form.submit();
+    var ov = document.getElementById('fsave');
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!ov || D.edit || still) { form.submit(); return; }
+    var target = parseInt((document.getElementById('estpts') || {}).textContent, 10) || 0;
+    var out = document.getElementById('fsvpts'), t0 = Date.now(), dur = 1800;
+    ov.hidden = false; void ov.offsetWidth; ov.classList.add('on');
+    (function tick() {
+      var k = Math.min(1, (Date.now() - t0) / dur);
+      if (out) out.textContent = String(Math.round(target * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) requestAnimationFrame(tick);
+    })();
+    setTimeout(function () { form.submit(); }, 2000);
   }
   form.addEventListener('submit', function (e) {
     e.preventDefault();

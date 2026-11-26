@@ -51,39 +51,11 @@ function site_tagline(): string
     return (string)setting('tagline', 'Free workout tracker with points, levels and quests');
 }
 
-/** Original mascot "Lev" (inline SVG). mood: happy | cheer | oops */
+/** Site mascot: Fito the wolf. mood: happy | cheer | oops (small sizes show the face only). */
 function mascot(string $mood = 'happy', int $size = 120, string $class = ''): string
 {
-    static $defs = false;
-    $g = '';
-    if (!$defs) {
-        $defs = true;
-        $g = '<defs><linearGradient id="lvBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a98bff"/><stop offset="1" stop-color="#6d3df2"/></linearGradient>'
-           . '<linearGradient id="lvBell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9edf7"/><stop offset="1" stop-color="#9aa6bf"/></linearGradient></defs>';
-    }
-    $mouth = $mood === 'cheer'
-        ? '<path d="M82 118 Q100 146 118 118 Z" fill="#3a1a7a"/><path d="M90 130 Q100 139 110 130 Q100 134 90 130Z" fill="#ff7aa8"/>'
-        : ($mood === 'oops'
-            ? '<path d="M88 128 Q100 120 112 128" fill="none" stroke="#3a1a7a" stroke-width="5" stroke-linecap="round"/>'
-            : '<path d="M84 120 Q100 138 116 120" fill="none" stroke="#3a1a7a" stroke-width="5" stroke-linecap="round"/>');
-    return '<svg class="mascot ' . e($class) . ' m-' . e($mood) . '" width="' . $size . '" height="' . $size . '" viewBox="0 0 200 200" role="img" aria-label="Lev, the MyFitLevel mascot">'
-        . $g
-        . '<ellipse class="m-shadow" cx="100" cy="188" rx="56" ry="8" fill="#000" opacity=".16"/>'
-        . '<g class="m-body">'
-        . '<g class="m-armL"><ellipse cx="34" cy="132" rx="14" ry="11" fill="#7d51f6" transform="rotate(25 34 132)"/></g>'
-        . '<path d="M100 30C150 30 174 72 174 114C174 158 142 180 100 180C58 180 26 158 26 114C26 72 50 30 100 30Z" fill="url(#lvBody)"/>'
-        . '<path d="M52 70C60 50 78 40 96 38" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="7" stroke-linecap="round"/>'
-        . '<path class="m-bolt" d="M106 6L86 36H103L95 58L122 24H106Z" fill="#ffd23f" stroke="#e9a800" stroke-width="2" stroke-linejoin="round"/>'
-        . '<ellipse cx="62" cy="116" rx="11" ry="7" fill="#ff7aa8" opacity=".55"/><ellipse cx="138" cy="116" rx="11" ry="7" fill="#ff7aa8" opacity=".55"/>'
-        . '<g class="m-eyes"><ellipse cx="78" cy="94" rx="15" ry="17" fill="#fff"/><ellipse cx="122" cy="94" rx="15" ry="17" fill="#fff"/>'
-        . '<circle cx="81" cy="97" r="9" fill="#2a1260"/><circle cx="119" cy="97" r="9" fill="#2a1260"/>'
-        . '<circle cx="84" cy="93" r="3.2" fill="#fff"/><circle cx="122" cy="93" r="3.2" fill="#fff"/></g>'
-        . $mouth
-        . '<ellipse cx="78" cy="180" rx="17" ry="8" fill="#5a2fd0"/><ellipse cx="122" cy="180" rx="17" ry="8" fill="#5a2fd0"/>'
-        . '<g class="m-armR"><path d="M166 124C178 118 182 102 180 88" fill="none" stroke="#7d51f6" stroke-width="15" stroke-linecap="round"/>'
-        . '<g class="m-bell"><rect x="168" y="76" width="26" height="6" rx="3" fill="#7a869e"/>'
-        . '<rect x="164" y="62" width="9" height="34" rx="4" fill="url(#lvBell)"/><rect x="189" y="62" width="9" height="34" rx="4" fill="url(#lvBell)"/></g></g>'
-        . '</g></svg>';
+    $pose = ['happy' => 'idle', 'cheer' => 'cheer', 'oops' => 'oops'][$mood] ?? 'idle';
+    return fito($pose, $size, $class, $size <= 48);
 }
 
 /**
@@ -134,6 +106,7 @@ function layout_header(string $title, string $active = '', array $meta = []): vo
 <?php if (defined('GAME_CSS')): ?><link rel="stylesheet" href="<?= e(asset('game.css')) ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="<?= e(asset('fx2.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset('fito.css')) ?>">
 <meta name="csrf" content="<?= e(csrf_token()) ?>">
 <meta name="app-base" content="<?= e(base()) ?>">
 <?php $sv = stats_track(); $svc = stats_consent_state(); if ($sv): ?><meta name="sv" content="<?= (int)$sv[0] . '.' . e($sv[1]) ?>">

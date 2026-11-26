@@ -1,0 +1,56 @@
+/* Fito the wolf: idle life and poses */
+.fito{display:block;overflow:visible}
+.fito .f-torso,.fito .f-head,.fito .f-eyes,.fito .f-tail,.fito .f-earL,.fito .f-earR,.fito .f-armL,.fito .f-armR,.fito .f-lift,.fito .f-sweat,.fito .f-shadow{transform-box:fill-box}
+.fito .f-torso{transform-origin:50% 100%;animation:fBreathe 3.6s ease-in-out infinite}
+.fito .f-head{transform-origin:50% 90%;transition:transform .18s ease-out;transform:translate(calc(var(--lx,0)*5px),calc(var(--ly,0)*3px)) rotate(calc(var(--lx,0)*3deg))}
+.fito .f-eyes{transform-origin:50% 50%;animation:fBlink 5.2s infinite}
+.fito .f-tail{transform-origin:6% 100%;animation:fTail 2.4s ease-in-out infinite}
+.fito .f-earL{transform-origin:70% 100%;animation:fEar 7s ease-in-out infinite}
+.fito .f-earR{transform-origin:30% 100%;animation:fEar 7s ease-in-out 2.6s infinite reverse}
+.fito .f-shadow{transform-origin:50% 50%}
+.fito.p-cheer{animation:fHop 1s ease-in-out infinite}
+.fito.p-cheer .f-armL{transform-origin:85% 90%;animation:fPumpL .5s ease-in-out infinite alternate}
+.fito.p-cheer .f-armR{transform-origin:15% 90%;animation:fPumpR .5s ease-in-out infinite alternate}
+.fito.p-cheer .f-tail{animation-duration:.5s}
+.fito.p-flex .f-armL{transform-origin:85% 90%;animation:fFlexL 2.4s ease-in-out infinite}
+.fito.p-flex .f-armR{transform-origin:15% 90%;animation:fFlexR 2.4s ease-in-out infinite}
+.fito.p-lift .f-lift{animation:fPress 1.8s ease-in-out infinite}
+.fito.p-lift .f-torso{animation-duration:1.8s}
+.fito.p-oops{animation:fShake 2.8s ease-in-out infinite}
+.fito.p-oops .f-sweat{animation:fDrip 1.8s ease-in infinite}
+.fito.p-oops .f-tail{animation:none;transform:rotate(14deg)}
+.fito.f-face .f-torso,.fito.f-face .f-tail{animation:none}
+.fito.f-live .f-head{will-change:transform}
+
+@keyframes fBreathe{50%{transform:scale(1.012,1.018)}}
+@keyframes fBlink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+@keyframes fTail{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(9deg)}}
+@keyframes fEar{0%,90%,100%{transform:rotate(0)}94%{transform:rotate(-7deg)}97%{transform:rotate(3deg)}}
+@keyframes fHop{0%,100%{transform:translateY(0)}45%{transform:translateY(-12px)}}
+@keyframes fPumpL{to{transform:rotate(-9deg)}}
+@keyframes fPumpR{to{transform:rotate(9deg)}}
+@keyframes fFlexL{0%,100%{transform:rotate(0)}40%,60%{transform:rotate(-7deg) scale(1.04)}}
+@keyframes fFlexR{0%,100%{transform:rotate(0)}40%,60%{transform:rotate(7deg) scale(1.04)}}
+@keyframes fPress{0%,100%{transform:translateY(8px)}50%{transform:translateY(-6px)}}
+@keyframes fShake{0%,86%,100%{transform:translateX(0)}90%{transform:translateX(-3px)}94%{transform:translateX(3px)}}
+@keyframes fDrip{0%{transform:translateY(-4px);opacity:0}25%{opacity:1}100%{transform:translateY(34px);opacity:0}}
+
+.nomotion.fito *,.nomotion.fito,html.fx-calm .fito:not(.fsv) *,html.fx-calm .fito:not(.fsv){animation:none!important}
+html.fx-calm .fito:not(.fsv) .f-head{transform:none}
+@media (prefers-reduced-motion:reduce){.fito *,.fito{animation:none!important}.fito .f-head{transform:none!important}}
+
+/* Workout saving overlay */
+.fsave{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(10,12,22,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.fsave[hidden]{display:none}
+.fsave.on{opacity:1;pointer-events:auto}
+.fsave .fsv-glow{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(98,204,255,.28),transparent 68%);animation:fsGlow 2s ease-in-out infinite}
+.fsave .mascot{position:relative;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5))}
+.fsave .fsv-pts{position:relative;font-size:46px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.fsave .fsv-pts small{font-size:16px;font-weight:600;opacity:.7;margin-left:6px}
+.fsave .fsv-msg{position:relative;opacity:.8;font-size:15px}
+.fsave .fsv-bar{position:relative;width:min(260px,70vw);height:6px;border-radius:6px;background:rgba(255,255,255,.14);overflow:hidden}
+.fsave .fsv-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#62ccff,#e9ecf3)}
+.fsave.on .fsv-bar i{animation:fsFill 2.4s cubic-bezier(.3,.7,.3,1) forwards}
+@keyframes fsFill{to{width:94%}}
+@keyframes fsGlow{50%{transform:scale(1.15);opacity:.7}}
+@media (prefers-reduced-motion:reduce){.fsave .fsv-glow,.fsave.on .fsv-bar i{animation:none}.fsave.on .fsv-bar i{width:94%}}

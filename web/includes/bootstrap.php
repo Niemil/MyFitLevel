@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('APP_VERSION', '3.37.0');
+define('APP_VERSION', '3.38.0');
 const SCHEMA_VERSION = 16;
 
 if (!defined('APP_ROOT')) {
@@ -77,6 +77,7 @@ require __DIR__ . '/webhook.php';
 require __DIR__ . '/bonuses.php';
 require __DIR__ . '/programs.php';
 require __DIR__ . '/stats.php';
+require __DIR__ . '/fito.php';
 require __DIR__ . '/fito_reference.php';
 require __DIR__ . '/game.php';
 

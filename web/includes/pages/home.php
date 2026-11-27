@@ -41,7 +41,7 @@ $schema = [
 
 $schema[] = ['@context' => 'https://schema.org', '@type' => 'VideoObject', 'name' => $name . ': the full tour',
     'description' => 'Track workouts, earn points, level from 1 to 100, finish quests, hit weekly goals and compete with friends. Free and non-profit.',
-    'thumbnailUrl' => [site_url('media/promo-poster.jpg')], 'uploadDate' => '2026-11-27', 'duration' => 'PT1M45S',
+    'thumbnailUrl' => [site_url('media/promo-poster.jpg')], 'uploadDate' => '2026-11-27', 'duration' => 'PT35S',
     'contentUrl' => site_url('media/promo.mp4')];
 define('GAME_CSS', true);
 game_ensure();
@@ -158,8 +158,8 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
 </section>
 
 <section class="sect rv promo">
-  <h2>Watch the tour</h2>
-  <p class="sub">Tracking, quests, muscle levels, the wardrobe, bosses, teams and more, in under two minutes.</p>
+  <h2>See it in 35 seconds</h2>
+  <p class="sub">Dress your hero, level every muscle, fight the boss and team up. Sound on for the beat.</p>
   <video controls preload="none" playsinline poster="<?= e(url('media/promo-poster.jpg')) ?>">
     <source src="<?= e(url('media/promo.mp4')) ?>" type="video/mp4">
   </video>

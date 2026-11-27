@@ -313,6 +313,7 @@ $nav = [
 
 <?php if ($tab === 'users'):
     $list = rows('SELECT * FROM users ORDER BY id DESC LIMIT 200'); ?>
+<p class="small"><a href="<?= e(url('admin?tab=tools')) ?>">Give or take coins, points and items from any member</a></p>
 <div class="card tablewrap">
 <table class="tbl">
   <tr><th>User</th><th>Lvl</th><th>pts</th><th>Last seen</th><th></th></tr>

@@ -299,7 +299,7 @@ layout_header('Admin');
 $nav = [
     'People' => [['users', 'Members', 'admin?tab=users'], ['feedback', 'Feedback' . ($fbNew ? ' (' . $fbNew . ')' : ''), 'admin?tab=feedback'], ['email', 'Email', 'admin?tab=email']],
     'Content' => [['exercises', 'Exercises', 'admin?tab=exercises'], ['events', 'Events', 'admin?tab=events'], ['', 'Blog', 'blog/admin'], ['game', 'Game', 'admin?tab=game'], ['fito', 'Fitocracy data', 'admin?tab=fito']],
-    'Insights' => [['stats', 'Traffic and visitors', 'admin?tab=stats&sub=traffic'], ['', 'Site log', 'admin/logs']],
+    'Insights' => [['stats', 'Traffic and visitors', 'admin?tab=stats&sub=traffic'], ['', 'Mentions on the web', 'admin/mentions'], ['', 'Site log', 'admin/logs']],
     'Site' => array_merge([['site', 'Settings', 'admin?tab=site'], ['tools', 'Tools', 'admin?tab=tools']], function_exists('calib_view') ? [['calib', 'Calibration', 'admin?tab=calib']] : []),
 ]; ?>
 <nav class="adminnav" aria-label="Admin">

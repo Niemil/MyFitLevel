@@ -25,6 +25,7 @@ if ($route === 'fito/upload') {
     $good = (string)setting('fito_token', '', true);
     if (!is_post() || $good === '' || !hash_equals($good, $tok)) {
         rate_hit('apifail:' . client_ip());
+        AppLog::security('api_key', 'Research upload refused: bad token');
         json_out(['ok' => false, 'error' => 'Bad token'], 403);
     }
     $name = preg_replace('/[^A-Za-z0-9._-]/', '_', (string)($_GET['name'] ?? ''));
@@ -89,6 +90,12 @@ if ($route === 'ping') {   // open, no key: which version is live
 
 $user = api_user(($_SERVER['REQUEST_METHOD'] ?? '') === 'GET' && in_array($route, ['widget', 'me', 'stats', 'quests', 'today', 'summary', 'prs', 'week', 'export.csv', 'calendar.ics'], true));
 if (!$user) {
+    $ah = (string)($_SERVER['HTTP_AUTHORIZATION'] ?? ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
+    $why = $ah === '' && empty($_SERVER['HTTP_X_API_KEY']) && empty($_GET['key']) ? 'missing key'
+        : (preg_match('/^Bearer\s+\S{20,}$/i', $ah) || strlen((string)($_SERVER['HTTP_X_API_KEY'] ?? ($_GET['key'] ?? ''))) >= 20 ? 'unknown or revoked key' : 'malformed key');
+    if ($why !== 'missing key' || random_int(1, 5) === 1) {
+        AppLog::security('api_key', 'API call refused: ' . $why . ' (' . ($_SERVER['REQUEST_METHOD'] ?? '') . ' ' . $route . ')');
+    }
     if (!rate_ok('apifail:' . client_ip(), 30, 600)) {
         json_out(['ok' => false, 'error' => 'Too many failed requests'], 429);
     }

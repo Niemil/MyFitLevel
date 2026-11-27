@@ -12,6 +12,7 @@ layout_header('Privacy', '', ['index' => true, 'path' => 'privacy', 'desc' => 'W
     <li>Your account: username, email (optional), a hashed password, and the profile details you choose to add.</li>
     <li>Your workouts, sets, props, comments, group posts, achievements and quests.</li>
     <li>Technical data needed to keep the service safe, such as rate-limit counters.</li>
+    <li>A site log of errors and security events (for example a failed login with the username typed, a blocked request, or a refused API key). It holds the page address without anything after the question mark, a shortened IP address and the first part of the browser name. It never holds passwords, API keys or what you search for, and it is deleted after 30 days.</li>
   </ul>
   <h2 id="choices">Cookies and visitor statistics</h2>
   <ul>

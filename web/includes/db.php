@@ -79,6 +79,9 @@ function rate_ok(string $key, int $max, int $windowSec): bool
         q('DELETE FROM rate_limits WHERE created_at < ?', [date('Y-m-d H:i:s', time() - 86400)]);
     }
     $n = (int)val('SELECT COUNT(*) FROM rate_limits WHERE k = ? AND created_at >= ?', [$key, $since]);
+    if ($n >= $max && class_exists('AppLog', false)) {
+        AppLog::security('rate_limit', 'Limit reached: ' . explode(':', $key)[0] . ' (' . $max . ' per ' . $windowSec . ' s)');   // only the kind of limit, never the rest of the key
+    }
     return $n < $max;
 }
 

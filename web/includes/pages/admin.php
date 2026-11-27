@@ -305,6 +305,7 @@ layout_header('Admin');
   <a class="<?= $tab === 'stats' ? 'on' : '' ?>" href="<?= e(url('admin?tab=stats')) ?>">Stats</a>
   <a class="<?= $tab === 'game' ? 'on' : '' ?>" href="<?= e(url('admin?tab=game')) ?>">Game</a>
   <a class="<?= $tab === 'tools' ? 'on' : '' ?>" href="<?= e(url('admin?tab=tools')) ?>">Tools</a>
+  <a href="<?= e(url('admin/logs')) ?>">Logs</a>
   <a class="<?= $tab === 'email' ? 'on' : '' ?>" href="<?= e(url('admin?tab=email')) ?>">Email</a>
   <?php ql_ensure_tables(); $fbNew = (int)val("SELECT COUNT(*) FROM feedback WHERE status = 'new'"); ?>
   <a class="<?= $tab === 'feedback' ? 'on' : '' ?>" href="<?= e(url('admin?tab=feedback')) ?>">Feedback<?= $fbNew ? ' · ' . $fbNew : '' ?></a>

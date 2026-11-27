@@ -48,6 +48,7 @@ function require_admin(): array
 {
     $u = require_login();
     if (!$u['is_admin']) {
+        AppLog::security('admin_denied', 'Non-admin tried an admin page (user #' . (int)$u['id'] . ')');
         http_response_code(403);
         exit('Forbidden');
     }

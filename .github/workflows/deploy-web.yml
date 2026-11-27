@@ -58,6 +58,10 @@ jobs:
           state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
+            logs/**
+            **/logs/**
+            **/*.log
+            **/*.log.1
             **/.git*/**
             README.md
             config/config.php

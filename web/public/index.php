@@ -83,6 +83,7 @@ $routes = [
     '#^settings/export$#'          => 'export',
     '#^notifications$#'            => 'notifications',
     '#^admin$#'                    => 'admin',
+    '#^admin/logs$#'               => 'admin_logs',
     '#^act/([a-z_]+)$#'            => 'act',
     '#^api/v1(?:/(.*))?$#'         => 'api',
     '#^manifest\.webmanifest$#'    => 'manifest',

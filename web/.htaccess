@@ -5,7 +5,7 @@ Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
   # never serve internals
-  RewriteRule ^(includes|config|data|storage)(/|$) - [F,L]
+  RewriteRule ^(includes|config|data|storage|logs)(/|$) - [F,L]
   # send everything else into public/
   RewriteCond %{REQUEST_URI} !/public/
   RewriteRule ^(.*)$ public/$1 [L]

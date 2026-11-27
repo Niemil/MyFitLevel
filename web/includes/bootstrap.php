@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('APP_VERSION', '3.49.0');
+define('APP_VERSION', '3.50.0');
 const SCHEMA_VERSION = 16;
 
 if (!defined('APP_ROOT')) {
@@ -52,6 +52,8 @@ header("Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:;
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 
 require __DIR__ . '/db.php';
+require __DIR__ . '/applog.php';
+AppLog::init();   // error handlers + logs/ outside public/
 require __DIR__ . '/schema.php';
 require __DIR__ . '/muscles.php';
 require __DIR__ . '/seed.php';

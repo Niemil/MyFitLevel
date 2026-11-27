@@ -51,6 +51,9 @@ function webhook_log_add(int $uid, string $url, int $status, string $resp, strin
             }
             @file_put_contents($lf, date('Y-m-d H:i:s') . ' | u' . $uid . ' | ' . ($method === 'IN' ? 'IN ' : 'OUT') . ' | ' . $url . ' | ' . $status . ' | ' . str_replace(["\r", "\n"], ' ', mb_substr($resp, 0, 300)) . "\n", FILE_APPEND | LOCK_EX);
         }
+        if ($method !== 'IN' && ($status < 200 || $status >= 300)) {
+            AppLog::warn('webhook', 'Call failed: ' . mb_substr($url, 0, 120) . ' -> ' . $status);
+        }
         webhook_log_ensure();
         q('INSERT INTO webhook_log (user_id, created_at, method, url, status, response) VALUES (?,?,?,?,?,?)', [$uid, date('Y-m-d H:i:s'), $method, mb_substr($url, 0, 300), $status, mb_substr($resp, 0, 300)]);
         q('DELETE FROM webhook_log WHERE user_id = ? AND id NOT IN (SELECT id FROM (SELECT id FROM webhook_log WHERE user_id = ? ORDER BY id DESC LIMIT 20) t)', [$uid, $uid]);

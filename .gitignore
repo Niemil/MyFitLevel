@@ -8,6 +8,8 @@ local.properties
 web/config/config.php
 web/config/installed.lock
 web/config/*.log
+web/logs/
+logs/
 web/**/errors.log
 *.log
 .env

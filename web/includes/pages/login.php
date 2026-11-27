@@ -34,6 +34,8 @@ if (is_post()) {
         }
         rate_hit($key);
         rate_hit($key2);
+        $shown = str_contains($ident, '@') ? substr($ident, 0, 1) . '***' . substr($ident, (int)strrpos($ident, '@')) : $ident;   // email addresses are masked
+        AppLog::security('login_failed', 'Failed login for "' . mb_substr($shown, 0, 60) . '"' . (($u && $u['is_banned']) ? ' (suspended account)' : ''));
         $error = ($u && $u['is_banned'])
             ? 'This account has been suspended' . ($u['banned_until'] ? ' until ' . date('j M Y H:i', strtotime($u['banned_until'])) : ' permanently') . ($u['ban_reason'] ? ': ' . $u['ban_reason'] : '.')
             : 'Wrong username or password.';

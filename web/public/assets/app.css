@@ -1203,3 +1203,4 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .dd-bonus{font-size:1.05rem;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.dd-layer svg{animation:none}.dd-layer{transition:none}}
 .dd-row .btn.ghost.on{background:#5a64ff;color:#fff;border-color:#5a64ff}
+.sx-filter a{white-space:nowrap}

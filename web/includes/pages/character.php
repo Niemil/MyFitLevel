@@ -12,7 +12,11 @@ if (is_post()) {
     csrf_check();
     $do = (string)($_POST['do'] ?? '');
     $cur = fito_look($uid);
-    if ($do === 'eye' && isset(FITO_EYES[(string)($_POST['eye'] ?? '')])) {
+    if ($do === 'body' && in_array((string)($_POST['body'] ?? ''), ['m', 'f'], true)) {
+        q('INSERT INTO char_look (user_id, species, eye, picks, body, updated_at) VALUES (?,?,?,?,?,?) ON DUPLICATE KEY UPDATE body = VALUES(body), updated_at = VALUES(updated_at)',
+          [$uid, $cur['species'], $cur['eye'], $cur['picks'], (string)$_POST['body'], now()]);
+        flash('Your character now looks ' . ($_POST['body'] === 'f' ? 'female' : 'male') . '.');
+    } elseif ($do === 'eye' && isset(FITO_EYES[(string)($_POST['eye'] ?? '')])) {
         q('INSERT INTO char_look (user_id, species, eye, picks, updated_at) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE eye = VALUES(eye), updated_at = VALUES(updated_at)',
           [$uid, $cur['species'], (string)$_POST['eye'], $cur['picks'], now()]);
         flash('Eye colour changed.');
@@ -75,6 +79,14 @@ layout_header('Character', 'me');
         <button class="btn small<?= $look['species'] === $k ? ' ghost' : '' ?>" type="submit" <?= $look['species'] === $k ? 'disabled' : '' ?>><?= $look['species'] === $k ? 'Current' : ($look['picks'] > 0 ? 'Choose (' . FITO_SPECIES_COST . ')' : 'Choose') ?></button></form>
     <?php endforeach; ?>
   </div>
+</div>
+
+<div class="card">
+  <h3>Build</h3>
+  <p class="muted small" style="margin-top:0">Pick a male or a female look for your animal. It is free to change.</p>
+  <form method="post" class="inl"><?= csrf_field() ?><input type="hidden" name="do" value="body">
+    <button class="btn small<?= $look['body'] === 'm' ? '' : ' ghost' ?>" name="body" value="m" type="submit">Male</button>
+    <button class="btn small<?= $look['body'] === 'f' ? '' : ' ghost' ?>" name="body" value="f" type="submit">Female</button></form>
 </div>
 
 <div class="card">

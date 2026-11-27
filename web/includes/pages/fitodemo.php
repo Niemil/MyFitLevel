@@ -13,7 +13,7 @@ foreach (['w' => 'wings', 'a' => 'aura'] as $param => $slot) {
     $k = 'look_' . $slot . '_' . (string)($_GET[$param] ?? '');
     if (isset($extras[$k])) { $keys[] = $k; }
 }
-$look = fito_try_on(['species' => 'wolf', 'eye' => 'ice', 'picks' => 0, 'gear' => []], $keys);
+$look = fito_try_on(['species' => 'wolf', 'eye' => 'ice', 'body' => (($_GET['s'] ?? '') === 'f' ? 'f' : 'm'), 'picks' => 0, 'gear' => []], $keys);
 header('Content-Type: image/svg+xml; charset=utf-8');
 header('Cache-Control: public, max-age=86400');
 echo preg_replace('/<svg/', '<svg xmlns="http://www.w3.org/2000/svg"', fito_dressed($look, 300), 1);

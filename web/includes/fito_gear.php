@@ -13,7 +13,14 @@ const FITO_SPECIES_COST = 250;   // the first pick is free, later changes cost t
 function fito_look(int $uid): array
 {
     staff_ensure();
-    $r = row('SELECT species, eye, picks FROM char_look WHERE user_id = ?', [$uid]) ?: ['species' => 'wolf', 'eye' => 'ice', 'picks' => 0];
+    if (setting('char_body_ok', '') !== '1') {
+        if (!row("SHOW COLUMNS FROM char_look LIKE 'body'")) {
+            q("ALTER TABLE char_look ADD COLUMN body CHAR(1) NOT NULL DEFAULT 'm'");
+        }
+        set_setting('char_body_ok', '1');
+    }
+    $r = row('SELECT species, eye, picks, body FROM char_look WHERE user_id = ?', [$uid]) ?: ['species' => 'wolf', 'eye' => 'ice', 'picks' => 0, 'body' => 'm'];
+    $r['body'] = ($r['body'] ?? 'm') === 'f' ? 'f' : 'm';
     if (!isset(FITO_SPECIES[$r['species']])) { $r['species'] = 'wolf'; }
     if (!isset(FITO_EYES[$r['eye']])) { $r['eye'] = 'ice'; }
     $g = game_gear($uid);
@@ -31,7 +38,7 @@ function fito_look(int $uid): array
             unset($gear[$slot]);
         }
     }
-    return ['species' => $r['species'], 'eye' => $r['eye'], 'picks' => (int)$r['picks'], 'gear' => $gear];
+    return ['species' => $r['species'], 'eye' => $r['eye'], 'body' => $r['body'], 'picks' => (int)$r['picks'], 'gear' => $gear];
 }
 
 /** Draws Fito (idle pose) with a member's look. */
@@ -211,7 +218,19 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
     $svg = preg_replace('/<path d="M70 218L170 218/', $boots . '<path d="M70 218L170 218', $svg, 1);
     $svg = preg_replace('/<g class="f-armL">/', $armor . $charm . '<g class="f-armL">', $svg, 1);
     $svg = preg_replace('/<g class="f-head">/', $hands . '<g class="f-head">', $svg, 1);
-    $svg = preg_replace('/<path d="M92 68L100 88"/', $helm . '<path d="M92 68L100 88"', $svg, 1);
+    // male / female look: heavier brows and cheek fur, or lashes, a hair tuft and a bow
+    $fl = 'url(#ftFurL-' . $id . ')';
+    $over = '';
+    if (($d['body'] ?? 'm') === 'f') {
+        $feat = '<path d="M80 91L69 86M82 88L72 79M160 91L171 86M158 88L168 79" stroke="#10131d" stroke-width="2.6" stroke-linecap="round"/>'
+            . '<path d="M102 76Q118 42 142 62Q130 60 122 76Z" fill="' . $fl . '" stroke="#10131d" stroke-opacity=".25"/>'
+            ;
+        $over = '<path d="M158 62L174 52L172 72ZM158 62L144 54L146 74Z" fill="#ff6b9a" stroke="#b02a5e" stroke-width="1.6"/><circle cx="158" cy="62" r="4" fill="#ffd0e0"/>';
+    } else {
+        $feat = '<path d="M76 88L110 94M164 88L130 94" stroke="#10131d" stroke-width="4.2" stroke-linecap="round" opacity=".75"/>'
+            . '<path d="M64 118L50 126L66 132ZM176 118L190 126L174 132Z" fill="' . $fl . '" stroke="#10131d" stroke-opacity=".25"/>';
+    }
+    $svg = preg_replace('/<path d="M92 68L100 88"/', $feat . $helm . $over . '<path d="M92 68L100 88"', $svg, 1);
     if (isset($gear['wings']) || isset($gear['aura'])) {
         $svg = preg_replace('/viewBox="0 0 240 300"/', 'viewBox="-40 -10 320 310"', $svg, 1);
     }

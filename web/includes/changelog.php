@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.51.1', '2026-11-27 11:00', 'More exercise names from SnakeDiet', ['Improve 20 more SnakeDiet exercise names are linked to the right exercise here (for example Reverse Flyes, Crunches, Ab Roller and Farmer\'s Walk).'], 'improve'],
     ['3.51.0', '2026-11-27 10:40', 'Smarter exercise matching from SnakeDiet', ['Improve Workouts from SnakeDiet now come in with their real sets. Exercise names like "Barbell Bench Press - Medium Grip" or "Dumbbell Bicep Curl" are matched to the right exercise here. Names that cannot be matched are shown in the Connect log and added to the workout note.'], 'improve'],
     ['3.50.1', '2026-11-27 10:20', 'SnakeDiet: skip very old workouts', ['Fix Editing a workout older than about two months no longer tries to send it to SnakeDiet, which only accepts the last 60 days. It is skipped quietly, not shown as an error.'], 'fix'],
     ['3.50.0', '2026-11-27 10:10', 'Site log', ['New Admin > Logs keeps errors, warnings and security events for 30 days: failed logins, rate limits, refused API keys and non-admins on admin pages. Each filter shows the last 24 hours and a box with the latest lines to copy.', 'Improve PHP errors are now written to a log outside the public folder. The log never holds passwords, keys or search words, and it is explained in the privacy page.'], 'improve'],

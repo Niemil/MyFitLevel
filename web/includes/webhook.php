@@ -282,7 +282,7 @@ function inbound_tokens(string $name): array
             'db' => 'dumbbell', 'bb' => 'barbell', 'kb' => 'kettlebell', 'ez' => 'ez', 'lunges' => 'lunge', 'squats' => 'squat', 'rows' => 'row',
             'curls' => 'curl', 'presses' => 'press', 'raises' => 'raise', 'extensions' => 'extension', 'flyes' => 'fly', 'flys' => 'fly', 'dips' => 'dip'];
     $n = str_replace(['shoulder press', 'military press'], 'overhead press', $n);
-    $stop = ['bicep', 'bent', 'over', 'medium', 'wide', 'narrow', 'grip', 'with', 'the', 'a', 'on', 'to', 'of', 'and', 'alternating', 'one', 'arm', 'single', 'exercise'];
+    $stop = ['bicep', 'alternate', 'bent', 'over', 'medium', 'wide', 'narrow', 'grip', 'with', 'the', 'a', 'on', 'to', 'of', 'and', 'alternating', 'one', 'arm', 'single', 'exercise'];
     $out = [];
     foreach (preg_split('/\s+/', trim($n)) ?: [] as $w) {
         if ($w === '') {
@@ -297,6 +297,33 @@ function inbound_tokens(string $name): array
     return array_keys($out);
 }
 
+/** Known SnakeDiet (free-exercise-db) names that need a manual link to our exercise slugs. '' = deliberately not matched. */
+function inbound_aliases(): array
+{
+    return [
+        'stiff-legged barbell deadlift' => 'stiff-leg-deadlift',
+        'reverse flyes' => 'rear-delt-fly',
+        'hyperextensions (back extensions)' => 'back-extension',
+        'dumbbell alternate bicep curl' => 'dumbbell-curl',
+        'high cable curls' => 'cable-curl',
+        'lying triceps press' => 'skull-crusher',
+        'kneeling cable triceps extension' => 'cable-overhead-triceps-extension',
+        'seated triceps press' => 'overhead-triceps-extension',
+        'dips - triceps version' => 'triceps-dip',
+        'crunches' => 'crunch',
+        'ab roller' => 'ab-wheel-rollout',
+        'mountain climbers' => 'mountain-climber',
+        'elliptical / cross trainer' => 'elliptical',
+        'one-arm kettlebell swings' => 'kettlebell-swing',
+        "farmer's walk" => 'farmer-s-carry',
+        'butterfly' => 'pec-deck',
+        'dumbbell step ups' => 'step-up',
+        'side lateral raise' => 'dumbbell-lateral-raise',
+        'dumbbell shoulder press' => 'seated-dumbbell-shoulder-press',
+        'front raise and pullover' => '',
+    ];
+}
+
 /** Finds an exercise from a free-text name ("Bench press", "Barbell Bench Press - Medium Grip"), or null. */
 function inbound_find_exercise(string $name): ?array
 {
@@ -308,6 +335,11 @@ function inbound_find_exercise(string $name): ?array
     $r = row('SELECT id, name FROM exercises WHERE active = 1 AND LOWER(name) = ?', [$q]);
     if ($r) {
         return $r;
+    }
+    $al = inbound_aliases();
+    $qa = preg_replace('/\s+/', ' ', str_replace(['’', '`'], "'", $q));
+    if (array_key_exists($qa, $al)) {
+        return $al[$qa] === '' ? null : (row('SELECT id, name FROM exercises WHERE active = 1 AND slug = ?', [$al[$qa]]) ?: null);
     }
     if ($idx === null) {
         $idx = [];

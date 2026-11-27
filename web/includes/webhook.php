@@ -84,6 +84,46 @@ function webhook_details(int $wid, string $unit): array
     return $out;
 }
 
+/** snakediet.org gets the finished workout through its workouts API (it counts kcal and KTN itself). */
+function webhook_is_snakediet(string $url): bool
+{
+    $p = parse_url($url);
+    $h = strtolower((string)($p['host'] ?? ''));
+    return $h === 'snakediet.org' || $h === 'www.snakediet.org';
+}
+
+function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, string $url, string $key): void
+{
+    $dur = (int)($w['duration_sec'] ?? 0);
+    $minutes = $dur > 0 ? (int)round($dur / 60) : (int)round(max(10, (int)$w['set_count'] * 2.5));
+    $minutes = max(1, min(600, $minutes));
+    $kinds = rows('SELECT DISTINCT e.kind, e.name FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.workout_id = ?', [$wid]);
+    $type = 'gym';
+    if ($kinds) {
+        $allCardio = true;
+        $names = '';
+        foreach ($kinds as $k) {
+            $allCardio = $allCardio && $k['kind'] === 'cardio';
+            $names .= ' ' . strtolower((string)$k['name']);
+        }
+        if ($allCardio) {
+            $type = str_contains($names, 'run') || str_contains($names, 'jog') ? 'run'
+                : (str_contains($names, 'walk') || str_contains($names, 'hike') ? 'walk'
+                : (str_contains($names, 'cycl') || str_contains($names, 'bike') ? 'cycle' : 'cardio'));
+        }
+    }
+    $start = min(strtotime((string)$w['performed_at']), time() - 60);
+    $payload = ['id' => 'mfl-' . $uid . '-' . $wid, 'source' => 'myfitlevel.com',
+        'title' => trim((string)$w['title']) !== '' ? mb_substr((string)$w['title'], 0, 80) : 'Workout',
+        'type' => $type, 'minutes' => $minutes, 'start' => date('c', $start)];
+    $details = webhook_details($wid, (string)($u['unit'] ?? 'kg'));
+    if ($details) {
+        $payload['details'] = array_slice($details, 0, 60);
+    }
+    $endpoint = 'https://snakediet.org/api/v1/workouts';
+    webhook_post($endpoint, $payload, $key);
+}
+
 function webhook_fire(int $uid, int $wid, int $points, array $awards): void
 {
     try {
@@ -91,10 +131,14 @@ function webhook_fire(int $uid, int $wid, int $points, array $awards): void
         if ($url === '') {
             return;
         }
-        $w = row('SELECT title, performed_at, set_count, volume_kg FROM workouts WHERE id = ? AND user_id = ?', [$wid, $uid]);
+        $w = row('SELECT title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE id = ? AND user_id = ?', [$wid, $uid]);
         $u = row('SELECT * FROM users WHERE id = ?', [$uid]);
         if (!$w || !$u || strtotime((string)$w['performed_at']) < time() - 36 * 3600) {
             return;   // old workouts added afterwards do not notify
+        }
+        if (webhook_is_snakediet($url)) {
+            webhook_snakediet_workout($uid, $wid, $w, $u, $url, (string)setting('webhook_key:' . $uid, ''));
+            return;   // SnakeDiet gets the workout itself, not also a feed post
         }
         $msg = '💪 ' . display_name($u) . ' finished ' . (trim((string)$w['title']) !== '' ? '“' . $w['title'] . '”' : 'a workout') . ': ' . (int)$w['set_count'] . ' sets, ' . $points . ' points.';
         if (!empty($awards['level_up'])) {

@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.57.0', '2026-11-27 17:10', 'Muscle levels', ['New Every muscle now levels up from the sets you log, shown on the new Muscle levels page.', 'New Train many body areas in a week to get up to +12% boss damage.', 'New 10 new achievements for muscle levels, training every muscle and full body weeks.'], 'new'],
     ['3.56.2', '2026-11-27 16:30', 'Better prize when the boss escapes', ['Improve A boss that escapes now pays 40% of the prize pool, up from 25%, and its unique loot can still drop at 40% of the normal odds.'], 'improve'],
     ['3.56.1', '2026-11-27 16:20', 'Bigger weekly boss prize', ['Improve The weekly boss prize pool now starts at 200 coins and grows by 30 for every hero who hits it, up to 500.'], 'improve'],
     ['3.56.0', '2026-11-27 15:20', 'Alert mail on the Mentions page', ['Improve Google Alerts and F5Bot mails sent to the site mailbox are read automatically and listed on the Mentions page. The web search was removed.'], 'improve'],

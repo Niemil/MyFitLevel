@@ -45,7 +45,7 @@ layout_header('Weekly boss', 'quests', ['index' => true, 'path' => 'boss', 'desc
   </div>
   <?php endif; ?>
   <?php if ($u && $d): ?>
-  <p class="small muted" style="margin:.8rem 0 0">Your hits: <b>×<?= number_format($d['level_mult'], 2) ?></b> from level<?= $d['gear'] ? ', <b>+' . $d['gear'] . '%</b> from gear' : '' ?><?= $d['boost'] ? ', <b>+' . $d['boost'] . '%</b> from your potion' : '' ?><?= !empty($d['team']) ? ', <b>+' . $d['team'] . '%</b> from your team' : '' ?>.
+  <p class="small muted" style="margin:.8rem 0 0">Your hits: <b>×<?= number_format($d['level_mult'], 2) ?></b> from level<?= !empty($d['balance']) ? ', <b>+' . $d['balance'] . '%</b> from <a href="' . e(url('muscles')) . '">training many muscles</a>' : '' ?><?= $d['gear'] ? ', <b>+' . $d['gear'] . '%</b> from gear' : '' ?><?= $d['boost'] ? ', <b>+' . $d['boost'] . '%</b> from your potion' : '' ?><?= !empty($d['team']) ? ', <b>+' . $d['team'] . '%</b> from your team' : '' ?>.
     A 100-point workout does about <b><?= number_format($d['dmg']) ?></b> damage. <a href="<?= e(url('shop')) ?>">Gear &amp; potions</a></p>
   <?php elseif (!$u): ?>
   <p class="center" style="margin:1rem 0 0"><a class="btn big" href="<?= e(url('register')) ?>">Join free and hit the boss</a></p>

@@ -1053,8 +1053,9 @@ function game_damage_for(array $user, int $points): array
     $boost = game_boost_active($w);
     $tm = game_team_of((int)$user['id']);
     $team = $tm ? game_team_bonus((int)$tm['id'])['dmg'] : 0;
-    $dmg = (int)round($points * $lvlMult * (1 + $gear['dmg'] / 100) * (1 + $boost / 100) * (1 + $team / 100) * (1 + game_event_bonus()['dmg'] / 100));
-    return ['dmg' => max(1, $dmg), 'level_mult' => $lvlMult, 'gear' => $gear['dmg'], 'boost' => $boost, 'team' => $team];
+    $bal = muscle_balance((int)$user['id'])['bonus'];
+    $dmg = (int)round($points * $lvlMult * (1 + $bal / 100) * (1 + $gear['dmg'] / 100) * (1 + $boost / 100) * (1 + $team / 100) * (1 + game_event_bonus()['dmg'] / 100));
+    return ['dmg' => max(1, $dmg), 'level_mult' => $lvlMult, 'gear' => $gear['dmg'], 'boost' => $boost, 'team' => $team, 'balance' => $bal];
 }
 
 /* ================= Bosses ================= */

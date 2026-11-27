@@ -118,3 +118,76 @@ function exercise_video_url(string $name): string
 {
     return 'https://www.youtube.com/results?search_query=' . rawurlencode('how to do ' . $name . ' proper form');
 }
+
+/* ================= Muscle levels ================= */
+
+/** The six body areas used for the weekly balance bonus. */
+function muscle_areas(): array
+{
+    return [
+        'Chest' => ['chest'], 'Back' => ['lats', 'traps', 'lowback'], 'Shoulders' => ['shoulders'],
+        'Arms' => ['biceps', 'triceps', 'forearms'], 'Core' => ['abs', 'obliques'], 'Legs' => ['quads', 'hamstrings', 'glutes', 'calves'],
+    ];
+}
+
+function muscle_level_for(float $xp): int
+{
+    return (int)floor(sqrt(max(0, $xp) / 20));
+}
+
+/** Total XP a muscle needs for a level (level n = 20 x n x n). */
+function muscle_xp_for(int $level): int
+{
+    return 20 * $level * $level;
+}
+
+/** Muscle XP and levels from every working set ever logged: 10 XP per set for the main muscle, 5 for helpers. */
+function muscle_stats(int $uid): array
+{
+    static $cache = [];
+    if (isset($cache[$uid])) {
+        return $cache[$uid];
+    }
+    $areaOf = [];
+    foreach (muscle_areas() as $a => $regs) {
+        foreach ($regs as $r) { $areaOf[$r] = $a; }
+    }
+    $xp = array_fill_keys(array_keys(muscle_regions()), 0.0);
+    $weeks = [];
+    foreach (rows(
+        "SELECT e.subs s, YEARWEEK(w.performed_at, 3) wk, COUNT(*) c FROM workout_sets ws
+         JOIN workouts w ON w.id = ws.workout_id JOIN exercises e ON e.id = ws.exercise_id
+         WHERE ws.user_id = ? AND ws.is_warmup = 0 AND e.subs <> '' GROUP BY e.subs, wk", [$uid]) as $r) {
+        foreach (explode(',', $r['s']) as $i => $m) {
+            if (!isset($xp[$m])) { continue; }
+            $xp[$m] += (int)$r['c'] * ($i === 0 ? 10 : 5);
+            if (isset($areaOf[$m])) { $weeks[$r['wk']][$areaOf[$m]] = true; }
+        }
+    }
+    $lv = array_map('muscle_level_for', $xp);
+    $full = 0;
+    foreach ($weeks as $w) {
+        if (count($w) >= count(muscle_areas())) { $full++; }
+    }
+    return $cache[$uid] = [
+        'xp' => $xp, 'lv' => $lv, 'full_weeks' => $full, 'top' => $lv ? max($lv) : 0,
+        'trained' => count(array_filter($xp, fn($x) => $x >= 20)), 'lv3' => count(array_filter($lv, fn($l) => $l >= 3)),
+    ];
+}
+
+/** Which body areas were trained in the last 7 days, and the damage bonus that gives (2% per area, up to 12%). */
+function muscle_balance(int $uid): array
+{
+    static $cache = [];
+    $key = $uid . ':' . date('YmdH');
+    if (isset($cache[$key])) {
+        return $cache[$key];
+    }
+    $heat = muscle_heat($uid, 7);
+    $areas = [];
+    foreach (muscle_areas() as $a => $regs) {
+        $areas[$a] = (bool)array_filter($regs, fn($r) => ($heat[$r] ?? 0) > 0);
+    }
+    $n = count(array_filter($areas));
+    return $cache[$key] = ['areas' => $areas, 'n' => $n, 'bonus' => 2 * $n];
+}

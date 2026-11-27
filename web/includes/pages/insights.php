@@ -80,6 +80,7 @@ if ($exName !== '') {
 layout_header('Insights', 'me');
 ?>
 <h1 class="pagetitle">Insights</h1>
+<p class="small"><a href="<?= e(url('muscles')) ?>">Your muscle levels</a></p>
 <?php if (!(int)$t['w']): ?>
 <div class="card center"><p class="muted">Log your first workout and your numbers, balance and records show up here.</p><a class="btn" href="<?= e(url('log')) ?>">Track a workout</a></div>
 <?php else: ?>

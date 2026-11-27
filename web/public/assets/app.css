@@ -1143,3 +1143,8 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .vis{padding:10px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
 .vis-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:2px}
 .vis .sx-sc{min-width:44px}
+.ml-areas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ml-area{display:flex;flex-direction:column;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-weight:600;color:var(--muted)}
+.ml-area small{font-weight:400;font-size:.72rem}.ml-area.on{color:var(--text);border-color:var(--accent)}
+.ml-row{padding:8px 0;border-top:1px solid var(--line)}.ml-top{display:flex;justify-content:space-between}
+.ml-bar{height:8px;background:var(--line);border-radius:4px;margin:6px 0;overflow:hidden}.ml-bar i{display:block;height:100%;background:var(--accent)}

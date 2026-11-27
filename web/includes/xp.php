@@ -213,6 +213,8 @@ function user_stats(int $uid): array
         $st['sets_' . $r['m']] = (int)$r['c'];
     }
     $st['sets_arms'] = $st['sets_biceps'] + $st['sets_triceps'];
+    $ms = muscle_stats($uid);
+    $st['muscle_top'] = $ms['top']; $st['regions_trained'] = $ms['trained']; $st['regions_lv3'] = $ms['lv3']; $st['full_weeks'] = $ms['full_weeks'];
 
     $st['following'] = (int)val('SELECT COUNT(*) FROM follows WHERE follower_id = ?', [$uid]);
     $st['followers'] = (int)val('SELECT COUNT(*) FROM follows WHERE followee_id = ?', [$uid]);
@@ -312,6 +314,16 @@ function badge_defs(): array
         'level_25'      => ['Level 25', 'Reach level 25', '💫', 'level', 25],
         'level_50'      => ['Level 50', 'Reach level 50', '✨', 'level', 50],
         'level_100'     => ['Level 100', 'Reach level 100', '🔱', 'level', 100],
+        'mlv_5'         => ['Strong Spot', 'Get any muscle to level 5', '🎯', 'muscle_top', 5],
+        'mlv_10'        => ['Specialist', 'Get any muscle to level 10', '🥇', 'muscle_top', 10],
+        'mlv_20'        => ['Powerhouse', 'Get any muscle to level 20', '🦾', 'muscle_top', 20],
+        'mus_14'        => ['Every Muscle', 'Train all 14 muscles at least a little', '🧬', 'regions_trained', 14],
+        'mlv3_7'        => ['Well Rounded', 'Get 7 muscles to level 3', '⚖️', 'regions_lv3', 7],
+        'mlv3_14'       => ['Balanced Build', 'Get all 14 muscles to level 3', '🏅', 'regions_lv3', 14],
+        'fw_1'          => ['Full Body Week', 'Train all 6 body areas in one week', '🧍', 'full_weeks', 1],
+        'fw_4'          => ['Month of Balance', 'Do 4 full body weeks', '🗓️', 'full_weeks', 4],
+        'fw_12'         => ['Season of Balance', 'Do 12 full body weeks', '🍂', 'full_weeks', 12],
+        'fw_26'         => ['Half a Year Balanced', 'Do 26 full body weeks', '🌗', 'full_weeks', 26],
         'explorer'      => ['Explorer', 'Log 25 different exercises', '🧭', 'distinct_exercises', 25],
         'cardio_10h'    => ['Engine', 'Log 10 hours of cardio', '🫀', 'cardio_min', 600],
         'first_follow'  => ['Hello There', 'Follow another member', '👋', 'following', 1],

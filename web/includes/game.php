@@ -1031,6 +1031,7 @@ function game_look_items(): array
             $c['look_' . $id . '_' . $suf[$slot]] = [$n . ' (look)', '@', 'look_' . $slot, 0, 0, max(20, (int)(round($price * 0.4 / 10) * 10)), 'Look only: the ' . $sdef['name'] . ' style, no bonus and no level needed', $sdef['tier'], $id];
         }
     }
+    $c += fa_look_catalog();
     return $c;
 }
 

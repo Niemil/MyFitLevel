@@ -97,26 +97,38 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
     }
 
     $gear = $d['gear'] ?? [];
-    $behind = $boots = $armor = $hands = $helm = $charm = '';
+    $behind = $boots = $armor = $hands = $helm = $charm = $shoulders = '';
+    $artDefs = [];
 
     // aura and wings (behind the body)
-    if (isset($gear['aura'])) {
+    if (isset($gear['aura']) && ($sp_ = fa_spec($gear['aura']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $behind .= fa_draw('aura', $sp_);
+    } elseif (isset($gear['aura'])) {
         $t = $gear['aura']['tier'];
         $behind .= '<circle class="f-aura" cx="120" cy="170" r="128" fill="url(#ga' . $t . ')" opacity=".28"/>';
     }
-    if (isset($gear['wings'])) {
+    if (isset($gear['wings']) && ($sp_ = fa_spec($gear['wings']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $behind .= fa_draw('wings', $sp_);
+    } elseif (isset($gear['wings'])) {
         $t = $gear['wings']['tier'];
         $w = '<path d="M62 160Q-18 96 -4 30Q30 66 44 58Q40 98 78 128Z" fill="url(#ga' . $t . ')"/><path d="M60 170Q-6 140 -14 96Q24 118 40 112Q40 140 76 150Z" fill="url(#ga' . $t . ')" opacity=".85"/>';
         $behind .= $w . '<g transform="translate(240 0) scale(-1 1)">' . $w . '</g>';
     }
     // boots
-    if (isset($gear['boots'])) {
+    if (isset($gear['boots']) && ($sp_ = fa_spec($gear['boots']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $boots = fa_draw('boots', $sp_);
+    } elseif (isset($gear['boots'])) {
         $a = 'url(#ga' . $gear['boots']['tier'] . ')';
         $boots = '<path d="M66 262Q94 250 118 262L120 285Q92 292 64 285Z" fill="' . $a . '"/><path d="M174 262Q146 250 122 262L120 285Q148 292 176 285Z" fill="' . $a . '"/>'
             . '<path d="M64 282Q92 289 120 283M176 282Q148 289 120 283" stroke="#1d2233" stroke-opacity=".6" stroke-width="3" fill="none"/>';
     }
     // armor
     $ar = $gear['armor']['tier'] ?? null;
+    if ($ar !== null && ($sp_ = fa_spec($gear['armor']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $pa = fa_draw('armor', $sp_);
+        $behind .= $pa['k']; $armor = $pa['b']; $shoulders = $pa['o'];
+        $ar = null;
+    }
     if ($ar !== null) {
         $a = 'url(#ga' . $ar . ')';
         $armor = '<path d="M62 150Q120 132 178 150L172 214Q120 232 68 214Z" fill="' . $a . '"/>';
@@ -136,16 +148,22 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
         }
     }
     // pendant
-    if (isset($gear['charm']) || isset($gear['relic'])) {
+    if (isset($gear['charm']) && ($sp_ = fa_spec($gear['charm']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $charm = fa_draw('charm', $sp_);
+    } elseif (isset($gear['charm']) || isset($gear['relic'])) {
         $t = ($gear['charm']['tier'] ?? $gear['relic']['tier']);
         $charm = '<path d="M96 144Q120 178 144 144" stroke="#d9deea" stroke-opacity=".7" stroke-width="2" fill="none"/><circle cx="120" cy="168" r="7" fill="url(#ga' . $t . ')" stroke="#fff" stroke-opacity=".5"/>';
     }
     // gloves and weapon (right fist at 182,228)
-    if (isset($gear['gloves'])) {
+    if (isset($gear['gloves']) && ($sp_ = fa_spec($gear['gloves']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $hands .= fa_draw('gloves', $sp_);
+    } elseif (isset($gear['gloves'])) {
         $a = 'url(#ga' . $gear['gloves']['tier'] . ')';
         $hands .= '<circle cx="58" cy="228" r="19" fill="' . $a . '"/><circle cx="182" cy="228" r="19" fill="' . $a . '"/>';
     }
-    if (isset($gear['weapon'])) {
+    if (isset($gear['weapon']) && ($sp_ = fa_spec($gear['weapon']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $hands .= '<g transform="translate(182 226) rotate(14)">' . fa_draw('weapon', $sp_) . '</g>';
+    } elseif (isset($gear['weapon'])) {
         $t = $gear['weapon']['tier'];
         $k = strtolower($gear['weapon']['name']);
         $a = 'url(#ga' . $t . ')';
@@ -167,7 +185,9 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
         $hands .= '<g transform="translate(182 226) rotate(14)">' . $wp . '</g>';
     }
     // helmet (drawn in head coordinates)
-    if (isset($gear['helmet'])) {
+    if (isset($gear['helmet']) && ($sp_ = fa_spec($gear['helmet']['key'])) !== null) {
+        $artDefs[$sp_[1]] = 1; $helm = fa_draw('helmet', $sp_);
+    } elseif (isset($gear['helmet'])) {
         $t = $gear['helmet']['tier'];
         $a = 'url(#ga' . $t . ')';
         if ($t === 0) {
@@ -181,6 +201,10 @@ function fito_dressup(string $svg, string $pose, bool $face, array $d): string
         $helm = $h;
     }
 
+    $ad = '';
+    foreach (array_keys($artDefs) as $code) { $ad .= fa_defs($code); }
+    $behind = $ad . $behind;
+    $hands = $shoulders . $hands;
     $svg = preg_replace('/<ellipse class="f-shadow"/', $behind . '<ellipse class="f-shadow"', $svg, 1);
     $svg = preg_replace('/<path d="M70 218L170 218/', $boots . '<path d="M70 218L170 218', $svg, 1);
     $svg = preg_replace('/<g class="f-armL">/', $armor . $charm . '<g class="f-armL">', $svg, 1);
@@ -214,6 +238,9 @@ function gear_icon(string $key, int $size = 56): string
         return '';
     }
     $slot = preg_replace('/^look_/', '', (string)$i[2]);
+    if (($sp_ = fa_spec($key)) !== null) {
+        return fa_icon($slot, $sp_, $size);
+    }
     [$a, $b] = fito_ramp(game_item_tier($key));
     $f = 'fill="' . $a . '" stroke="' . $b . '" stroke-width="2.5" stroke-linejoin="round"';
     $dk = 'fill="#1d2233"';

@@ -27,7 +27,7 @@ $drop = $roster ? ($cat[$roster[3]] ?? null) : null;
 $w = $u ? game_wallet((int)$u['id']) : null;
 $d = $u ? game_damage_for($u, 100) : null;
 $partic = $b ? (int)val('SELECT COUNT(*) FROM boss_hits WHERE boss_id = ? AND damage > 0', [$b['id']]) : 0;
-$poolNow = min(500, 100 + 20 * max(1, $partic));
+$poolNow = min(500, 200 + 30 * max(1, $partic));
 
 define('GAME_CSS', true);
 layout_header('Weekly boss', 'quests', ['index' => true, 'path' => 'boss', 'desc' => 'Every workout logged on ' . site_name() . ' damages the weekly boss. Join in, share the loot and level up together.']);

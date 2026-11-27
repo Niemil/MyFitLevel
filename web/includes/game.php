@@ -1241,7 +1241,7 @@ function game_boss_end(array $b, bool $killed): void
     $isTeam = $b['team_id'] !== null;
     $cm = (float)game_cfg('coin_mult') ?: 1.0;
     $diff = $isTeam ? game_raid_diff((string)$b['boss_key']) : 1.0;
-    $pool = $isTeam ? (int)round((40 + 15 * count($hits)) * $diff) : min(500, 100 + 20 * count($hits));
+    $pool = $isTeam ? (int)round((40 + 15 * count($hits)) * $diff) : min(500, 200 + 30 * count($hits));
     $pool = (int)round($pool * $cm);
     if (!$killed) {
         $pool = (int)round($pool * 0.25);

@@ -34,12 +34,23 @@ $owned = array_column($ownedRows, 'equipped', 'item');
 $dm = 0; $cn = 0;
 foreach ($tryKeys as $k) { if (strpos($k, 'look_') !== 0) { $dm += $cat[$k][3]; $cn += $cat[$k][4]; } }
 
-$buyCost = 0; $wearN = 0;
+// what a "buy and wear" would really do, item by item, with the coins you have
+$plan = []; $buyCost = 0; $left = (int)$w['coins']; $doKeys = [];
 foreach ($tryKeys as $k) {
-    $on = (int)val('SELECT equipped FROM game_items WHERE user_id = ? AND item = ?', [$uid, $k]);
-    $has = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $k]);
-    if (!$has && $cat[$k][5] > 0) { $buyCost += (int)$cat[$k][5]; } elseif ($has && !$on) { $wearN++; }
+    $i = $cat[$k];
+    $row = row('SELECT equipped FROM game_items WHERE user_id = ? AND item = ?', [$uid, $k]);
+    $why = '';
+    if ((int)$u['level'] < game_item_req($k)) { $why = 'needs level ' . game_item_req($k); }
+    elseif (($me = game_item_muscle_error($uid, $k)) !== null) { $why = 'needs ' . game_item_muscle_text($k); }
+    if ($row && (int)$row['equipped']) { $plan[$k] = ['worn', '']; }
+    elseif ($row) { $plan[$k] = $why === '' ? ['wear', ''] : ['blocked', $why]; if ($why === '') { $doKeys[] = $k; } }
+    elseif ($i[5] <= 0) { $plan[$k] = ['blocked', 'cannot be bought']; }
+    elseif ($why !== '') { $plan[$k] = ['blocked', $why]; }
+    elseif ($i[5] > $left) { $plan[$k] = ['blocked', 'not enough coins']; }
+    else { $plan[$k] = ['buy', '']; $left -= (int)$i[5]; $buyCost += (int)$i[5]; $doKeys[] = $k; }
 }
+$review = isset($_GET['review']) && $doKeys;
+$wearN = count(array_filter($plan, fn($p) => $p[0] === 'wear'));
 $stat = []; $looks = [];
 foreach ($cat as $k => $i) {
     $slot = (string)$i[2];
@@ -85,9 +96,22 @@ layout_header('Wardrobe', 'me');
       <span class="muted small">Trying on</span>
       <p class="small" style="margin:2px 0"><?= e(implode(', ', array_map(fn($k) => $cat[$k][0], $tryKeys))) ?></p>
       <?php if ($dm || $cn): ?><p class="small" style="margin:2px 0">Stat items tried would give <b>+<?= $dm ?>% damage<?= $cn ? ', +' . $cn . '% coins' : '' ?></b></p><?php endif; ?>
-      <?php if ($buyCost > 0 || $wearN > 0): ?>
-      <form method="post" action="<?= e(url('shop')) ?>" style="margin:6px 0"><?= csrf_field() ?><input type="hidden" name="do" value="wear_tried"><input type="hidden" name="keys" value="<?= e(implode(',', $tryKeys)) ?>"><input type="hidden" name="back" value="wardrobe"><input type="hidden" name="bs" value="<?= e($s) ?>"><input type="hidden" name="bt" value="<?= e(implode(',', $tryKeys)) ?>">
-        <button class="btn small" type="submit"><?= $buyCost > 0 ? 'Buy and wear all (' . number_format($buyCost) . ' coins)' : 'Wear all of this' ?></button></form>
+      <?php if ($review): ?>
+      <div class="wd-review">
+        <b>Please confirm</b>
+        <?php foreach ($plan as $k => [$st, $why]): ?>
+          <div class="wd-line <?= e($st) ?>"><span><?= e($cat[$k][0]) ?></span><em><?php
+            echo $st === 'buy' ? 'buy for ' . number_format((int)$cat[$k][5]) . ' coins' : ($st === 'wear' ? 'you own it, will wear' : ($st === 'worn' ? 'already worn' : 'will NOT be bought: ' . e($why)));
+          ?></em></div>
+        <?php endforeach; ?>
+        <p class="small" style="margin:6px 0"><?= $buyCost > 0 ? 'Total <b>' . number_format($buyCost) . ' coins</b>. You have ' . number_format((int)$w['coins']) . ', ' . number_format($left) . ' left after.' : 'Nothing to pay.' ?></p>
+        <form method="post" action="<?= e(url('shop')) ?>" style="display:inline"><?= csrf_field() ?><input type="hidden" name="do" value="wear_tried"><input type="hidden" name="keys" value="<?= e(implode(',', $doKeys)) ?>"><input type="hidden" name="back" value="wardrobe"><input type="hidden" name="bs" value="<?= e($s) ?>"><input type="hidden" name="bt" value="<?= e(implode(',', $tryKeys)) ?>">
+          <button class="btn small" type="submit">Confirm<?= $buyCost > 0 ? ' and pay ' . number_format($buyCost) : '' ?></button></form>
+        <a class="btn ghost small" href="<?= e(url('wardrobe?s=' . $s . '&t=' . implode(',', $tryKeys))) ?>">Cancel</a>
+      </div>
+      <?php elseif ($doKeys): ?>
+        <a class="btn small" href="<?= e(url('wardrobe?s=' . $s . '&t=' . implode(',', $tryKeys) . '&review=1')) ?>"><?= $buyCost > 0 ? 'Review and buy (' . number_format($buyCost) . ' coins)' : 'Wear all of this' ?></a>
+        <?php if (count(array_filter($plan, fn($p) => $p[0] === 'blocked'))): ?><small class="muted" style="display:block">Some items can not be bought yet, you will see which.</small><?php endif; ?>
       <?php endif; ?>
       <a class="btn ghost small" href="<?= e(url('wardrobe?s=' . $s)) ?>">Back to what I wear</a>
     <?php else: ?><span class="muted small">This is how you look now. Pick something and press Try on.</span><?php endif; ?>

@@ -109,7 +109,7 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
   <h2>Dress your hero</h2>
   <p class="sub">Earn coins from every workout and spend them on gear. Try some of the outfits, wings and auras.</p>
   <div class="dd-wrap">
-    <div class="dd-stage"><img id="ddimg" src="<?= e(url('fito-demo?o=cha&w=angel_gold&a=ring_gold')) ?>" width="300" height="300" alt="Your hero in a chosen outfit"></div>
+    <div class="dd-stage" id="ddstage"><div class="dd-layer on"></div><div class="dd-layer"></div><i class="dd-burst"></i></div>
     <div class="dd-pick" data-base="<?= e(url('fito-demo')) ?>">
       <h4>Outfit</h4>
       <div class="dd-row" data-k="o">
@@ -134,12 +134,17 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
         <button type="button" class="btn ghost small" data-v="glow_mythril">Glow</button>
       </div>
       <h4>Every muscle levels up</h4>
-      <div class="dd-mus">
+      <div class="dd-mus" id="ddmus">
         <?php foreach ([['Chest', 8], ['Back', 6], ['Shoulders', 5], ['Arms', 7], ['Core', 4], ['Legs', 9]] as [$mn, $ml]): ?>
-          <div><span><?= e($mn) ?></span><i><b style="width:<?= $ml * 10 ?>%"></b></i><em>Lv <?= $ml ?></em></div>
+          <div data-lv="<?= $ml ?>"><span><?= e($mn) ?></span><i><b></b></i><em>Lv <u><?= $ml ?></u></em><strong class="dd-lu">LEVEL UP</strong></div>
         <?php endforeach; ?>
       </div>
-      <p class="muted small" style="margin:.4rem 0 0">Train a muscle to level it up and unlock stronger gear for that body part. Train your whole body in a week for a damage bonus.</p>
+      <h4>Train every area consistently</h4>
+      <div class="dd-week" id="ddweek">
+        <div class="dd-dots"><?php foreach (['Chest', 'Back', 'Shoulders', 'Arms', 'Core', 'Legs'] as $mn): ?><span><?= e($mn) ?></span><?php endforeach; ?></div>
+        <b class="dd-bonus">+<u id="ddbonus">0</u>% boss damage</b>
+      </div>
+      <p class="muted small" style="margin:.4rem 0 0">Every muscle you train levels up and unlocks stronger gear for that body part. Train all areas, week after week, for the biggest damage bonus.</p>
       <?php if ($open): ?><p style="margin:.6rem 0 0"><a class="btn" href="<?= e(url('register')) ?>">Create a free account</a></p><?php endif; ?>
     </div>
   </div>

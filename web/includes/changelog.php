@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.66.1', '2026-11-27 23:40', 'Promo with more action', ['Improve The promo video now has a bright opening card, zoom punches, flashes on every cut, popping captions, whooshes and a progress bar.'], 'improve'],
     ['3.66.0', '2026-11-27 23:10', 'Fast vertical promo video', ['New A new 35 second vertical promo in dark mode with quick cuts, the light/dark switch, dress-up, muscle levels, wardrobe, boss and team chat.', 'Improve Admin members list now links to Give or take (coins, XP and items for any member).'], 'new'],
     ['3.65.0', '2026-11-27 22:40', 'Confirm before buying in the wardrobe', ['Fix The wardrobe now shows a confirm step before buying: every item you are trying, what will be bought and for how much, and which items will NOT be bought and why. Nothing is bought until you press Confirm.'], 'fix'],
     ['3.64.0', '2026-11-27 22:10', 'New tour video', ['New A new video tour of the site: feed, logging, quests, muscle levels, achievements, bosses, wardrobe, shop, teams, leaderboards and insights.'], 'new'],

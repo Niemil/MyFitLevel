@@ -10,7 +10,7 @@ return [
         'Muscle levels: every muscle group levels up from your training and shows on your character.',
         'Teams got a chat. The front page got a live dress-up and muscle demo.',
         'Boss prizes are bigger. Your workouts can also be shared with the linked SnakeDiet site.',
-        'A new 47 second promo video. The team gets every cosmetic for free, plus their own outfit sets.',
+        'A new 47 second promo video. The team gets every cosmetic for free, plus their own animated outfits, wings and auras. The front page demo shows every outfit members can buy.',
     ]],
     ['2026-11-26', 'Meet Fito', [
         'Fito, your training buddy: coaches you, trains along with you and makes the first workout easier.',

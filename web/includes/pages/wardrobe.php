@@ -122,8 +122,13 @@ layout_header('Wardrobe', 'me');
   <p class="sx-filter small" style="margin-top:0">
     <?php foreach ($slotNames as $k => $l): ?><a class="<?= $s === $k ? 'on' : '' ?>" href="<?= e(url('wardrobe?s=' . $k . ($tryKeys ? '&t=' . implode(',', $tryKeys) : ''))) ?>"><?= e($l) ?></a><?php endforeach; ?>
   </p>
+  <?php $teamLooks = array_filter($looks, fn($i, $k) => fa_staff_only($k), ARRAY_FILTER_USE_BOTH); $pubLooks = array_diff_key($looks, $teamLooks); ?>
+  <?php if ($teamLooks): ?>
+  <h3>Team only <span class="muted small">free for admins and moderators</span></h3>
+  <div class="gshop"><?php foreach ($teamLooks as $k => $i) { $tile($k); } ?></div>
+  <?php endif; ?>
   <h3>Look only</h3>
-  <div class="gshop"><?php foreach ($looks as $k => $i) { $tile($k); } if (!$looks) { echo '<p class="muted small">No look-only items for this slot yet.</p>'; } ?></div>
+  <div class="gshop"><?php foreach ($pubLooks as $k => $i) { $tile($k); } if (!$pubLooks) { echo '<p class="muted small">No look-only items for this slot yet.</p>'; } ?></div>
 </div>
 <div class="card">
   <h3>Gear with bonuses</h3>

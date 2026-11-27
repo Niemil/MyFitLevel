@@ -471,6 +471,12 @@ function fa_look_sets(): array
         'cru' => ['Crusader', ['weapon' => ['Crusader Sword', 'longsword', 'steel', 440], 'helmet' => ['Crusader Helm', 'barbute', 'steel', 340], 'armor' => ['Crusader Tabard', 'tabard', 'crimson', 520], 'gloves' => ['Crusader Gauntlets', 'gauntlet', 'steel', 220], 'boots' => ['Crusader Greaves', 'greaves', 'steel', 240]]],
         'adm' => ['Overseer (admin)', ['weapon' => ['Overseer Blade', 'glowsword', 'gold', 100], 'helmet' => ['Overseer Crown', 'crown', 'gold', 100], 'armor' => ['Overseer Robes', 'royal', 'royal', 100], 'gloves' => ['Overseer Gloves', 'glove', 'gold', 100], 'boots' => ['Overseer Boots', 'winged', 'gold', 100]]],
         'mod' => ['Warden (moderator)', ['weapon' => ['Warden Halberd', 'spear', 'frost', 100], 'helmet' => ['Warden Helm', 'winged', 'frost', 100], 'armor' => ['Warden Plate', 'plate', 'steel', 100], 'gloves' => ['Warden Gauntlets', 'plated', 'frost', 100], 'boots' => ['Warden Boots', 'winged', 'steel', 100]]],
+        'stf1' => ['Void Sovereign', ['weapon' => ['Void Scythe', 'scythe', 'storm', 100], 'helmet' => ['Void Crown', 'horned', 'storm', 100], 'armor' => ['Void Mail', 'scale', 'obsidian', 100], 'gloves' => ['Void Claws', 'claws', 'storm', 100], 'boots' => ['Void Treads', 'spiked', 'obsidian', 100]]],
+        'stf2' => ['Solar Phoenix', ['weapon' => ['Phoenix Blade', 'greatsword', 'lava', 100], 'helmet' => ['Phoenix Helm', 'winged', 'gold', 100], 'armor' => ['Phoenix Plate', 'scale', 'sun', 100], 'gloves' => ['Phoenix Talons', 'claws', 'lava', 100], 'boots' => ['Phoenix Greaves', 'winged', 'lava', 100]]],
+        'stf3' => ['Frost Emperor', ['weapon' => ['Emperor Blade', 'glowsword', 'mythril', 100], 'helmet' => ['Ice Crown', 'crown', 'frost', 100], 'armor' => ['Emperor Robes', 'royal', 'frost', 100], 'gloves' => ['Frost Mitts', 'plated', 'mythril', 100], 'boots' => ['Rime Boots', 'winged', 'frost', 100]]],
+        'stf4' => ['Emerald Warden', ['weapon' => ['Warden Trident', 'trident', 'emerald', 100], 'helmet' => ['Leaf Crown', 'leaf', 'emerald', 100], 'armor' => ['Warden Mail', 'elven', 'emerald', 100], 'gloves' => ['Warden Gloves', 'glove', 'emerald', 100], 'boots' => ['Warden Boots', 'winged', 'emerald', 100]]],
+        'stf5' => ['Crimson Tyrant', ['weapon' => ['Tyrant Blade', 'greatsword', 'crimson', 100], 'helmet' => ['Tyrant Horns', 'horned', 'crimson', 100], 'armor' => ['Tyrant Armor', 'samurai', 'crimson', 100], 'gloves' => ['Tyrant Spikes', 'spiked', 'crimson', 100], 'boots' => ['Tyrant Boots', 'spiked', 'crimson', 100]]],
+        'stf6' => ['Celestial', ['weapon' => ['Celestial Staff', 'staff', 'gold', 100], 'helmet' => ['Celestial Circlet', 'circlet', 'gold', 100], 'armor' => ['Celestial Robe', 'robe', 'royal', 100], 'gloves' => ['Celestial Gloves', 'glove', 'gold', 100], 'boots' => ['Celestial Boots', 'winged', 'gold', 100]]],
     ];
 }
 
@@ -502,7 +508,7 @@ function fa_look_extras(): array
             $o['look_charm_' . $d . '_' . $p] = [$ccol[$p] . ' ' . $charms[$d], 'charm', $d, $p, 200];
         }
     }
-    return $o;
+    return $o + fa_staff_extras();
 }
 
 /** Map of item key => [design, palette]. */
@@ -566,8 +572,21 @@ function fa_icon(string $slot, array $spec, int $size): string
 }
 
 
+/** Animated wings, auras and charms only admins and moderators can get: key => [name, slot, design, palette, price]. */
+function fa_staff_extras(): array
+{
+    $o = [];
+    $w = [['angel', 'royal', 'Seraph'], ['angel', 'mythril', 'Archangel'], ['dragon', 'lava', 'Inferno Dragon'], ['dragon', 'gold', 'Golden Dragon'], ['fairy', 'storm', 'Twilight Fairy'], ['fairy', 'mythril', 'Frost Fairy'], ['bat', 'storm', 'Void Bat'], ['bat', 'lava', 'Ember Bat']];
+    foreach ($w as [$d, $p, $n]) { $o['look_stfw_' . $d . '_' . $p] = [$n . ' Wings', 'wings', $d, $p, 100]; }
+    $a = [['ring', 'crimson', 'Crimson Halo'], ['ring', 'mythril', 'Ice Halo'], ['flame', 'storm', 'Violet Flame'], ['flame', 'gold', 'Golden Flame'], ['sparks', 'mythril', 'Frost Sparkle'], ['sparks', 'crimson', 'Ruby Sparkle'], ['glow', 'gold', 'Royal Glow'], ['glow', 'storm', 'Storm Glow']];
+    foreach ($a as [$d, $p, $n]) { $o['look_stfx_' . $d . '_' . $p] = [$n, 'aura', $d, $p, 100]; }
+    $c = [['gem', 'gold', 'Crown Jewel'], ['medal', 'royal', 'Order Medal'], ['scarf', 'storm', 'Storm Scarf']];
+    foreach ($c as [$d, $p, $n]) { $o['look_stfc_' . $d . '_' . $p] = [$n, 'charm', $d, $p, 100]; }
+    return $o;
+}
+
 /** Sets only admins and moderators can get. */
 function fa_staff_only(string $key): bool
 {
-    return str_starts_with($key, 'look_adm_') || str_starts_with($key, 'look_mod_');
+    return str_starts_with($key, 'look_adm_') || str_starts_with($key, 'look_mod_') || str_starts_with($key, 'look_stf');
 }

@@ -113,25 +113,23 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
     <div class="dd-pick" data-base="<?= e(url('fito-demo')) ?>">
       <h4>Outfit</h4>
       <div class="dd-row" data-k="o">
-        <?php foreach (['wan' => 'Wanderer', 'iro' => 'Ironclad', 'cha' => 'Champion', 'myt' => 'Mythril', 'sto' => 'Stormforged', 'sam' => 'Samurai', 'vik' => 'Viking', 'mag' => 'Archmage', 'nin' => 'Shadow', 'pir' => 'Pirate', 'dra' => 'Dragonscale', 'rea' => 'Reaper'] as $id => $nm): ?>
+        <?php $ddn = []; foreach (game_set_defs() as $sid => $sd) { $ddn[$sid] = $sd['name']; } foreach (fa_look_sets() as $sid => $sd) { if (!fa_staff_only('look_' . $sid . '_w')) { $ddn[$sid] = $sd[0]; } } foreach ($ddn as $id => $nm): ?>
           <button type="button" class="btn ghost small<?= $id === 'cha' ? ' on' : '' ?>" data-v="<?= $id ?>"><?= e($nm) ?></button>
         <?php endforeach; ?>
       </div>
       <h4>Wings</h4>
       <div class="dd-row" data-k="w">
         <button type="button" class="btn ghost small" data-v="">None</button>
-        <button type="button" class="btn ghost small on" data-v="angel_gold">Golden angel</button>
-        <button type="button" class="btn ghost small" data-v="bat_obsidian">Bat</button>
-        <button type="button" class="btn ghost small" data-v="dragon_crimson">Dragon</button>
-        <button type="button" class="btn ghost small" data-v="fairy_emerald">Fairy</button>
+        <?php $ddf = true; foreach (fa_look_extras() as $xk => $xi): if ($xi[1] !== 'wings' || fa_staff_only($xk)) { continue; } ?>
+        <button type="button" class="btn ghost small<?= $xk === 'look_wings_angel_gold' ? ' on' : '' ?>" data-v="<?= e(substr($xk, 11)) ?>"><?= e($xi[0]) ?></button>
+        <?php endforeach; ?>
       </div>
       <h4>Aura</h4>
       <div class="dd-row" data-k="a">
         <button type="button" class="btn ghost small" data-v="">None</button>
-        <button type="button" class="btn ghost small on" data-v="ring_gold">Halo ring</button>
-        <button type="button" class="btn ghost small" data-v="flame_lava">Flame</button>
-        <button type="button" class="btn ghost small" data-v="sparks_sakura">Sparkle</button>
-        <button type="button" class="btn ghost small" data-v="glow_mythril">Glow</button>
+        <?php foreach (fa_look_extras() as $xk => $xi): if ($xi[1] !== 'aura' || fa_staff_only($xk)) { continue; } ?>
+        <button type="button" class="btn ghost small<?= $xk === 'look_aura_ring_gold' ? ' on' : '' ?>" data-v="<?= e(substr($xk, 10)) ?>"><?= e($xi[0]) ?></button>
+        <?php endforeach; ?>
       </div>
       <h4>Every muscle levels up</h4>
       <div class="dd-mus" id="ddmus">

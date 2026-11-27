@@ -185,6 +185,9 @@ function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, strin
                 : (str_contains($names, 'cycl') || str_contains($names, 'bike') ? 'cycle' : 'cardio'));
         }
     }
+    if (strtotime((string)$w['performed_at']) < time() - 58 * 86400) {
+        return 'skipped';   // SnakeDiet accepts workouts up to 60 days old
+    }
     $start = min(strtotime((string)$w['performed_at']), time() - 60);
     $payload = ['id' => 'mfl-' . $uid . '-' . $wid, 'source' => 'myfitlevel.com', 'event' => $event,
         'title' => trim((string)$w['title']) !== '' ? mb_substr((string)$w['title'], 0, 80) : 'Workout',
@@ -203,6 +206,9 @@ function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, strin
     }
     $ok = webhook_post('https://snakediet.org/api/v1/workouts', $payload, $key, $timeout, $uid);
     $GLOBALS['webhook_err'] = $ok ? '' : ('HTTP ' . (int)($GLOBALS['webhook_last']['code'] ?? 0) . ' ' . mb_substr((string)($GLOBALS['webhook_last']['raw'] ?? '') ?: (string)($GLOBALS['webhook_last']['error'] ?? ''), 0, 300) . ' [' . (string)($GLOBALS['webhook_last']['url'] ?? '') . ']');
+    if (!$ok && (string)($GLOBALS['webhook_last']['body']['error'] ?? '') === 'too_old') {
+        return 'skipped';   // not an error
+    }
     return $ok ? (!empty($GLOBALS['webhook_last']['body']['duplicate']) ? 'duplicate' : 'sent') : 'failed';
 }
 
@@ -217,7 +223,7 @@ function webhook_resend_snakediet(int $uid, int $days = 7): array
     }
     inbound_ensure();
     $ws = rows('SELECT id, title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE user_id = ? AND performed_at >= ? AND id NOT IN (SELECT workout_id FROM inbound_workouts WHERE user_id = ?) ORDER BY performed_at LIMIT 25', [$uid, date('Y-m-d H:i:s', time() - $days * 86400), $uid]);
-    $res = ['sent' => 0, 'duplicate' => 0, 'failed' => 0];
+    $res = ['sent' => 0, 'duplicate' => 0, 'failed' => 0, 'skipped' => 0];
     foreach ($ws as $w) {
         $r = webhook_snakediet_workout($uid, (int)$w['id'], $w, $u, $url, $key, 8);
         $res[$r]++;

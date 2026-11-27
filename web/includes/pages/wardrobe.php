@@ -46,8 +46,8 @@ foreach ($tryKeys as $k) {
     elseif ($row) { $plan[$k] = $why === '' ? ['wear', ''] : ['blocked', $why]; if ($why === '') { $doKeys[] = $k; } }
     elseif ($i[5] <= 0) { $plan[$k] = ['blocked', 'cannot be bought']; }
     elseif ($why !== '') { $plan[$k] = ['blocked', $why]; }
-    elseif ($i[5] > $left) { $plan[$k] = ['blocked', 'not enough coins']; }
-    else { $plan[$k] = ['buy', '']; $left -= (int)$i[5]; $buyCost += (int)$i[5]; $doKeys[] = $k; }
+    elseif (($pc = game_price_for($u, $k, $cat) < 0 ? 0 : (int)$i[5]) > $left) { $plan[$k] = ['blocked', 'not enough coins']; }
+    else { $plan[$k] = ['buy', '']; $left -= $pc; $buyCost += $pc; $doKeys[] = $k; }
 }
 $review = isset($_GET['review']) && $doKeys;
 $wearN = count(array_filter($plan, fn($p) => $p[0] === 'wear'));
@@ -101,7 +101,7 @@ layout_header('Wardrobe', 'me');
         <b>Please confirm</b>
         <?php foreach ($plan as $k => [$st, $why]): ?>
           <div class="wd-line <?= e($st) ?>"><span><?= e($cat[$k][0]) ?></span><em><?php
-            echo $st === 'buy' ? 'buy for ' . number_format((int)$cat[$k][5]) . ' coins' : ($st === 'wear' ? 'you own it, will wear' : ($st === 'worn' ? 'already worn' : 'will NOT be bought: ' . e($why)));
+            echo $st === 'buy' ? (game_price_for($u, $k, $cat) < 0 ? 'free for staff' : 'buy for ' . number_format((int)$cat[$k][5]) . ' coins') : ($st === 'wear' ? 'you own it, will wear' : ($st === 'worn' ? 'already worn' : 'will NOT be bought: ' . e($why)));
           ?></em></div>
         <?php endforeach; ?>
         <p class="small" style="margin:6px 0"><?= $buyCost > 0 ? 'Total <b>' . number_format($buyCost) . ' coins</b>. You have ' . number_format((int)$w['coins']) . ', ' . number_format($left) . ' left after.' : 'Nothing to pay.' ?></p>

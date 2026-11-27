@@ -1845,3 +1845,11 @@ function game_admin_view(): void
 </div>
 <?php
 }
+
+
+/** What this member pays for an item. Admins and moderators get every look-only (cosmetic) item for free. */
+function game_price_for(array $u, string $key, array $cat): int
+{
+    $p = (int)($cat[$key][5] ?? 0);
+    return ($p > 0 && is_staff($u) && str_starts_with((string)$cat[$key][2], 'look_')) ? -1 : $p;
+}

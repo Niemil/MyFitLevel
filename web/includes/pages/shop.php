@@ -13,6 +13,7 @@ if (is_post()) {
     $key = (string)($_POST['item'] ?? '');
     $w = game_wallet($uid);
     if ($do === 'buy' && isset($cat[$key]) && $cat[$key][5] > 0) {
+        $cost = game_price_for($u, $key, $cat) < 0 ? 0 : (int)$cat[$key][5];
         $own = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key]);
         if ($own) {
             flash('You already own that.', 'err');
@@ -20,11 +21,11 @@ if (is_post()) {
             flash('You need level ' . game_item_req($key) . ' for that.', 'err');
         } elseif (($me = game_item_muscle_error($uid, $key)) !== null) {
             flash($me, 'err');
-        } elseif ((int)$w['coins'] < $cat[$key][5]) {
+        } elseif ((int)$w['coins'] < $cost) {
             flash('Not enough coins yet. Keep training!', 'err');
         } else {
-            game_coins_add($uid, -$cat[$key][5], 'shop', $cat[$key][0]);
-            game_give_item($uid, $key, 'shop');
+            if ($cost > 0) { game_coins_add($uid, -$cost, 'shop', $cat[$key][0]); }
+            game_give_item($uid, $key, $cost > 0 ? 'shop' : 'staff');
             flash('Bought ' . trim($cat[$key][1] . ' ' . $cat[$key][0]) . '.');
         }
     } elseif ($do === 'equip' && isset($cat[$key])) {
@@ -47,12 +48,13 @@ if (is_post()) {
             $has = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $k]);
             if (!$has) {
                 $w = game_wallet($uid);
-                if ($cat[$k][5] <= 0 || (int)$u['level'] < game_item_req($k) || game_item_muscle_error($uid, $k) !== null || (int)$w['coins'] < $cat[$k][5]) {
+                $cost = game_price_for($u, $k, $cat) < 0 ? 0 : (int)$cat[$k][5];
+                if ($cat[$k][5] <= 0 || (int)$u['level'] < game_item_req($k) || game_item_muscle_error($uid, $k) !== null || (int)$w['coins'] < $cost) {
                     $skipped[] = $cat[$k][0];
                     continue;
                 }
-                game_coins_add($uid, -$cat[$k][5], 'shop', $cat[$k][0]);
-                game_give_item($uid, $k, 'shop');
+                if ($cost > 0) { game_coins_add($uid, -$cost, 'shop', $cat[$k][0]); }
+                game_give_item($uid, $k, $cost > 0 ? 'shop' : 'staff');
                 $bought++;
             } elseif ((int)$u['level'] < game_item_req($k) || game_item_muscle_error($uid, $k) !== null) {
                 $skipped[] = $cat[$k][0];

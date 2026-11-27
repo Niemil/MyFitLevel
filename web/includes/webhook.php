@@ -21,7 +21,7 @@ function webhook_resolve(string $url): ?array
     return [$host, $ip];
 }
 
-function webhook_post(string $url, array $payload, string $key = ''): bool
+function webhook_post(string $url, array $payload, string $key = '', int $timeout = 3): bool
 {
     $r = webhook_resolve($url);
     if (!$r || !function_exists('curl_init')) {
@@ -31,13 +31,37 @@ function webhook_post(string $url, array $payload, string $key = ''): bool
     curl_setopt_array($ch, [
         CURLOPT_POST => true, CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
         CURLOPT_HTTPHEADER => array_filter(['Content-Type: application/json', 'User-Agent: MyFitLevel-webhook', $key !== '' ? 'Authorization: Bearer ' . $key : '']),
-        CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 3, CURLOPT_CONNECTTIMEOUT => 2, CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => $timeout, CURLOPT_CONNECTTIMEOUT => 2, CURLOPT_FOLLOWLOCATION => false,
         CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, CURLOPT_RESOLVE => [$r[0] . ':443:' . $r[1]],
     ]);
-    curl_exec($ch);
+    $body = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    $GLOBALS['webhook_last'] = ['code' => $code, 'body' => is_string($body) ? (json_decode($body, true) ?: []) : []];
     return $code >= 200 && $code < 300;
+}
+
+/** One object per working set, weight always in kg: [{"exercise","reps","kg"}] or [{"exercise","seconds","kg"}]. */
+function webhook_sets(int $wid): array
+{
+    $out = [];
+    $rs = rows('SELECT s.weight_kg, s.reps, s.duration_sec, s.distance_m, e.name FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.workout_id = ? AND s.is_warmup = 0 ORDER BY s.id', [$wid]);
+    foreach ($rs as $r) {
+        $o = ['exercise' => mb_substr((string)$r['name'], 0, 80)];
+        if ((int)$r['reps'] > 0) {
+            $o['reps'] = (int)$r['reps'];
+        } elseif ((int)$r['duration_sec'] > 0) {
+            $o['seconds'] = (int)$r['duration_sec'];
+        } else {
+            $o['reps'] = 1;
+        }
+        $o['kg'] = $r['weight_kg'] !== null ? round((float)$r['weight_kg'], 2) : 0;
+        $out[] = $o;
+        if (count($out) >= 300) {
+            break;
+        }
+    }
+    return $out;
 }
 
 /** One short line per exercise, e.g. "Bench press — 4×8 @ 80 kg" (max 40 lines, 140 chars each). */
@@ -92,7 +116,7 @@ function webhook_is_snakediet(string $url): bool
     return $h === 'snakediet.org' || $h === 'www.snakediet.org';
 }
 
-function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, string $url, string $key): void
+function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, string $url, string $key, int $timeout = 3): string
 {
     $dur = (int)($w['duration_sec'] ?? 0);
     $minutes = $dur > 0 ? (int)round($dur / 60) : (int)round(max(10, (int)$w['set_count'] * 2.5));
@@ -115,13 +139,38 @@ function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, strin
     $start = min(strtotime((string)$w['performed_at']), time() - 60);
     $payload = ['id' => 'mfl-' . $uid . '-' . $wid, 'source' => 'myfitlevel.com',
         'title' => trim((string)$w['title']) !== '' ? mb_substr((string)$w['title'], 0, 80) : 'Workout',
-        'type' => $type, 'minutes' => $minutes, 'start' => date('c', $start)];
-    $details = webhook_details($wid, (string)($u['unit'] ?? 'kg'));
-    if ($details) {
-        $payload['details'] = array_slice($details, 0, 60);
+        'type' => $type, 'start' => date('c', $start)];
+    $sets = webhook_sets($wid);
+    if ($dur > 0 || !$sets) {
+        $payload['minutes'] = $minutes;   // the real length when we have it
     }
-    $endpoint = 'https://snakediet.org/api/v1/workouts';
-    webhook_post($endpoint, $payload, $key);
+    if ($sets) {
+        $payload['sets'] = $sets;   // no kcal: SnakeDiet counts it from the sets
+    } else {
+        $details = webhook_details($wid, (string)($u['unit'] ?? 'kg'));
+        if ($details) {
+            $payload['details'] = array_slice($details, 0, 60);
+        }
+    }
+    $ok = webhook_post('https://snakediet.org/api/v1/workouts', $payload, $key, $timeout);
+    return $ok ? (!empty($GLOBALS['webhook_last']['body']['duplicate']) ? 'duplicate' : 'sent') : 'failed';
+}
+
+/** Sends the last N days of workouts again (same ids, SnakeDiet skips ones it already has). Returns [sent, duplicate, failed]. */
+function webhook_resend_snakediet(int $uid, int $days = 7): array
+{
+    $url = (string)setting('webhook:' . $uid, '');
+    $key = (string)setting('webhook_key:' . $uid, '');
+    $u = row('SELECT * FROM users WHERE id = ?', [$uid]);
+    if (!$u || !webhook_is_snakediet($url) || $key === '') {
+        return [0, 0, 0];
+    }
+    $ws = rows('SELECT id, title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE user_id = ? AND performed_at >= ? ORDER BY performed_at LIMIT 25', [$uid, date('Y-m-d H:i:s', time() - $days * 86400)]);
+    $res = ['sent' => 0, 'duplicate' => 0, 'failed' => 0];
+    foreach ($ws as $w) {
+        $res[webhook_snakediet_workout($uid, (int)$w['id'], $w, $u, $url, $key, 8)]++;
+    }
+    return [$res['sent'], $res['duplicate'], $res['failed']];
 }
 
 function webhook_fire(int $uid, int $wid, int $points, array $awards): void

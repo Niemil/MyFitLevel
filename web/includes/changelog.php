@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.47.4', '2026-11-27 09:10', 'Sets to SnakeDiet and resend', ['Improve Workouts sent to SnakeDiet now include every set (exercise, reps or seconds, and weight in kg), so SnakeDiet can count calories from the real load.', 'New Connect page: a "Resend last 7 days to SnakeDiet" button for when you set up the link after training. Workouts SnakeDiet already has are skipped.'], 'new'],
     ['3.47.3', '2026-11-27 08:40', 'Workouts go to SnakeDiet as workouts', ['Improve If your webhook points at SnakeDiet, each finished workout is now sent as a real workout (time, type and one line per exercise), so SnakeDiet counts calories and KTN itself. It is no longer posted as a feed message there.'], 'improve'],
     ['3.47.2', '2026-11-27 07:00', 'Workout details in SnakeDiet posts', ['New When a finished workout is posted to SnakeDiet (or another site), it now includes one line per exercise, like "Bench press — 4×8 @ 80 kg", in your own unit.'], 'new'],
     ['3.47.1', '2026-11-27 05:50', 'Shop preview fix', ['Fix Name effect previews in the Shop were too big on phones and overlapped their labels. They now fit on one line.'], 'fix'],

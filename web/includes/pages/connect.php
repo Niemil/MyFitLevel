@@ -25,6 +25,14 @@ if ($u && is_post()) {
             set_setting('webhook:' . $uid, $url);
             flash('Saved. You get a message each time you finish a workout.');
         }
+    } elseif ($do === 'hook_resend') {
+        if (!rate_ok('hookresend:' . $uid, 3, 600)) {
+            flash('Wait a few minutes before sending again.', 'err');
+        } else {
+            rate_hit('hookresend:' . $uid);
+            [$n, $d, $x] = webhook_resend_snakediet($uid, 7);
+            flash($n + $d + $x === 0 ? 'Nothing to send. Save a SnakeDiet address and key first, and log a workout in the last 7 days.' : 'Sent ' . $n . ' workout' . ($n === 1 ? '' : 's') . ($d ? ', ' . $d . ' already there' : '') . ($x ? ', ' . $x . ' failed' : '') . '.', $x ? 'err' : 'ok');
+        }
     } elseif ($do === 'hook_test') {
         $url = (string)setting('webhook:' . $uid, '');
         if ($url !== '' && rate_ok('hooktest:' . $uid, 5, 600)) {
@@ -66,7 +74,8 @@ layout_header('Connect & automate', '');
     <label>Webhook address <input type="url" name="url" value="<?= e($hook) ?>" placeholder="https://discord.com/api/webhooks/…" maxlength="400"></label>
     <label>Key for that site (only if it asks for one, e.g. SnakeDiet) <input type="password" name="key" autocomplete="off" placeholder="<?= setting('webhook_key:' . $uid, '') !== '' ? 'saved (type a new one to replace)' : 'optional' ?>" maxlength="120"></label>
     <div class="row" style="gap:.5rem"><button class="btn" type="submit">Save</button>
-    <?php if ($hook): ?><button class="btn ghost" name="do" value="hook_test" type="submit">Send a test</button><?php endif; ?></div>
+    <?php if ($hook): ?><button class="btn ghost" name="do" value="hook_test" type="submit">Send a test</button><?php endif; ?>
+    <?php if (webhook_is_snakediet($hook)): ?><button class="btn ghost" name="do" value="hook_resend" type="submit">Resend last 7 days to SnakeDiet</button><?php endif; ?></div>
     <p class="muted small">Leave empty and save to remove it. Only https addresses on the public internet work.</p></form>
   <?php else: ?><p><a href="<?= e(url('login')) ?>">Log in</a> to set this up.</p><?php endif; ?></div>
 

@@ -269,18 +269,131 @@ function webhook_is_inbound(int $wid): bool
     }
 }
 
-/** Finds an exercise from free text ("Bench press"), or null. */
+/** Lowercase words of an exercise name without grip/position noise, so "Barbell Bench Press - Medium Grip" ~ "Barbell Bench Press". */
+function inbound_tokens(string $name): array
+{
+    $n = mb_strtolower($name);
+    $n = preg_replace('/\s+[-–—]\s+.*$/u', '', $n) ?? $n;          // "... - Medium Grip" -> "..."
+    $n = preg_replace('/\([^)]*\)/u', ' ', $n) ?? $n;              // "(machine)"
+    $n = str_replace(['-', '_', '/', ','], ' ', $n);
+    $n = preg_replace('/[^a-z0-9åäö ]+/u', '', $n) ?? $n;
+    $syn = ['biceps' => 'bicep', 'triceps' => 'tricep', 'pushups' => 'push up', 'pushup' => 'push up', 'pullups' => 'pull up', 'pullup' => 'pull up',
+            'chinups' => 'chin up', 'chinup' => 'chin up', 'situps' => 'sit up', 'situp' => 'sit up', 'dumbbells' => 'dumbbell', 'barbells' => 'barbell',
+            'db' => 'dumbbell', 'bb' => 'barbell', 'kb' => 'kettlebell', 'ez' => 'ez', 'lunges' => 'lunge', 'squats' => 'squat', 'rows' => 'row',
+            'curls' => 'curl', 'presses' => 'press', 'raises' => 'raise', 'extensions' => 'extension', 'flyes' => 'fly', 'flys' => 'fly', 'dips' => 'dip'];
+    $n = str_replace(['shoulder press', 'military press'], 'overhead press', $n);
+    $stop = ['bicep', 'bent', 'over', 'medium', 'wide', 'narrow', 'grip', 'with', 'the', 'a', 'on', 'to', 'of', 'and', 'alternating', 'one', 'arm', 'single', 'exercise'];
+    $out = [];
+    foreach (preg_split('/\s+/', trim($n)) ?: [] as $w) {
+        if ($w === '') {
+            continue;
+        }
+        foreach (explode(' ', $syn[$w] ?? $w) as $x) {
+            if (!in_array($x, $stop, true) && $x !== '') {
+                $out[$x] = true;
+            }
+        }
+    }
+    return array_keys($out);
+}
+
+/** Finds an exercise from a free-text name ("Bench press", "Barbell Bench Press - Medium Grip"), or null. */
 function inbound_find_exercise(string $name): ?array
 {
+    static $idx = null;
     $q = strtolower(trim($name));
     if ($q === '') {
         return null;
     }
     $r = row('SELECT id, name FROM exercises WHERE active = 1 AND LOWER(name) = ?', [$q]);
-    if (!$r) {
-        $r = row('SELECT id, name FROM exercises WHERE active = 1 AND LOWER(name) LIKE ? ORDER BY LENGTH(name) LIMIT 1', ['%' . str_replace(['%', '_'], '', $q) . '%']);
+    if ($r) {
+        return $r;
     }
-    return $r ?: null;
+    if ($idx === null) {
+        $idx = [];
+        foreach (rows("SELECT id, name FROM exercises WHERE active = 1 AND slug <> 'workout-from-snakediet'") as $e) {
+            $idx[] = ['id' => (int)$e['id'], 'name' => (string)$e['name'], 't' => inbound_tokens((string)$e['name'])];
+        }
+    }
+    $eqWords = ['barbell', 'dumbbell', 'kettlebell', 'cable', 'machine', 'smith', 'ez', 'band', 'bodyweight'];
+    $t = inbound_tokens($name);
+    $tc = array_values(array_diff($t, $eqWords));   // the movement itself
+    $te = array_values(array_intersect($t, $eqWords));
+    if (!$tc) {
+        return null;
+    }
+    $best = null;
+    $bestScore = 0.0;
+    foreach ($idx as $e) {
+        $ec = array_values(array_diff($e['t'], $eqWords));
+        $ee = array_values(array_intersect($e['t'], $eqWords));
+        if ($te && $ee && !array_intersect($te, $ee)) {
+            continue;   // barbell vs dumbbell: not the same exercise
+        }
+        $inter = count(array_intersect($tc, $ec));
+        if ($inter === 0) {
+            continue;
+        }
+        $score = $inter / count(array_unique(array_merge($tc, $ec)));
+        if ($inter === count($tc) && count($ec) - $inter <= 1) {
+            $score = max($score, 0.6);   // "Squat" ~ "Back Squat"
+        }
+        if ($te && array_intersect($te, $ee)) {
+            $score += 0.05;   // same equipment is a tie-breaker
+        }
+        if ($score > $bestScore + 0.0001 || (abs($score - $bestScore) < 0.0001 && $best && mb_strlen($e['name']) < mb_strlen($best['name']))) {
+            $bestScore = $score;
+            $best = $e;
+        }
+    }
+    return ($best && $bestScore >= 0.6) ? ['id' => $best['id'], 'name' => $best['name']] : null;
+}
+
+/** Turns the "sets" list [{exercise, reps|seconds, kg}] into save_workout exercises. Names that match nothing are returned too. */
+function inbound_parse_sets(array $sets): array
+{
+    $by = [];
+    $missed = [];
+    foreach (array_slice($sets, 0, 300) as $s) {
+        if (!is_array($s)) {
+            continue;
+        }
+        $name = trim((string)($s['exercise'] ?? ''));
+        if ($name === '') {
+            continue;
+        }
+        $key = mb_strtolower($name);
+        if (!isset($by[$key])) {
+            $by[$key] = ['name' => $name, 'ex' => inbound_find_exercise($name), 'sets' => []];
+        }
+        $ex = $by[$key]['ex'];
+        if (!$ex) {
+            $missed[$name] = true;
+            continue;
+        }
+        $kind = (string)val('SELECT kind FROM exercises WHERE id = ?', [$ex['id']]);
+        $reps = (int)round((float)($s['reps'] ?? 0));
+        $sec = (int)round((float)($s['seconds'] ?? 0));
+        $kg = max(0.0, (float)($s['kg'] ?? 0));
+        if (in_array($kind, ['weight', 'bodyweight'], true)) {
+            if ($reps < 1) {
+                continue;
+            }
+            $by[$key]['sets'][] = ['w' => round($kg, 2), 'r' => $reps, 't' => 0, 'd' => 0, 'wu' => 0];
+        } else {
+            if ($sec < 1) {
+                continue;
+            }
+            $by[$key]['sets'][] = ['w' => 0, 'r' => 0, 't' => $sec, 'd' => 0, 'wu' => 0];
+        }
+    }
+    $out = [];
+    foreach ($by as $g) {
+        if ($g['ex'] && $g['sets']) {
+            $out[] = ['id' => $g['ex']['id'], 'sets' => array_slice($g['sets'], 0, 40)];
+        }
+    }
+    return [$out, array_keys($missed)];
 }
 
 /** Turns lines like "Bench press — 3×8 @ 80 kg, 1×6 @ 85 kg" into save_workout exercises. Unknown exercises are skipped. */
@@ -391,7 +504,18 @@ function inbound_workout(array $user, array $b): array
     $GLOBALS['inbound_saving'] = true;   // webhook_fire must not send this workout back out
     try {
     $res = null;
-    $parsed = $type === 'gym' || $type === 'hiit' || $type === 'sport' || $type === 'other' ? inbound_parse_details($details, 'kg') : [];
+    $parsed = [];
+    $missed = [];
+    if (is_array($b['sets'] ?? null) && $b['sets']) {
+        [$parsed, $missed] = inbound_parse_sets($b['sets']);   // exact sets win over the text lines
+    } elseif ($type === 'gym' || $type === 'hiit' || $type === 'sport' || $type === 'other') {
+        $parsed = inbound_parse_details($details, 'kg');
+    }
+    if ($missed) {
+        // so SnakeDiet and Emil can build a name mapping: shown in the Connect log
+        webhook_log_add($uid, 'exercise names not matched (' . ($src !== '' ? $src : 'other site') . ')', 200, 'Not matched: ' . implode('; ', array_slice($missed, 0, 20)), 'IN');
+        $input['notes'] = mb_substr($input['notes'] . ' · Also: ' . implode(', ', array_slice($missed, 0, 8)), 0, 1000);
+    }
     if ($parsed) {
         $res = save_workout($apiUser, $input + ['ex' => $parsed]);
         if (!$res['ok']) {

@@ -295,22 +295,20 @@ layout_header('Admin');
   <div><b><?= $active7 ?></b><span>active this week</span></div>
   <div><b><?= $totalW ?></b><span>workouts</span></div>
 </div>
-<div class="tabs admintabs">
-  <a class="<?= $tab === 'users' ? 'on' : '' ?>" href="<?= e(url('admin?tab=users')) ?>">Users</a>
-  <a class="<?= $tab === 'exercises' ? 'on' : '' ?>" href="<?= e(url('admin?tab=exercises')) ?>">Exercises</a>
-  <a class="<?= $tab === 'site' ? 'on' : '' ?>" href="<?= e(url('admin?tab=site')) ?>">Site</a>
-  <a class="<?= $tab === 'fito' ? 'on' : '' ?>" href="<?= e(url('admin?tab=fito')) ?>">Fitocracy data</a>
- <a class="<?= $tab === 'events' ? 'on' : '' ?>" href="<?= e(url('admin?tab=events')) ?>">Events</a>
-  <a href="<?= e(url('blog/admin')) ?>">Blog</a>
-  <a class="<?= $tab === 'stats' ? 'on' : '' ?>" href="<?= e(url('admin?tab=stats')) ?>">Stats</a>
-  <a class="<?= $tab === 'game' ? 'on' : '' ?>" href="<?= e(url('admin?tab=game')) ?>">Game</a>
-  <a class="<?= $tab === 'tools' ? 'on' : '' ?>" href="<?= e(url('admin?tab=tools')) ?>">Tools</a>
-  <a href="<?= e(url('admin/logs')) ?>">Logs</a>
-  <a class="<?= $tab === 'email' ? 'on' : '' ?>" href="<?= e(url('admin?tab=email')) ?>">Email</a>
-  <?php ql_ensure_tables(); $fbNew = (int)val("SELECT COUNT(*) FROM feedback WHERE status = 'new'"); ?>
-  <a class="<?= $tab === 'feedback' ? 'on' : '' ?>" href="<?= e(url('admin?tab=feedback')) ?>">Feedback<?= $fbNew ? ' · ' . $fbNew : '' ?></a>
-  <?php if (function_exists('calib_view')): ?><a class="<?= $tab === 'calib' ? 'on' : '' ?>" href="<?= e(url('admin?tab=calib')) ?>">Calibration</a><?php endif; ?>
-</div>
+<?php ql_ensure_tables(); $fbNew = (int)val("SELECT COUNT(*) FROM feedback WHERE status = 'new'");
+$nav = [
+    'People' => [['users', 'Members', 'admin?tab=users'], ['feedback', 'Feedback' . ($fbNew ? ' (' . $fbNew . ')' : ''), 'admin?tab=feedback'], ['email', 'Email', 'admin?tab=email']],
+    'Content' => [['exercises', 'Exercises', 'admin?tab=exercises'], ['events', 'Events', 'admin?tab=events'], ['', 'Blog', 'blog/admin'], ['game', 'Game', 'admin?tab=game'], ['fito', 'Fitocracy data', 'admin?tab=fito']],
+    'Insights' => [['stats', 'Traffic and visitors', 'admin?tab=stats&sub=traffic'], ['', 'Site log', 'admin/logs']],
+    'Site' => array_merge([['site', 'Settings', 'admin?tab=site'], ['tools', 'Tools', 'admin?tab=tools']], function_exists('calib_view') ? [['calib', 'Calibration', 'admin?tab=calib']] : []),
+]; ?>
+<nav class="adminnav" aria-label="Admin">
+  <?php foreach ($nav as $grp => $items): ?>
+  <div><h4><?= e($grp) ?></h4>
+    <?php foreach ($items as [$t, $lbl, $href]): ?><a class="<?= $t !== '' && $tab === $t ? 'on' : '' ?>" href="<?= e(url($href)) ?>"><?= e($lbl) ?></a><?php endforeach; ?>
+  </div>
+  <?php endforeach; ?>
+</nav>
 
 <?php if ($tab === 'users'):
     $list = rows('SELECT * FROM users ORDER BY id DESC LIMIT 200'); ?>

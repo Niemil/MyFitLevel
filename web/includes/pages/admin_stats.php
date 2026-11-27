@@ -25,11 +25,33 @@ function stats_src_sql(string $p = ''): string
     return "CASE WHEN {$p}ref_type='direct' THEN 'Direct / unknown' WHEN {$p}ref_type='internal' THEN 'Own site' WHEN {$p}ref_type='campaign' THEN CONCAT('Campaign: ', {$p}utm) ELSE {$p}ref_host END";
 }
 
+/** SQL expression: 0-100 likelihood that a visit is a real person (VPN/IP ignored; uses JS, interaction, time on page, headers). */
+function stats_score_sql(string $p = ''): string
+{
+    return "(CASE WHEN {$p}bot <> '' THEN 1 ELSE LEAST(99, GREATEST(2, 30 + IF({$p}human = 1, 45, 0) + IF({$p}js = 1, 15, -15)"
+        . " + IF({$p}dwell >= 5, 10, IF({$p}dwell >= 2, 5, 0)) + IF({$p}lang <> '', 5, -10) + IF({$p}device = '' OR {$p}browser = '', -10, 0)"
+        . " + IF({$p}ref_type IN ('search','social','other','campaign'), 5, 0))) END)";
+}
+
+/** Human-readable reasons behind a visit's score. */
+function stats_score_reasons(array $r): string
+{
+    if ($r['bot'] !== '') {
+        return 'Known bot: ' . $r['bot'];
+    }
+    $o = [];
+    $o[] = $r['human'] ? 'interacted' : ($r['js'] ? 'JS on' : 'no JS');
+    if ((int)$r['dwell'] >= 5) { $o[] = (int)$r['dwell'] . 's on page'; }
+    if ($r['lang'] === '') { $o[] = 'no language header'; }
+    if ($r['device'] === '' || $r['browser'] === '') { $o[] = 'unknown browser'; }
+    return implode(', ', $o);
+}
+
 function stats_admin_view(): void
 {
     stats_ensure();
     $days = in_array((int)($_GET['days'] ?? 7), [1, 7, 30, 90], true) ? (int)($_GET['days'] ?? 7) : 7;
-    $sub = in_array($_GET['sub'] ?? '', ['overview', 'sources', 'pages', 'audience', 'privacy'], true) ? $_GET['sub'] : 'overview';
+    $sub = in_array($_GET['sub'] ?? '', ['overview', 'traffic', 'sources', 'pages', 'audience', 'privacy'], true) ? $_GET['sub'] : 'overview';
     $from = date('Y-m-d', strtotime('-' . ($days - 1) . ' days'));
     $W = 'day >= ?';
     $P = [$from];
@@ -65,7 +87,7 @@ function stats_admin_view(): void
 <div class="sx">
 <div class="sx-top">
   <div class="sx-tabs">
-    <?php foreach (['overview' => 'Overview', 'sources' => 'Sources', 'pages' => 'Pages', 'audience' => 'Audience', 'privacy' => 'Privacy & log'] as $k => $lbl): ?>
+    <?php foreach (['overview' => 'Overview', 'traffic' => 'Traffic', 'sources' => 'Sources', 'pages' => 'Pages', 'audience' => 'Audience', 'privacy' => 'Privacy & log'] as $k => $lbl): ?>
     <a class="<?= $sub === $k ? 'on' : '' ?>" href="<?= e($lnk($k, $days)) ?>"><?= e($lbl) ?></a>
     <?php endforeach; ?>
   </div>
@@ -164,6 +186,95 @@ function stats_admin_view(): void
     <tr><td class="small"><?= e(rel_time($r['ts'])) ?></td><td><?= e($r['matched'] ? ($r['ref_type'] === 'direct' ? 'Direct / unknown' : ($r['ref_host'] !== '' ? $r['ref_host'] : ($r['utm'] !== '' ? 'Campaign: ' . $r['utm'] : $r['ref_type']))) : 'Unknown (no earlier visit found)') ?></td><td class="small"><?= e($r['landing'] ?: '–') ?></td><td><?= e(stats_flag((string)$r['country']) . ' ' . ($r['country'] ?: '??')) ?></td></tr>
   <?php endforeach; ?>
   </table></div>
+</div>
+
+<?php elseif ($sub === 'traffic'):
+    $S = stats_score_sql();
+    $cl = in_array($_GET['c'] ?? '', ['human', 'unsure', 'bot'], true) ? $_GET['c'] : 'all';
+    $cc = preg_match('/^[A-Z]{2}$|^\?\?$/', (string)($_GET['cc'] ?? '')) ? (string)$_GET['cc'] : '';
+    $TW = $W; $TP = $P;
+    if ($cl === 'human') { $TW .= " AND $S >= 70"; } elseif ($cl === 'unsure') { $TW .= " AND $S BETWEEN 40 AND 69"; } elseif ($cl === 'bot') { $TW .= " AND $S < 40"; }
+    if ($cc !== '') { $TW .= $cc === '??' ? " AND country = ''" : ' AND country = ?'; if ($cc !== '??') { $TP[] = $cc; } }
+    $k = row("SELECT COUNT(*) n, SUM($S >= 70) h, SUM($S BETWEEN 40 AND 69) u, SUM($S < 40) b, SUM(js = 1) j, COUNT(DISTINCT vid) v, AVG($S) a FROM stat_visits WHERE $W", $P);
+    $kn = (int)($k['n'] ?? 0);
+    $tl = fn(string $c, string $x = '') => url('admin?tab=stats&sub=traffic&days=' . $days . '&c=' . $c . ($cc !== '' ? '&cc=' . $cc : '') . $x);
+    ?>
+<div class="sx-kpis">
+  <div class="kp"><span>Visits</span><b><?= $nf($kn) ?></b><small><?= $nf((int)($k['v'] ?? 0)) ?> unique per day</small></div>
+  <div class="kp acc"><span>Likely human</span><b><?= $pct((int)($k['h'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['h'] ?? 0)) ?> visits, score 70+</small></div>
+  <div class="kp"><span>Uncertain</span><b><?= $pct((int)($k['u'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['u'] ?? 0)) ?> visits, 40 to 69</small></div>
+  <div class="kp"><span>Likely bot</span><b><?= $pct((int)($k['b'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['b'] ?? 0)) ?> visits, under 40</small></div>
+  <div class="kp"><span>JavaScript on</span><b><?= $pct((int)($k['j'] ?? 0), $kn) ?></b><small>ran our script</small></div>
+  <div class="kp"><span>Average score</span><b><?= (int)round((float)($k['a'] ?? 0)) ?></b><small>of 100</small></div>
+</div>
+<?php
+    $ser = [];
+    foreach (rows("SELECT day, SUM($S >= 70) h, SUM($S BETWEEN 40 AND 69) u, SUM($S < 40) b FROM stat_visits WHERE $W GROUP BY day", $P) as $r) { $ser[$r['day']] = $r; }
+    $pts = []; $mx = 1;
+    for ($i = $days - 1; $i >= 0; $i--) {
+        $d = date('Y-m-d', strtotime("-$i days"));
+        $r = $ser[$d] ?? [];
+        $pt = ['d' => $d, 'h' => (int)($r['h'] ?? 0), 'u' => (int)($r['u'] ?? 0), 'b' => (int)($r['b'] ?? 0)];
+        $mx = max($mx, $pt['h'] + $pt['u'] + $pt['b']);
+        $pts[] = $pt;
+    }
+    $n = count($pts); $Wd = 640; $Ht = 150; $bw = $Wd / max(1, $n);
+?>
+<div class="card sx-chart">
+  <h3>Visits per day by likelihood</h3>
+  <svg viewBox="0 0 <?= $Wd ?> <?= $Ht + 22 ?>" role="img" aria-label="Visits per day split into likely human, uncertain and likely bot">
+    <?php foreach ($pts as $i => $p): $x = $i * $bw; $y = $Ht;
+        foreach (['h' => 'sh', 'u' => 'su', 'b' => 'sb'] as $key => $cls): $hh = $p[$key] / $mx * ($Ht - 12); if ($hh <= 0) { continue; } $y -= $hh; ?>
+    <rect x="<?= round($x + $bw * 0.12, 1) ?>" y="<?= round($y, 1) ?>" width="<?= round($bw * 0.76, 1) ?>" height="<?= round($hh, 1) ?>" class="<?= $cls ?>"><title><?= e($p['d']) ?>: <?= $p[$key] ?></title></rect>
+    <?php endforeach;
+        if ($n <= 14 || $i % max(1, (int)ceil($n / 10)) === 0): ?>
+    <text x="<?= round($x + $bw / 2, 1) ?>" y="<?= $Ht + 15 ?>" text-anchor="middle" class="gt"><?= e(date($n > 31 ? 'j/n' : 'D j', strtotime($p['d']))) ?></text>
+    <?php endif; endforeach; ?>
+  </svg>
+  <div class="sx-leg"><span><i class="ls-h"></i>Likely human</span><span><i class="ls-u"></i>Uncertain</span><span><i class="ls-b"></i>Likely bot</span></div>
+</div>
+<div class="sx-two">
+  <div class="card"><h3>Countries</h3>
+    <div class="tablewrap"><table class="tbl sx-t"><tr><th>Country</th><th>Visits</th><th>Human</th><th>Bot</th></tr>
+    <?php foreach (rows("SELECT IF(country='','??',country) c, COUNT(*) n, SUM($S >= 70) h, SUM($S < 40) b FROM stat_visits WHERE $W GROUP BY c ORDER BY n DESC LIMIT 15", $P) as $r): ?>
+      <tr><td><a href="<?= e($tl($cl, '&cc=' . $r['c'])) ?>"><?= e(stats_flag($r['c'] === '??' ? '' : $r['c']) . ' ' . ($r['c'] === '??' ? 'Unknown' : stats_country_name($r['c']))) ?></a></td>
+        <td><?= number_format((int)$r['n']) ?></td><td><?= $pct((int)$r['h'], (int)$r['n']) ?></td><td><?= $pct((int)$r['b'], (int)$r['n']) ?></td></tr>
+    <?php endforeach; if ($kn === 0): ?><tr><td class="muted">No data yet</td></tr><?php endif; ?>
+    </table></div>
+  </div>
+  <div class="card"><h3>Sources</h3>
+    <div class="tablewrap"><table class="tbl sx-t"><tr><th>From</th><th>Visits</th><th>Human</th></tr>
+    <?php foreach (rows("SELECT $src AS k, COUNT(*) n, SUM($S >= 70) h FROM stat_visits WHERE $W AND ref_type <> 'internal' GROUP BY k ORDER BY n DESC LIMIT 15", $P) as $r): ?>
+      <tr><td><?= e($r['k']) ?></td><td><?= number_format((int)$r['n']) ?></td><td><?= $pct((int)$r['h'], (int)$r['n']) ?></td></tr>
+    <?php endforeach; if ($kn === 0): ?><tr><td class="muted">No data yet</td></tr><?php endif; ?>
+    </table></div>
+  </div>
+</div>
+<div class="card tablewrap">
+  <h3>Every visit</h3>
+  <p class="sx-filter small">Show:
+    <?php foreach (['all' => 'All', 'human' => 'Likely human', 'unsure' => 'Uncertain', 'bot' => 'Likely bot'] as $c => $lbl): ?>
+    <a class="<?= $cl === $c ? 'on' : '' ?>" href="<?= e($tl($c)) ?>"><?= e($lbl) ?></a>
+    <?php endforeach; ?>
+    <?php if ($cc !== ''): ?> · Country: <b><?= e($cc) ?></b> <a href="<?= e(url('admin?tab=stats&sub=traffic&days=' . $days . '&c=' . $cl)) ?>">clear</a><?php endif; ?>
+  </p>
+  <p class="small muted">Score is the chance a visit is a real person, from JavaScript, interaction, time on page and browser headers. VPN and IP do not count. IP is only shown for visitors who pressed OK on the cookie banner.</p>
+  <table class="tbl sx-t">
+    <tr><th>When</th><th>Score</th><th>Page</th><th>From</th><th>Country</th><th>Device</th><th>JS</th><th>Why</th></tr>
+    <?php foreach (rows("SELECT *, $S AS sc FROM stat_visits WHERE $TW ORDER BY id DESC LIMIT 100", $TP) as $r):
+        $sc = (int)$r['sc']; $cls = $sc >= 70 ? 'sh' : ($sc >= 40 ? 'su' : 'sb'); ?>
+    <tr>
+      <td class="small"><?= e(rel_time($r['ts'])) ?></td>
+      <td><span class="sx-sc <?= $cls ?>"><?= $sc ?>%</span></td>
+      <td class="small"><?= e($r['path']) ?></td>
+      <td class="small"><?= e($r['ref_host'] !== '' ? $r['ref_host'] : ($r['utm'] !== '' ? $r['utm'] : $r['ref_type'])) ?></td>
+      <td class="small"><?= e($r['country'] ?: '??') ?></td>
+      <td class="small"><?= e(trim($r['device'] . ' ' . $r['browser'] . ' ' . $r['os'])) ?></td>
+      <td class="small"><?= $r['js'] ? 'On' : 'Off' ?></td>
+      <td class="small muted"><?= e(stats_score_reasons($r)) ?><?= $r['ip'] ? ' · ' . e($r['ip']) : '' ?></td>
+    </tr>
+    <?php endforeach; ?>
+  </table>
 </div>
 
 <?php elseif ($sub === 'pages'): ?>

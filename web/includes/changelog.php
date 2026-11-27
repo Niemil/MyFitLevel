@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.52.0', '2026-11-27 12:50', 'Traffic: who is real?', ['New A Traffic page in admin shows every visit with a score for how likely it is a real person, JavaScript on or off, country and source, with filters for likely human, uncertain and likely bot.', 'Improve The admin menu is now grouped under People, Content, Insights and Site.'], 'new'],
     ['3.51.2', '2026-11-27 11:15', 'Exact exercises from SnakeDiet', ['Improve Workouts from SnakeDiet can name the exact exercise with its slug, so no name guessing is needed.'], 'improve'],
     ['3.51.1', '2026-11-27 11:00', 'More exercise names from SnakeDiet', ['Improve 20 more SnakeDiet exercise names are linked to the right exercise here (for example Reverse Flyes, Crunches, Ab Roller and Farmer\'s Walk).'], 'improve'],
     ['3.51.0', '2026-11-27 10:40', 'Smarter exercise matching from SnakeDiet', ['Improve Workouts from SnakeDiet now come in with their real sets. Exercise names like "Barbell Bench Press - Medium Grip" or "Dumbbell Bicep Curl" are matched to the right exercise here. Names that cannot be matched are shown in the Connect log and added to the workout note.'], 'improve'],

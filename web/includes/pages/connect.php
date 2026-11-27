@@ -82,8 +82,8 @@ layout_header('Connect & automate', '');
   <?php else: ?><p><a href="<?= e(url('login')) ?>">Log in</a> to set this up.</p><?php endif; ?></div>
 <?php if ($u): webhook_log_ensure(); $wlog = rows('SELECT created_at, method, url, status, response FROM webhook_log WHERE user_id = ? ORDER BY id DESC LIMIT 20', [$uid]); ?>
 <?php if ($wlog): ?>
-<div class="card prose"><h3>Last outgoing calls</h3>
-  <p class="muted small">The last 20 calls made from here (your key is never shown).</p>
+<div class="card prose"><h3>Last calls in and out</h3>
+  <p class="muted small">The last 20 calls sent from here (POST) or received (IN). Your key is never shown.</p>
   <?php foreach ($wlog as $l): ?>
   <div class="small" style="margin:.5rem 0;word-break:break-all"><b class="<?= (int)$l['status'] >= 200 && (int)$l['status'] < 300 ? 'ok' : '' ?>"><?= (int)$l['status'] ?></b> <?= e($l['method']) ?> <code><?= e($l['url']) ?></code> <span class="muted"><?= e($l['created_at']) ?></span><br><span class="muted"><?= e($l['response'] !== '' ? $l['response'] : '(no response)') ?></span></div>
   <?php endforeach; ?></div>

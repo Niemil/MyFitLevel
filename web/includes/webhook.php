@@ -40,11 +40,11 @@ function webhook_log_ensure(): void
 }
 
 /** Keeps the last 20 outgoing calls per member (never the key). */
-function webhook_log_add(int $uid, string $url, int $status, string $resp): void
+function webhook_log_add(int $uid, string $url, int $status, string $resp, string $method = 'POST'): void
 {
     try {
         webhook_log_ensure();
-        q('INSERT INTO webhook_log (user_id, created_at, method, url, status, response) VALUES (?,?,?,?,?,?)', [$uid, date('Y-m-d H:i:s'), 'POST', mb_substr($url, 0, 300), $status, mb_substr($resp, 0, 300)]);
+        q('INSERT INTO webhook_log (user_id, created_at, method, url, status, response) VALUES (?,?,?,?,?,?)', [$uid, date('Y-m-d H:i:s'), $method, mb_substr($url, 0, 300), $status, mb_substr($resp, 0, 300)]);
         q('DELETE FROM webhook_log WHERE user_id = ? AND id NOT IN (SELECT id FROM (SELECT id FROM webhook_log WHERE user_id = ? ORDER BY id DESC LIMIT 20) t)', [$uid, $uid]);
     } catch (Throwable $e) {
     }
@@ -204,7 +204,8 @@ function webhook_resend_snakediet(int $uid, int $days = 7): array
     if (!$u || !webhook_is_snakediet($url) || $key === '') {
         return [0, 0, 0];
     }
-    $ws = rows('SELECT id, title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE user_id = ? AND performed_at >= ? ORDER BY performed_at LIMIT 25', [$uid, date('Y-m-d H:i:s', time() - $days * 86400)]);
+    inbound_ensure();
+    $ws = rows('SELECT id, title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE user_id = ? AND performed_at >= ? AND id NOT IN (SELECT workout_id FROM inbound_workouts WHERE user_id = ?) ORDER BY performed_at LIMIT 25', [$uid, date('Y-m-d H:i:s', time() - $days * 86400), $uid]);
     $res = ['sent' => 0, 'duplicate' => 0, 'failed' => 0];
     foreach ($ws as $w) {
         $r = webhook_snakediet_workout($uid, (int)$w['id'], $w, $u, $url, $key, 8);
@@ -216,12 +217,201 @@ function webhook_resend_snakediet(int $uid, int $days = 7): array
     return [$res['sent'], $res['duplicate'], $res['failed']];
 }
 
+/* ---------- Incoming workouts from other sites (SnakeDiet) ---------- */
+
+function inbound_ensure(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    q('CREATE TABLE IF NOT EXISTS inbound_workouts (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        user_id INT UNSIGNED NOT NULL,
+        ext_id VARCHAR(80) NOT NULL,
+        workout_id INT UNSIGNED NOT NULL,
+        source VARCHAR(60) NOT NULL DEFAULT \'\',
+        minutes INT UNSIGNED NULL,
+        kcal INT UNSIGNED NULL,
+        created_at DATETIME NOT NULL,
+        UNIQUE KEY uq_ext (user_id, ext_id),
+        KEY idx_w (workout_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    q("INSERT IGNORE INTO exercises (slug, name, muscle, equipment, kind, coef, bw_pct, dist_coef, active) VALUES ('workout-from-snakediet', 'Workout from SnakeDiet', 'fullbody', 'any', 'cardio', 0.90, 0, 0, 1)");
+}
+
+/** True for workouts that came in from another site: they are never sent back out (loop protection). */
+function webhook_is_inbound(int $wid): bool
+{
+    try {
+        inbound_ensure();
+        return (bool)val('SELECT 1 FROM inbound_workouts WHERE workout_id = ?', [$wid]);
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+/** Finds an exercise from free text ("Bench press"), or null. */
+function inbound_find_exercise(string $name): ?array
+{
+    $q = strtolower(trim($name));
+    if ($q === '') {
+        return null;
+    }
+    $r = row('SELECT id, name FROM exercises WHERE active = 1 AND LOWER(name) = ?', [$q]);
+    if (!$r) {
+        $r = row('SELECT id, name FROM exercises WHERE active = 1 AND LOWER(name) LIKE ? ORDER BY LENGTH(name) LIMIT 1', ['%' . str_replace(['%', '_'], '', $q) . '%']);
+    }
+    return $r ?: null;
+}
+
+/** Turns lines like "Bench press — 3×8 @ 80 kg, 1×6 @ 85 kg" into save_workout exercises. Unknown exercises are skipped. */
+function inbound_parse_details(array $details, string $unit): array
+{
+    $out = [];
+    foreach (array_slice($details, 0, 60) as $line) {
+        $line = (string)$line;
+        if (!preg_match('/^(.+?)\s+[—–-]\s+(.+)$/u', $line, $m)) {
+            continue;
+        }
+        $ex = inbound_find_exercise($m[1]);
+        if (!$ex) {
+            continue;
+        }
+        $sets = [];
+        foreach (explode(',', $m[2]) as $part) {
+            if (preg_match('/(\d{1,2})\s*[×x]\s*(\d{1,3})(?:\s*@\s*([\d.,]+)\s*(kg|lb)?)?/iu', $part, $p)) {
+                $w = (float)str_replace(',', '.', $p[3] ?? '0');
+                $lb = strtolower((string)($p[4] ?? '')) === 'lb';
+                for ($i = 0; $i < min(20, (int)$p[1]); $i++) {
+                    $sets[] = ['w' => $lb ? round($w * 0.45359237, 2) : $w, 'r' => (int)$p[2], 't' => 0, 'd' => 0, 'wu' => 0];
+                }
+            }
+        }
+        if ($sets) {
+            $out[] = ['id' => $ex['id'], 'sets' => $sets];
+        }
+    }
+    return $out;
+}
+
+/**
+ * Receives one workout from another site. Returns [http status, json body].
+ * Body: {id, source, title, type, minutes, kcal, start|date, details[]}
+ */
+function inbound_workout(array $user, array $b): array
+{
+    $uid = (int)$user['id'];
+    $src = strtolower(preg_replace('/[^a-z0-9.\-]/i', '', (string)($b['source'] ?? '')));
+    $ext = trim((string)($b['id'] ?? ''));
+    $log = static function (int $status, array $body) use ($uid, $src, $ext): array {
+        webhook_log_add($uid, '/api/v1/workouts' . ($src !== '' ? ' (from ' . $src . ')' : '') . ($ext !== '' ? ' ' . mb_substr($ext, 0, 60) : ''), $status, (string)json_encode($body, JSON_UNESCAPED_UNICODE), 'IN');
+        return [$status, $body];
+    };
+    if ($ext === '' || !preg_match('/^[A-Za-z0-9._:\-]{3,80}$/', $ext)) {
+        return $log(422, ['ok' => false, 'error' => 'invalid_id']);
+    }
+    if ($src !== '' && strcasecmp($src, (string)parse_url(site_url(''), PHP_URL_HOST)) === 0) {
+        return $log(422, ['ok' => false, 'error' => 'own_source']);   // loop protection
+    }
+    $types = ['gym', 'run', 'walk', 'cardio', 'cycle', 'hiit', 'sport', 'yoga', 'other'];
+    $type = strtolower((string)($b['type'] ?? 'other'));
+    if (!in_array($type, $types, true)) {
+        return $log(422, ['ok' => false, 'error' => 'invalid_type']);
+    }
+    $minutes = (int)round((float)($b['minutes'] ?? 0));
+    if ($minutes < 1 || $minutes > 1440) {
+        return $log(422, ['ok' => false, 'error' => 'invalid_minutes']);
+    }
+    $kcal = isset($b['kcal']) && is_numeric($b['kcal']) ? max(0, min(20000, (int)round((float)$b['kcal']))) : null;
+
+    $tz = user_tz($user);
+    try {
+        if (!empty($b['start'])) {
+            $d = new DateTime((string)$b['start']);
+            $d->setTimezone($tz);
+        } elseif (!empty($b['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$b['date'])) {
+            $d = new DateTime((string)$b['date'] . ' 12:00:00', $tz);
+        } else {
+            return $log(422, ['ok' => false, 'error' => 'invalid_date']);
+        }
+    } catch (Throwable $e) {
+        return $log(422, ['ok' => false, 'error' => 'invalid_date']);
+    }
+    if ($d->getTimestamp() > time() + 3600) {
+        return $log(422, ['ok' => false, 'error' => 'date_in_future']);
+    }
+    if ($d->getTimestamp() < strtotime('-3 years')) {
+        return $log(422, ['ok' => false, 'error' => 'too_old']);
+    }
+
+    inbound_ensure();
+    $dup = row('SELECT workout_id FROM inbound_workouts WHERE user_id = ? AND ext_id = ?', [$uid, $ext]);
+    if ($dup) {
+        return $log(200, ['ok' => true, 'duplicate' => true, 'id' => (int)$dup['workout_id']]);
+    }
+    if (!rate_ok('sdin:' . $uid, 60, 600)) {
+        return $log(429, ['ok' => false, 'error' => 'rate_limit']);
+    }
+
+    $title = clean_text((string)($b['title'] ?? ''), 80);
+    $details = is_array($b['details'] ?? null) ? array_map('strval', $b['details']) : [];
+    $apiUser = $user;
+    $apiUser['unit'] = 'kg';
+    $notesBits = ['From ' . ($src !== '' ? $src : 'another site'), $minutes . ' min'];
+    if ($kcal !== null) {
+        $notesBits[] = $kcal . ' kcal';
+    }
+    $notes = implode(' · ', $notesBits);
+    $input = ['performed_at' => $d->format('Y-m-d H:i:s'), 'title' => $title, 'notes' => $notes, 'duration' => $minutes * 60];
+
+    $GLOBALS['inbound_saving'] = true;   // webhook_fire must not send this workout back out
+    try {
+    $res = null;
+    $parsed = $type === 'gym' || $type === 'hiit' || $type === 'sport' || $type === 'other' ? inbound_parse_details($details, 'kg') : [];
+    if ($parsed) {
+        $res = save_workout($apiUser, $input + ['ex' => $parsed]);
+        if (!$res['ok']) {
+            $res = null;   // e.g. an absurd weight: fall back to a plain timed workout
+        }
+    }
+    if ($res === null) {
+        $names = ['run' => 'Running', 'walk' => 'Walking', 'cycle' => 'Cycling', 'cardio' => 'Elliptical', 'yoga' => 'Yoga'];
+        $ex = isset($names[$type]) ? row('SELECT id FROM exercises WHERE active = 1 AND name = ?', [$names[$type]]) : null;
+        if (!$ex) {
+            $ex = row("SELECT id FROM exercises WHERE slug = 'workout-from-snakediet'");
+        }
+        if (!$ex) {
+            return $log(500, ['ok' => false, 'error' => 'no_exercise']);
+        }
+        $res = save_workout($apiUser, $input + ['ex' => [['id' => $ex['id'], 'sets' => [['w' => 0, 'r' => 0, 't' => $minutes * 60, 'd' => 0, 'wu' => 0]]]]]);
+    }
+    } finally {
+        $GLOBALS['inbound_saving'] = false;
+    }
+    if (!$res['ok']) {
+        return $log(422, ['ok' => false, 'error' => 'save_failed', 'detail' => (string)$res['error']]);
+    }
+    $wid = (int)$res['workout_id'];
+    try {
+        q('INSERT INTO inbound_workouts (user_id, ext_id, workout_id, source, minutes, kcal, created_at) VALUES (?,?,?,?,?,?,?)', [$uid, $ext, $wid, $src, $minutes, $kcal, date('Y-m-d H:i:s')]);
+    } catch (Throwable $e) {
+        // a parallel request with the same id won; keep ours (rare)
+    }
+    rate_hit('sdin:' . $uid);
+    return $log(201, ['ok' => true, 'id' => $wid, 'points' => (int)$res['points'], 'level_up' => (bool)($res['awards']['level_up'] ?? false)]);
+}
+
 function webhook_fire(int $uid, int $wid, int $points, array $awards): void
 {
     try {
         $url = (string)setting('webhook:' . $uid, '');
         if ($url === '') {
             return;
+        }
+        if (!empty($GLOBALS['inbound_saving']) || webhook_is_inbound($wid)) {
+            return;   // came from another site: never send it back
         }
         $w = row('SELECT title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE id = ? AND user_id = ?', [$wid, $uid]);
         $u = row('SELECT * FROM users WHERE id = ?', [$uid]);

@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.48.0', '2026-11-27 09:40', 'Workouts from SnakeDiet', ['New Workouts you log on SnakeDiet now arrive here as real workouts: they show in your history and feed and earn points like your own. Minutes and calories are kept, and lines like "Bench press — 3×8 @ 80 kg" become real sets when the exercise is known.', 'Improve Workouts that came from SnakeDiet are never sent back to it. The Connect page log shows what came in.'], 'new'],
     ['3.47.6', '2026-11-27 09:00', 'Call log for SnakeDiet and webhooks', ['New The Connect page lists the last 20 outgoing calls (time, address, status and the first part of the reply). Your key is never shown.', 'Improve A failed resend now shows the full reply and the exact address that was called. Only successful resends count toward the limit of 3 per 10 minutes.'], 'new'],
     ['3.47.5', '2026-11-27 08:45', 'Clearer resend errors', ['Fix The SnakeDiet resend button now shows why a workout was refused.'], 'fix'],
     ['3.47.4', '2026-11-27 09:10', 'Sets to SnakeDiet and resend', ['Improve Workouts sent to SnakeDiet now include every set (exercise, reps or seconds, and weight in kg), so SnakeDiet can count calories from the real load.', 'New Connect page: a "Resend last 7 days to SnakeDiet" button for when you set up the link after training. Workouts SnakeDiet already has are skipped.'], 'new'],

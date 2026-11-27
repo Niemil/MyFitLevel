@@ -409,6 +409,12 @@ switch ($route) {
 
     case 'workouts':
         if (is_post()) {
+            $peek = json_decode((string)file_get_contents('php://input'), true);
+            if (is_array($peek) && !isset($peek['exercises']) && (isset($peek['id']) || isset($peek['minutes']) || isset($peek['type']))) {
+                // a finished workout from another site (SnakeDiet): see inbound_workout()
+                [$st, $out] = inbound_workout($user, $peek);
+                json_out($out, $st);
+            }
             if (!rate_ok('apipost:' . $uid, 120, 3600)) {
                 json_out(['ok' => false, 'error' => 'Rate limit'], 429);
             }

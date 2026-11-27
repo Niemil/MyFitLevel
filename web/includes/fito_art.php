@@ -549,11 +549,11 @@ function fa_look_catalog(): array
     $c = [];
     foreach (fa_look_sets() as $id => [$sn, $pieces]) {
         foreach ($pieces as $slot => [$n, $d, $p, $price]) {
-            $c['look_' . $id . '_' . $suf[$slot]] = [$n, '@', 'look_' . $slot, 0, 0, $price, 'Look only: ' . $sn . ' style, no bonus and no level needed', 2, $id];
+            $c['look_' . $id . '_' . $suf[$slot]] = [$n, '@', 'look_' . $slot, 0, 0, fa_look_price($price, 'look_' . $id . '_x'), 'Look only: ' . $sn . ' style, no bonus and no level needed', 2, $id];
         }
     }
     foreach (fa_look_extras() as $k => [$n, $slot, $d, $p, $price]) {
-        $c[$k] = [$n, '@', 'look_' . $slot, 0, 0, $price, 'Look only: no bonus and no level needed', 2, 'x'];
+        $c[$k] = [$n, '@', 'look_' . $slot, 0, 0, fa_look_price($price, $k), 'Look only: no bonus and no level needed', 2, 'x'];
     }
     return $c;
 }
@@ -589,4 +589,17 @@ function fa_staff_extras(): array
 function fa_staff_only(string $key): bool
 {
     return str_starts_with($key, 'look_adm_') || str_starts_with($key, 'look_mod_') || str_starts_with($key, 'look_stf');
+}
+
+
+/** Cosmetics are a long-term goal: a full costume takes an active member (3-4 workouts a week) roughly 3-6 months of coins. Team items stay cheap (they are free for staff anyway). */
+function fa_look_price(int $base, string $key): int
+{
+    return fa_staff_only($key) ? $base : (int)(round($base * 3.5 / 10) * 10);
+}
+
+/** Pieces of a look-only set as item keys, slot order. */
+function fa_set_keys(string $id): array
+{
+    return array_map(fn($x) => 'look_' . $id . '_' . $x, ['w', 'h', 'a', 'g', 'b']);
 }

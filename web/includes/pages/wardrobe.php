@@ -118,6 +118,28 @@ layout_header('Wardrobe', 'me');
     <p class="small" style="margin:8px 0 0"><b><?= number_format((int)$w['coins']) ?></b> coins</p>
   </div>
 </div>
+<div class="card" id="costumes">
+  <details open><summary><b>Full costumes</b> <span class="muted small">a whole outfit in one go. Press Try, then Wear all of this.</span></summary>
+    <div class="wd-sets" style="margin-top:8px">
+    <?php
+    $setList = [];
+    foreach (fa_look_sets() as $sid => $sd) {
+        $ks = fa_set_keys($sid);
+        $team = fa_staff_only($ks[0]);
+        if ($team && !is_staff($u)) { continue; }
+        $tot = 0; foreach ($ks as $kk) { if (isset($cat[$kk])) { $tot += $team ? 0 : (int)$cat[$kk][5]; } }
+        $setList[] = [$sd[0], $ks, $tot, $team];
+    }
+    usort($setList, fn($a, $b) => [$b[3], $a[2]] <=> [$a[3], $b[2]]);
+    foreach ($setList as [$sn, $ks, $tot, $team]): ?>
+      <div class="wd-line" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line,#ffffff14)">
+        <span><b><?= e($sn) ?></b><?= $team ? ' <span class="muted small">team only</span>' : '' ?></span>
+        <span class="small"><?= $team ? 'free' : number_format($tot) . ' coins' ?> <a class="btn ghost small" href="<?= e(url('wardrobe?s=' . $s . '&t=' . implode(',', $ks))) ?>">Try</a></span>
+      </div>
+    <?php endforeach; ?>
+    </div>
+  </details>
+</div>
 <div class="card" id="items">
   <p class="sx-filter small" style="margin-top:0">
     <?php foreach ($slotNames as $k => $l): ?><a class="<?= $s === $k ? 'on' : '' ?>" href="<?= e(url('wardrobe?s=' . $k . ($tryKeys ? '&t=' . implode(',', $tryKeys) : ''))) ?>"><?= e($l) ?></a><?php endforeach; ?>

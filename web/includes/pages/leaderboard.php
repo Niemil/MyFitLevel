@@ -27,6 +27,17 @@ layout_header('Leaderboard', 'rank');
   <a class="<?= $range === 'month' ? 'on' : '' ?>" href="<?= e(url('leaderboard?range=month')) ?>">This month</a>
   <a class="<?= $range === 'all' ? 'on' : '' ?>" href="<?= e(url('leaderboard?range=all')) ?>">All time</a>
 </div>
+<?php if (count($list) >= 3): ?>
+<div class="card podium">
+  <?php foreach ([1, 0, 2] as $pi): $r = $list[$pi]; ?>
+    <a class="pod pod<?= $pi + 1 ?>" href="<?= e(url('u/' . $r['username'])) ?>">
+      <span class="ah-fig"><?= game_hero_svg((int)$r['id'], $pi === 0 ? 150 : 120) ?></span>
+      <b><?= ['🥇', '🥈', '🥉'][$pi] ?> <?= e(display_name($r)) ?></b>
+      <small class="muted"><?= number_format((int)$r['pts']) ?> pts</small>
+    </a>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
 <div class="card">
   <?php if (!$list): ?><p class="muted center">Nobody has scored yet. Be the first!</p><?php endif; ?>
   <?php foreach ($list as $i => $r): ?>

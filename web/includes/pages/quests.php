@@ -64,6 +64,7 @@ foreach ($lines as $code => $d) {
 layout_header('Quests', 'quests');
 ?>
 <h1 class="pagetitle">Quests</h1>
+<p class="sx-filter small"><a class="on" href="<?= e(url('quests')) ?>">Quests</a><a href="<?= e(url('boss')) ?>">Weekly boss</a><a href="<?= e(url('teams')) ?>">Teams</a><a href="<?= e(url('challenges')) ?>">Challenges</a><a href="<?= e(url('leaderboard')) ?>">Leaderboard</a></p>
 <p class="muted">Start a quest, then follow its steps in your normal workouts. Each step pays points and the whole quest pays a bonus. Run up to <?= QL_MAX_ACTIVE ?> at a time. Counter-style goals such as "log 100 sets" are under <a href="<?= e(url('badges')) ?>">Achievements</a>.</p>
 
 <?php if ($running): ?><h3>In progress</h3><?php endif; ?>

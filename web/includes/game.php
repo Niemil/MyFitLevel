@@ -854,13 +854,13 @@ function game_today_card(array $u): void
     }
     echo '<section class="card todaycard">';
     if ($ch['can']) {
-        echo '<form method="post" action="' . e(url('shop')) . '" class="tc-row">' . csrf_field() . '<input type="hidden" name="do" value="chest"><input type="hidden" name="back" value="feed">'
+        echo '<form method="post" action="' . e(url('shop')) . '" class="tc-row">' . csrf_field() . '<input type="hidden" name="do" value="chest"><input type="hidden" name="back" value="today">'
            . '<span class="tc-ic">🎁</span><div class="tc-txt"><b>Daily chest is ready</b><small>Day ' . (int)$ch['next_day'] . ' of 7 · +' . (int)$ch['reward'] . ' coins' . ($ch['streak'] ? ' · keep your ' . (int)$ch['streak'] . '-day streak' : '') . '</small></div>'
            . '<button class="btn" type="submit">Open</button></form>';
     }
     if ($advOpen) {
         $isRare = $adv['day'] >= 20;
-        echo '<form method="post" action="' . e(url('shop')) . '" class="tc-row adv">' . csrf_field() . '<input type="hidden" name="do" value="advent"><input type="hidden" name="back" value="feed">'
+        echo '<form method="post" action="' . e(url('shop')) . '" class="tc-row adv">' . csrf_field() . '<input type="hidden" name="do" value="advent"><input type="hidden" name="back" value="today">'
            . '<span class="tc-ic">🎄</span><div class="tc-txt"><b>Advent door ' . (int)$adv['day'] . ' is open today</b><small>' . ($isRare ? 'A permanent treasure! Only today.' : 'Same gift for everyone. Only today.') . '</small></div>'
            . '<button class="btn" type="submit">Open</button></form>';
     }
@@ -1852,4 +1852,48 @@ function game_price_for(array $u, string $key, array $cat): int
 {
     $p = (int)($cat[$key][5] ?? 0);
     return ($p > 0 && is_staff($u) && str_starts_with((string)$cat[$key][2], 'look_')) ? -1 : $p;
+}
+
+/** A member's hero as a picture. Looks are cached for the request. */
+function game_hero_svg(int $uid, int $size): string
+{
+    static $c = [];
+    $k = $uid . ':' . $size;
+    return $c[$k] ??= fito_dressed(fito_look($uid), $size);
+}
+
+/** The arena: the heroes who hit this week's boss the hardest, so styling your hero shows. */
+function game_boss_arena(array $u, ?array $b = null): void
+{
+    game_ensure();
+    $b = $b ?: game_boss_public();
+    if (!$b) {
+        return;
+    }
+    $top = rows('SELECT h.user_id, h.damage, us.username, us.display_name FROM boss_hits h JOIN users us ON us.id = h.user_id
+                 WHERE h.boss_id = ? AND h.damage > 0 AND us.is_banned = 0 ORDER BY h.damage DESC LIMIT 5', [(int)$b['id']]);
+    $me = (int)$u['id'];
+    if (!array_filter($top, fn($r) => (int)$r['user_id'] === $me)) {
+        $mine = row('SELECT h.user_id, h.damage, us.username, us.display_name FROM boss_hits h JOIN users us ON us.id = h.user_id WHERE h.boss_id = ? AND h.user_id = ?', [(int)$b['id'], $me]);
+        if ($mine) { $top[] = $mine; }
+    }
+    ?>
+<section class="card arena">
+  <h3 style="margin:0 0 6px">The arena</h3>
+  <?php if (!$top): ?>
+    <p class="muted small" style="margin:0">Nobody has hit <?= e($b['name']) ?> yet. Log a workout and your hero steps in first.</p>
+  <?php else: ?>
+  <p class="muted small" style="margin:0 0 8px">Heroes fighting <?= e($b['name']) ?> this week.</p>
+  <div class="arena-row">
+    <?php foreach ($top as $i => $r): ?>
+      <a class="arena-h<?= (int)$r['user_id'] === $me ? ' me' : '' ?>" href="<?= e(url('u/' . $r['username'])) ?>">
+        <span class="ah-fig"><?= game_hero_svg((int)$r['user_id'], 120) ?></span>
+        <b><?= e(display_name($r)) ?></b>
+        <small class="muted"><?= number_format((int)$r['damage']) ?> dmg</small>
+      </a>
+    <?php endforeach; ?>
+  </div>
+  <?php endif; ?>
+</section>
+<?php
 }

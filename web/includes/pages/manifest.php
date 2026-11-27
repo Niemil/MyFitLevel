@@ -9,7 +9,7 @@ echo json_encode([
     'name' => $name,
     'short_name' => mb_substr($name, 0, 12),
     'description' => site_tagline() . '. Track workouts, earn points, level up with friends.',
-    'start_url' => url('feed'),
+    'start_url' => url('today'),
     'scope' => $scope,
     'display' => 'standalone',
     'orientation' => 'portrait',

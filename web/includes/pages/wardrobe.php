@@ -119,7 +119,7 @@ layout_header('Wardrobe', 'me');
   </div>
 </div>
 <div class="card" id="costumes">
-  <details open><summary><b>Full costumes</b> <span class="muted small">a whole outfit in one go. Press Try, then Wear all of this.</span></summary>
+  <details open><summary><b>Full costumes</b> <span class="muted small">a whole outfit in one go. Try it first, or press Buy to see what it costs before you confirm.</span></summary>
     <div class="wd-sets" style="margin-top:8px">
     <?php
     $setList = [];
@@ -134,7 +134,7 @@ layout_header('Wardrobe', 'me');
     foreach ($setList as [$sn, $ks, $tot, $team]): ?>
       <div class="wd-line" style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line,#ffffff14)">
         <span><b><?= e($sn) ?></b><?= $team ? ' <span class="muted small">team only</span>' : '' ?></span>
-        <span class="small"><?= $team ? 'free' : number_format($tot) . ' coins' ?> <a class="btn ghost small" href="<?= e(url('wardrobe?s=' . $s . '&t=' . implode(',', $ks))) ?>">Try</a></span>
+        <span class="small"><?= $team ? 'free' : number_format($tot) . ' coins' ?> <a class="btn ghost small" href="<?= e(url('wardrobe?s=' . $s . '&t=' . implode(',', $ks))) ?>">Try</a> <a class="btn small" href="<?= e(url('wardrobe?s=' . $s . '&t=' . implode(',', $ks) . '&review=1')) ?>"><?= $team ? 'Wear' : 'Buy' ?></a></span>
       </div>
     <?php endforeach; ?>
     </div>

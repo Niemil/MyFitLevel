@@ -6,6 +6,7 @@ function icon(string $name): string
     static $paths = [
         'feed'   => '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
         'quest'  => '<path d="M12 2l3 6 6 .9-4.5 4.3 1.1 6.3L12 16.8 6.4 19.5l1.1-6.3L3 8.9 9 8z"/>',
+        'news'   => '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 16h5"/>',
         'plus'   => '<path d="M12 5v14M5 12h14"/>',
         'rank'   => '<path d="M6 21V10M12 21V3M18 21v-7"/>',
         'user'   => '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
@@ -121,9 +122,10 @@ function layout_header(string $title, string $active = '', array $meta = []): vo
 <div class="betabar" id="betabar" hidden><span>🚧 <b><?= e($name) ?></b> is brand new and still being built. Expect rough edges and tell us what you'd like to see!</span><button type="button" id="betaclose" aria-label="Hide message">×</button></div>
 <?php endif; ?>
 <header class="top">
-  <a class="brand" href="<?= e(url($u ? 'feed' : '')) ?>"><span class="logo"><?= mascot('happy', 30, 'nomotion') ?></span><span class="bname"><?= e($name) ?></span></a>
+  <a class="brand" href="<?= e(url($u ? 'today' : '')) ?>"><span class="logo"><?= mascot('happy', 30, 'nomotion') ?></span><span class="bname"><?= e($name) ?></span></a>
   <?php if ($u): ?>
   <nav class="topnav">
+    <a href="<?= e(url('today')) ?>" class="<?= $active === 'today' ? 'on' : '' ?>">Today</a>
     <a href="<?= e(url('feed')) ?>" class="<?= $active === 'feed' ? 'on' : '' ?>">Feed</a>
     <a href="<?= e(url('log')) ?>" class="<?= $active === 'log' ? 'on' : '' ?>">Track</a>
     <a href="<?= e(url('quests')) ?>" class="<?= $active === 'quests' ? 'on' : '' ?>">Quests</a>
@@ -236,10 +238,10 @@ function layout_footer(string $active = '', array $scripts = []): void
 </footer>
 <?php if ($u): ?>
 <nav class="bottomnav">
-  <a href="<?= e(url('feed')) ?>" class="<?= $active === 'feed' ? 'on' : '' ?>"><?= icon('feed') ?><span>Feed</span></a>
-  <a href="<?= e(url('quests')) ?>" class="<?= $active === 'quests' ? 'on' : '' ?>"><?= icon('quest') ?><span>Quests</span></a>
+  <a href="<?= e(url('today')) ?>" class="<?= $active === 'today' ? 'on' : '' ?>"><?= icon('feed') ?><span>Today</span></a>
+  <a href="<?= e(url('feed')) ?>" class="<?= $active === 'feed' ? 'on' : '' ?>"><?= icon('news') ?><span>Feed</span></a>
   <a href="<?= e(url('log')) ?>" class="fab <?= $active === 'log' ? 'on' : '' ?>"><?= icon('plus') ?><span>Track</span></a>
-  <a href="<?= e(url('leaderboard')) ?>" class="<?= $active === 'rank' ? 'on' : '' ?>"><?= icon('rank') ?><span>Leaders</span></a>
+  <a href="<?= e(url('quests')) ?>" class="<?= $active === 'quests' ? 'on' : '' ?>"><?= icon('quest') ?><span>Quests</span></a>
   <a href="<?= e(url('u/' . $u['username'])) ?>" class="<?= $active === 'me' ? 'on' : '' ?>"><?= icon('user') ?><span>Me</span></a>
 </nav>
 <?php endif; ?>

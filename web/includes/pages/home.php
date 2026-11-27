@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 if (me()) {
-    redirect('feed');
+    redirect('today');
 }
 
 $members = (int)val('SELECT COUNT(*) FROM users');

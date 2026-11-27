@@ -106,7 +106,7 @@ if (is_post()) {
         $bt = implode(',', array_filter(array_map(fn($k) => isset($cat[$k]) ? $k : '', explode(',', (string)($_POST['bt'] ?? '')))));
         redirect('wardrobe?s=' . preg_replace('/[^a-z_]/', '', (string)($_POST['bs'] ?? 'armor')) . ($bt !== '' ? '&t=' . $bt : '') . '#items');
     }
-    redirect(in_array($back, ['feed', 'boss', 'shop'], true) ? $back : 'shop');
+    redirect(in_array($back, ['feed', 'today', 'boss', 'shop'], true) ? $back : 'shop');
 }
 
 $w = game_wallet($uid);

@@ -27,6 +27,7 @@ $routes = [
     '#^login$#'                    => 'login',
     '#^register$#'                 => 'register',
     '#^logout$#'                   => 'logout',
+    '#^today$#'                    => 'today',
     '#^feed$#'                     => 'feed',
     '#^log$#'                      => 'log',
     '#^log/draft$#'                => 'draft',

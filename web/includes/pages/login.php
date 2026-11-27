@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 if (me()) {
-    redirect('feed');
+    redirect('today');
 }
 
 $error = '';
@@ -30,7 +30,7 @@ if (is_post()) {
                 header('Location: ' . $to);
                 exit;
             }
-            redirect('feed');
+            redirect('today');
         }
         rate_hit($key);
         rate_hit($key2);

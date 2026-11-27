@@ -37,6 +37,7 @@ layout_header('Weekly boss', 'quests', ['index' => true, 'path' => 'boss', 'desc
 
 <div class="card gbig">
   <?php game_boss_card($b, 'full', $mine); ?>
+  <?php if ($u) { game_boss_arena($u, $b); } ?>
   <?php if ($b): ?>
   <div class="gb-facts">
     <div><b>🪙 <?= $poolNow ?>+</b><span>prize pool, split by damage</span></div>

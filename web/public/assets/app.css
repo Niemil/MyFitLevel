@@ -1210,3 +1210,21 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .wd-line em{font-style:normal;opacity:.8}.wd-line.blocked em{color:#e0524a;opacity:1}
 
 .role.founder{color:#ffcf4a}
+
+.todayhero{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.todayhero .th-fito{flex:0 0 150px;max-width:150px}
+.todayhero .th-fito svg{width:100%;height:auto}
+.todayhero .th-txt{flex:1;min-width:180px}
+.th-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+.arena-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.arena-h{flex:0 0 108px;text-align:center;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.85rem}
+.arena-h b{max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arena-h.me .ah-fig{filter:drop-shadow(0 0 8px #7b8cff)}
+.ah-fig svg{width:100%;height:auto;display:block}
+.arena-h .ah-fig{width:100px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;text-align:center}
+.podium .pod{flex:1;max-width:150px;text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;font-size:.85rem}
+.podium .pod b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.podium .pod .ah-fig{width:100%}
+.podium .pod1 .ah-fig{width:112%}

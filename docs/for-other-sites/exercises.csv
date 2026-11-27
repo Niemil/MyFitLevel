@@ -1,0 +1,340 @@
+slug,name,muscle,equipment,kind,coef,bw_pct,dist_coef,per_side,subs
+assisted-pull-up,Assisted Pull-Up,back,machine,weight,0.64,0.0,0.0,0,"lats,biceps"
+back-extension,Back Extension,back,bodyweight,bodyweight,0.6,0.5,0.0,0,"lowback,glutes"
+barbell-row,Barbell Row,back,barbell,weight,1.0,0.0,0.0,0,"lats,traps,biceps"
+barbell-shrug,Barbell Shrug,back,barbell,weight,0.6,0.0,0.0,0,traps
+cable-shrug,Cable Shrug,back,cable,weight,0.54,0.0,0.0,0,traps
+chest-supported-row,Chest-Supported Row,back,dumbbell,weight,0.8,0.0,0.0,1,"lats,traps,biceps"
+chin-up,Chin-Up,back,bodyweight,bodyweight,1.0,1.0,0.0,0,"lats,biceps"
+close-grip-lat-pulldown,Close-Grip Lat Pulldown,back,cable,weight,0.72,0.0,0.0,0,"lats,biceps"
+dead-hang,Dead Hang,back,bodyweight,duration,2.5,0.0,0.0,0,"forearms,lats"
+deadlift,Deadlift,back,barbell,weight,1.15,0.0,0.0,0,"lowback,glutes,hamstrings"
+deficit-deadlift,Deficit Deadlift,back,barbell,weight,1.15,0.0,0.0,0,"lowback,glutes,hamstrings"
+dumbbell-deadlift,Dumbbell Deadlift,back,dumbbell,weight,1.0,0.0,0.0,1,"lowback,glutes,hamstrings"
+dumbbell-row,Dumbbell Row,back,dumbbell,weight,1.0,0.0,0.0,1,"lats,traps,biceps"
+dumbbell-shrug,Dumbbell Shrug,back,dumbbell,weight,0.6,0.0,0.0,1,traps
+face-pull,Face Pull,back,cable,weight,0.54,0.0,0.0,0,"shoulders,traps"
+good-morning,Good Morning,back,barbell,weight,1.0,0.0,0.0,0,"hamstrings,glutes,lowback"
+inverted-row,Inverted Row,back,bodyweight,bodyweight,0.8,0.6,0.0,0,"lats,traps,biceps"
+lat-pulldown,Lat Pulldown,back,cable,weight,0.72,0.0,0.0,0,"lats,biceps"
+machine-row,Machine Row,back,machine,weight,0.64,0.0,0.0,0,"lats,traps,biceps"
+meadows-row,Meadows Row,back,barbell,weight,1.0,0.0,0.0,0,"lats,traps,biceps"
+muscle-up,Muscle-Up,back,bodyweight,bodyweight,1.0,1.0,0.0,0,"lats,biceps"
+neutral-grip-pull-up,Neutral-Grip Pull-Up,back,bodyweight,bodyweight,1.0,1.0,0.0,0,"lats,biceps"
+pendlay-row,Pendlay Row,back,barbell,weight,1.0,0.0,0.0,0,"lats,traps,biceps"
+pull-up,Pull-Up,back,bodyweight,bodyweight,1.0,1.0,0.0,0,"lats,biceps"
+rack-pull,Rack Pull,back,barbell,weight,1.0,0.0,0.0,0,"lowback,glutes,hamstrings"
+reverse-hyperextension,Reverse Hyperextension,back,machine,weight,0.48,0.0,0.0,0,"lowback,glutes"
+reverse-pec-deck,Reverse Pec Deck,back,machine,weight,0.48,0.0,0.0,0,"shoulders,traps"
+seal-row,Seal Row,back,barbell,weight,1.0,0.0,0.0,0,"lats,traps,biceps"
+seated-cable-row,Seated Cable Row,back,cable,weight,0.72,0.0,0.0,0,"lats,traps,biceps"
+single-arm-cable-row,Single-Arm Cable Row,back,cable,weight,0.72,0.0,0.0,0,"lats,traps,biceps"
+straight-arm-pulldown,Straight-Arm Pulldown,back,cable,weight,0.72,0.0,0.0,0,"lats,biceps"
+superman,Superman,back,bodyweight,bodyweight,0.8,0.3,0.0,0,"lowback,glutes"
+t-bar-row,T-Bar Row,back,barbell,weight,1.0,0.0,0.0,0,"lats,traps,biceps"
+trap-bar-deadlift,Trap Bar Deadlift,back,barbell,weight,1.15,0.0,0.0,0,"lowback,glutes,hamstrings"
+wide-grip-pull-up,Wide-Grip Pull-Up,back,bodyweight,bodyweight,1.0,1.0,0.0,0,"lats,biceps"
+wide-grip-seated-row,Wide-Grip Seated Row,back,cable,weight,0.72,0.0,0.0,0,"lats,traps,biceps"
+barbell-curl,Barbell Curl,biceps,barbell,weight,0.6,0.0,0.0,0,biceps
+bayesian-cable-curl,Bayesian Cable Curl,biceps,cable,weight,0.54,0.0,0.0,0,biceps
+cable-curl,Cable Curl,biceps,cable,weight,0.54,0.0,0.0,0,biceps
+cable-hammer-curl,Cable Hammer Curl,biceps,cable,weight,0.54,0.0,0.0,0,"biceps,forearms"
+chin-up-hold,Chin-Up Hold,biceps,bodyweight,duration,2.5,0.0,0.0,0,"forearms,lats"
+concentration-curl,Concentration Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,biceps
+drag-curl,Drag Curl,biceps,barbell,weight,0.6,0.0,0.0,0,biceps
+dumbbell-curl,Dumbbell Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,biceps
+ez-bar-curl,EZ-Bar Curl,biceps,barbell,weight,0.6,0.0,0.0,0,biceps
+hammer-curl,Hammer Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,"biceps,forearms"
+incline-dumbbell-curl,Incline Dumbbell Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,biceps
+machine-curl,Machine Curl,biceps,machine,weight,0.48,0.0,0.0,0,biceps
+preacher-curl,Preacher Curl,biceps,barbell,weight,0.6,0.0,0.0,0,biceps
+reverse-curl,Reverse Curl,biceps,barbell,weight,0.6,0.0,0.0,0,"forearms,biceps"
+reverse-wrist-curl,Reverse Wrist Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,forearms
+spider-curl,Spider Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,biceps
+wrist-curl,Wrist Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,forearms
+zottman-curl,Zottman Curl,biceps,dumbbell,weight,0.6,0.0,0.0,1,"biceps,forearms"
+american-football,American Football,cardio,any,cardio,1.5,0.0,0.0,0,
+aqua-aerobics,Aqua Aerobics,cardio,pool,cardio,1.2,0.0,0.0,0,
+assault-bike,Assault Bike,cardio,machine,cardio,2.0,0.0,0.0,0,
+badminton,Badminton,cardio,any,cardio,1.3,0.0,0.0,0,
+baseball-softball,Baseball / Softball,cardio,any,cardio,0.8,0.0,0.0,0,
+basketball,Basketball,cardio,any,cardio,1.6,0.0,0.0,0,
+bootcamp,Bootcamp,cardio,any,cardio,1.8,0.0,0.0,0,
+bouldering,Bouldering,cardio,any,cardio,1.6,0.0,0.0,0,
+boxing,Boxing,cardio,any,cardio,1.9,0.0,0.0,0,
+brazilian-jiu-jitsu,Brazilian Jiu-Jitsu,cardio,any,cardio,1.7,0.0,0.0,0,
+calisthenics-session,Calisthenics Session,cardio,bodyweight,cardio,1.5,0.0,0.0,0,
+canoeing,Canoeing,cardio,outdoor,cardio,1.1,0.0,4.0,0,
+circuit-training,Circuit Training,cardio,any,cardio,1.8,0.0,0.0,0,
+cross-country-skiing,Cross-Country Skiing,cardio,outdoor,cardio,1.8,0.0,5.0,0,
+crossfit-wod,CrossFit WOD,cardio,any,cardio,2.0,0.0,0.0,0,
+cycling,Cycling,cardio,outdoor,cardio,1.0,0.0,2.5,0,
+dance,Dance,cardio,any,cardio,1.2,0.0,0.0,0,
+dog-walk,Dog Walk,cardio,outdoor,cardio,0.8,0.0,3.0,0,
+downhill-skiing,Downhill Skiing,cardio,outdoor,cardio,1.2,0.0,0.0,0,
+e-bike-ride,E-Bike Ride,cardio,outdoor,cardio,0.7,0.0,1.5,0,
+elliptical,Elliptical,cardio,machine,cardio,1.2,0.0,2.0,0,
+floorball-bandy,Floorball / Bandy,cardio,any,cardio,1.5,0.0,0.0,0,
+foam-rolling,Foam Rolling,cardio,any,cardio,0.3,0.0,0.0,0,
+golf-walking,Golf (Walking),cardio,outdoor,cardio,0.7,0.0,3.0,0,
+handball,Handball,cardio,any,cardio,1.6,0.0,0.0,0,
+hauling-firewood,Hauling Firewood,cardio,outdoor,cardio,1.0,0.0,0.0,0,
+hiit,HIIT,cardio,any,cardio,2.0,0.0,0.0,0,
+hiking,Hiking,cardio,outdoor,cardio,1.1,0.0,4.0,0,
+horse-riding,Horse Riding,cardio,outdoor,cardio,0.9,0.0,0.0,0,
+ice-hockey,Ice Hockey,cardio,any,cardio,1.7,0.0,0.0,0,
+ice-skating,Ice Skating,cardio,outdoor,cardio,1.3,0.0,3.0,0,
+incline-treadmill-walk,Incline Treadmill Walk,cardio,machine,cardio,1.1,0.0,3.0,0,
+inline-skating,Inline Skating,cardio,outdoor,cardio,1.2,0.0,3.0,0,
+jogging,Jogging,cardio,outdoor,cardio,1.3,0.0,6.0,0,
+judo,Judo,cardio,any,cardio,1.6,0.0,0.0,0,
+jump-rope,Jump Rope,cardio,rope,cardio,2.0,0.0,0.0,0,"quads,glutes"
+karate-taekwondo,Karate / Taekwondo,cardio,any,cardio,1.4,0.0,0.0,0,
+kayaking,Kayaking,cardio,outdoor,cardio,1.2,0.0,4.0,0,
+kickboxing,Kickboxing,cardio,any,cardio,1.9,0.0,0.0,0,
+martial-arts,Martial Arts,cardio,any,cardio,1.6,0.0,0.0,0,
+mountain-biking,Mountain Biking,cardio,outdoor,cardio,1.3,0.0,3.0,0,
+muay-thai,Muay Thai,cardio,any,cardio,1.9,0.0,0.0,0,
+nordic-walking,Nordic Walking,cardio,outdoor,cardio,1.0,0.0,3.5,0,hamstrings
+open-water-swimming,Open Water Swimming,cardio,outdoor,cardio,2.0,0.0,25.0,0,
+orienteering,Orienteering,cardio,outdoor,cardio,1.4,0.0,5.0,0,
+other-cardio,Other Cardio,cardio,any,cardio,1.2,0.0,0.0,0,
+outdoor-rowing,Outdoor Rowing,cardio,outdoor,cardio,1.6,0.0,6.0,0,"lats,traps,biceps"
+padel,Padel,cardio,any,cardio,1.4,0.0,0.0,0,
+pickleball,Pickleball,cardio,any,cardio,1.2,0.0,0.0,0,
+pilates,Pilates,cardio,any,cardio,0.9,0.0,0.0,0,
+playing-with-kids,Playing With Kids,cardio,any,cardio,0.8,0.0,0.0,0,
+power-walking,Power Walking,cardio,outdoor,cardio,1.0,0.0,3.5,0,
+rock-climbing,Rock Climbing,cardio,outdoor,cardio,1.6,0.0,0.0,0,
+roller-skating,Roller Skating,cardio,outdoor,cardio,1.2,0.0,3.0,0,
+rowing-machine,Rowing Machine,cardio,machine,cardio,1.6,0.0,6.0,0,"lats,traps,biceps"
+rucking,Rucking,cardio,outdoor,cardio,1.3,0.0,4.0,0,
+rugby,Rugby,cardio,any,cardio,1.8,0.0,0.0,0,
+running,Running,cardio,outdoor,cardio,1.5,0.0,7.0,0,
+skateboarding,Skateboarding,cardio,outdoor,cardio,1.0,0.0,0.0,0,
+ski-erg,Ski Erg,cardio,machine,cardio,1.8,0.0,6.0,0,
+ski-touring,Ski Touring,cardio,outdoor,cardio,1.6,0.0,5.0,0,
+snow-shoveling,Snow Shoveling,cardio,outdoor,cardio,1.2,0.0,0.0,0,
+snowboarding,Snowboarding,cardio,outdoor,cardio,1.2,0.0,0.0,0,
+snowshoeing,Snowshoeing,cardio,outdoor,cardio,1.4,0.0,4.0,0,
+soccer-football,Soccer / Football,cardio,any,cardio,1.6,0.0,0.0,0,
+spin-class,Spin Class,cardio,machine,cardio,1.5,0.0,0.0,0,
+sprint-intervals,Sprint Intervals,cardio,outdoor,cardio,2.2,0.0,0.0,0,
+squash,Squash,cardio,any,cardio,1.8,0.0,0.0,0,
+stadium-stairs,Stadium Stairs,cardio,outdoor,cardio,1.8,0.0,0.0,0,
+stair-climber,Stair Climber,cardio,machine,cardio,1.5,0.0,0.0,0,
+stair-walking,Stair Walking,cardio,any,cardio,1.3,0.0,0.0,0,
+stand-up-paddleboarding,Stand-Up Paddleboarding,cardio,outdoor,cardio,1.0,0.0,3.0,0,
+stationary-bike,Stationary Bike,cardio,machine,cardio,1.1,0.0,2.0,0,
+stretching-mobility,Stretching / Mobility,cardio,any,cardio,0.4,0.0,0.0,0,
+stroller-walk,Stroller Walk,cardio,outdoor,cardio,0.9,0.0,3.2,0,
+surfing,Surfing,cardio,outdoor,cardio,1.4,0.0,0.0,0,
+swimming,Swimming,cardio,pool,cardio,2.0,0.0,25.0,0,
+table-tennis,Table Tennis,cardio,any,cardio,0.9,0.0,0.0,0,
+tai-chi,Tai Chi,cardio,any,cardio,0.6,0.0,0.0,0,
+team-sport-ball-game,Team Sport / Ball Game,cardio,any,cardio,1.5,0.0,0.0,0,
+tennis,Tennis,cardio,any,cardio,1.5,0.0,0.0,0,
+trail-running,Trail Running,cardio,outdoor,cardio,1.7,0.0,7.0,0,
+treadmill-run,Treadmill Run,cardio,machine,cardio,1.5,0.0,7.0,0,
+treadmill-walk,Treadmill Walk,cardio,machine,cardio,0.8,0.0,3.0,0,
+ultimate-frisbee,Ultimate Frisbee,cardio,outdoor,cardio,1.3,0.0,0.0,0,
+volleyball,Volleyball,cardio,any,cardio,1.1,0.0,0.0,0,
+walking,Walking,cardio,outdoor,cardio,0.8,0.0,3.0,0,
+wrestling,Wrestling,cardio,any,cardio,1.8,0.0,0.0,0,
+yard-work-gardening,Yard Work / Gardening,cardio,outdoor,cardio,0.8,0.0,0.0,0,
+yoga,Yoga,cardio,any,cardio,0.8,0.0,0.0,0,
+zumba-aerobics,Zumba / Aerobics,cardio,any,cardio,1.3,0.0,0.0,0,
+archer-push-up,Archer Push-Up,chest,bodyweight,bodyweight,0.8,0.7,0.0,0,"chest,triceps,shoulders"
+barbell-bench-press,Barbell Bench Press,chest,barbell,weight,1.0,0.0,0.0,0,"chest,triceps,shoulders"
+cable-crossover,Cable Crossover,chest,cable,weight,0.54,0.0,0.0,2,"chest,triceps,shoulders"
+chest-dip,Chest Dip,chest,bodyweight,bodyweight,1.0,1.0,0.0,0,"chest,triceps"
+clap-push-up,Clap Push-Up,chest,bodyweight,bodyweight,0.8,0.65,0.0,0,"chest,triceps,shoulders"
+close-grip-push-up,Close-Grip Push-Up,chest,bodyweight,bodyweight,0.8,0.65,0.0,0,"chest,triceps,shoulders"
+decline-bench-press,Decline Bench Press,chest,barbell,weight,0.8,0.0,0.0,0,"chest,triceps,shoulders"
+decline-push-up,Decline Push-Up,chest,bodyweight,bodyweight,0.8,0.7,0.0,0,"chest,triceps,shoulders"
+diamond-push-up,Diamond Push-Up,chest,bodyweight,bodyweight,0.8,0.65,0.0,0,"triceps,chest"
+dumbbell-bench-press,Dumbbell Bench Press,chest,dumbbell,weight,1.0,0.0,0.0,1,"chest,triceps,shoulders"
+dumbbell-fly,Dumbbell Fly,chest,dumbbell,weight,0.6,0.0,0.0,1,"chest,triceps,shoulders"
+dumbbell-pullover,Dumbbell Pullover,chest,dumbbell,weight,0.8,0.0,0.0,0,"chest,triceps"
+dumbbell-squeeze-press,Dumbbell Squeeze Press,chest,dumbbell,weight,0.8,0.0,0.0,0,"chest,triceps,shoulders"
+floor-press,Floor Press,chest,barbell,weight,0.8,0.0,0.0,0,"chest,triceps,shoulders"
+high-cable-fly,High Cable Fly,chest,cable,weight,0.54,0.0,0.0,2,"chest,triceps,shoulders"
+incline-barbell-bench-press,Incline Barbell Bench Press,chest,barbell,weight,0.8,0.0,0.0,0,"chest,triceps,shoulders"
+incline-dumbbell-press,Incline Dumbbell Press,chest,dumbbell,weight,0.8,0.0,0.0,1,"chest,triceps"
+incline-machine-press,Incline Machine Press,chest,machine,weight,0.64,0.0,0.0,0,"chest,triceps"
+incline-push-up,Incline Push-Up,chest,bodyweight,bodyweight,0.8,0.5,0.0,0,"chest,triceps,shoulders"
+knee-push-up,Knee Push-Up,chest,bodyweight,bodyweight,0.8,0.45,0.0,0,"chest,triceps,shoulders"
+low-cable-fly,Low Cable Fly,chest,cable,weight,0.54,0.0,0.0,2,"chest,triceps,shoulders"
+machine-chest-press,Machine Chest Press,chest,machine,weight,0.8,0.0,0.0,0,"chest,triceps,shoulders"
+pec-deck,Pec Deck,chest,machine,weight,0.48,0.0,0.0,0,"chest,triceps,shoulders"
+push-up,Push-Up,chest,bodyweight,bodyweight,0.8,0.65,0.0,0,"chest,triceps,shoulders"
+ring-push-up,Ring Push-Up,chest,bodyweight,bodyweight,0.8,0.7,0.0,0,"chest,triceps,shoulders"
+smith-machine-bench-press,Smith Machine Bench Press,chest,machine,weight,0.9,0.0,0.0,0,"chest,triceps,shoulders"
+svend-press,Svend Press,chest,plate,weight,0.72,0.0,0.0,0,"chest,triceps,shoulders"
+wide-push-up,Wide Push-Up,chest,bodyweight,bodyweight,0.8,0.65,0.0,0,"chest,triceps,shoulders"
+ab-machine-crunch,Ab Machine Crunch,core,machine,weight,0.48,0.0,0.0,0,abs
+ab-wheel-rollout,Ab Wheel Rollout,core,bodyweight,bodyweight,0.6,0.55,0.0,0,abs
+bear-crawl,Bear Crawl,core,bodyweight,duration,4.0,0.0,0.0,0,"abs,shoulders"
+bicycle-crunch,Bicycle Crunch,core,bodyweight,bodyweight,0.6,0.25,0.0,0,"obliques,abs"
+bird-dog,Bird Dog,core,bodyweight,bodyweight,0.8,0.25,0.0,0,"abs,lowback"
+cable-crunch,Cable Crunch,core,cable,weight,0.54,0.0,0.0,0,abs
+cable-woodchopper,Cable Woodchopper,core,cable,weight,0.54,0.0,0.0,0,"obliques,abs"
+captain-s-chair-leg-raise,Captain's Chair Leg Raise,core,bodyweight,bodyweight,0.6,0.4,0.0,0,abs
+copenhagen-plank,Copenhagen Plank,core,bodyweight,duration,3.5,0.0,0.0,0,"obliques,abs"
+crunch,Crunch,core,bodyweight,bodyweight,0.6,0.25,0.0,0,abs
+dead-bug,Dead Bug,core,bodyweight,bodyweight,0.8,0.25,0.0,0,abs
+decline-sit-up,Decline Sit-Up,core,bodyweight,bodyweight,0.6,0.4,0.0,0,abs
+dragon-flag,Dragon Flag,core,bodyweight,bodyweight,0.8,0.7,0.0,0,abs
+dumbbell-side-bend,Dumbbell Side Bend,core,dumbbell,weight,0.8,0.0,0.0,0,"obliques,abs"
+flutter-kicks,Flutter Kicks,core,bodyweight,bodyweight,0.8,0.2,0.0,0,abs
+hanging-knee-raise,Hanging Knee Raise,core,bodyweight,bodyweight,0.6,0.45,0.0,0,abs
+hanging-leg-raise,Hanging Leg Raise,core,bodyweight,bodyweight,0.6,0.5,0.0,0,abs
+hollow-hold,Hollow Hold,core,bodyweight,duration,3.0,0.0,0.0,0,abs
+l-sit,L-Sit,core,bodyweight,duration,4.0,0.0,0.0,0,abs
+landmine-twist,Landmine Twist,core,barbell,weight,0.6,0.0,0.0,0,"obliques,abs"
+lying-leg-raise,Lying Leg Raise,core,bodyweight,bodyweight,0.6,0.4,0.0,0,abs
+mountain-climber,Mountain Climber,core,bodyweight,bodyweight,0.8,0.3,0.0,0,"abs,shoulders"
+pallof-press,Pallof Press,core,cable,weight,0.72,0.0,0.0,0,"obliques,abs"
+plank,Plank,core,bodyweight,duration,3.0,0.0,0.0,0,abs
+plank-shoulder-tap,Plank Shoulder Tap,core,bodyweight,bodyweight,0.6,0.3,0.0,0,"abs,shoulders"
+reverse-crunch,Reverse Crunch,core,bodyweight,bodyweight,0.6,0.25,0.0,0,abs
+reverse-plank,Reverse Plank,core,bodyweight,duration,3.0,0.0,0.0,0,abs
+russian-twist,Russian Twist,core,bodyweight,weight,0.6,0.0,0.0,0,"obliques,abs"
+side-plank,Side Plank,core,bodyweight,duration,3.0,0.0,0.0,0,"obliques,abs"
+sit-up,Sit-Up,core,bodyweight,bodyweight,0.6,0.35,0.0,0,abs
+suitcase-carry,Suitcase Carry,core,dumbbell,weight,1.0,0.0,0.0,0,"forearms,traps"
+toes-to-bar,Toes-to-Bar,core,bodyweight,bodyweight,0.8,0.55,0.0,0,abs
+v-up,V-Up,core,bodyweight,bodyweight,0.8,0.35,0.0,0,abs
+weighted-sit-up,Weighted Sit-Up,core,plate,weight,0.54,0.0,0.0,0,abs
+battle-ropes,Battle Ropes,fullbody,rope,duration,5.0,0.0,0.0,0,"shoulders,lats"
+burpee,Burpee,fullbody,bodyweight,bodyweight,0.8,0.7,0.0,0,"quads,chest"
+burpee-box-jump,Burpee Box Jump,fullbody,bodyweight,bodyweight,0.8,0.75,0.0,0,"quads,glutes"
+clean-and-jerk,Clean and Jerk,fullbody,barbell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+clean-pull,Clean Pull,fullbody,barbell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+devil-press,Devil Press,fullbody,dumbbell,weight,0.8,0.0,0.0,1,"quads,shoulders"
+dumbbell-clean-and-press,Dumbbell Clean and Press,fullbody,dumbbell,weight,1.0,0.0,0.0,1,"traps,quads,glutes"
+dumbbell-snatch,Dumbbell Snatch,fullbody,dumbbell,weight,1.0,0.0,0.0,1,"traps,quads,glutes"
+dumbbell-thruster,Dumbbell Thruster,fullbody,dumbbell,weight,1.0,0.0,0.0,1,"quads,shoulders"
+farmer-s-carry,Farmer's Carry,fullbody,dumbbell,weight,1.0,0.0,0.0,1,"forearms,traps"
+hang-clean,Hang Clean,fullbody,barbell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+hang-snatch,Hang Snatch,fullbody,barbell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+jumping-jack,Jumping Jack,fullbody,bodyweight,bodyweight,0.8,0.25,0.0,0,"quads,glutes"
+kettlebell-clean,Kettlebell Clean,fullbody,kettlebell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+kettlebell-snatch,Kettlebell Snatch,fullbody,kettlebell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+kettlebell-swing,Kettlebell Swing,fullbody,kettlebell,weight,1.0,0.0,0.0,0,"glutes,hamstrings"
+medicine-ball-slam,Medicine Ball Slam,fullbody,medicine ball,weight,0.72,0.0,0.0,0,"shoulders,abs"
+power-clean,Power Clean,fullbody,barbell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+rope-climb,Rope Climb,fullbody,rope,bodyweight,0.72,1.0,0.0,0,"shoulders,lats"
+sandbag-carry,Sandbag Carry,fullbody,sandbag,weight,0.9,0.0,0.0,0,"forearms,traps"
+sandbag-clean,Sandbag Clean,fullbody,sandbag,weight,0.9,0.0,0.0,0,"traps,quads,glutes"
+sled-pull,Sled Pull,fullbody,sled,weight,0.72,0.0,0.0,0,"quads,glutes"
+sled-push,Sled Push,fullbody,sled,weight,0.72,0.0,0.0,0,"quads,glutes"
+snatch,Snatch,fullbody,barbell,weight,1.0,0.0,0.0,0,"traps,quads,glutes"
+star-jump,Star Jump,fullbody,bodyweight,bodyweight,0.8,0.4,0.0,0,"quads,glutes"
+thruster,Thruster,fullbody,barbell,weight,1.0,0.0,0.0,0,"quads,shoulders"
+tire-flip,Tire Flip,fullbody,tire,weight,0.72,0.0,0.0,0,"quads,glutes"
+turkish-get-up,Turkish Get-Up,fullbody,kettlebell,weight,1.0,0.0,0.0,0,"shoulders,abs"
+wall-ball-shot,Wall Ball Shot,fullbody,medicine ball,weight,0.72,0.0,0.0,0,"shoulders,abs"
+yoke-carry,Yoke Carry,fullbody,yoke,weight,0.9,0.0,0.0,0,"forearms,traps"
+back-squat,Back Squat,legs,barbell,weight,1.15,0.0,0.0,0,"quads,glutes"
+banded-lateral-walk,Banded Lateral Walk,legs,band,duration,2.0,0.0,0.0,0,"glutes,hamstrings"
+barbell-glute-bridge,Barbell Glute Bridge,legs,barbell,weight,0.8,0.0,0.0,0,"glutes,hamstrings"
+barbell-lunge,Barbell Lunge,legs,barbell,weight,1.0,0.0,0.0,0,"quads,glutes"
+belt-squat,Belt Squat,legs,machine,weight,0.48,0.0,0.0,0,"quads,glutes"
+bodyweight-squat,Bodyweight Squat,legs,bodyweight,bodyweight,1.0,0.5,0.0,0,"quads,glutes"
+box-jump,Box Jump,legs,bodyweight,bodyweight,0.8,0.5,0.0,0,"quads,glutes"
+bulgarian-split-squat,Bulgarian Split Squat,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+cable-glute-kickback,Cable Glute Kickback,legs,cable,weight,0.54,0.0,0.0,0,"triceps,chest"
+cable-pull-through,Cable Pull-Through,legs,cable,weight,0.72,0.0,0.0,0,"glutes,hamstrings"
+cossack-squat,Cossack Squat,legs,bodyweight,bodyweight,1.0,0.55,0.0,0,"quads,glutes"
+curtsy-lunge,Curtsy Lunge,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+donkey-calf-raise,Donkey Calf Raise,legs,machine,weight,0.36,0.0,0.0,0,calves
+donkey-kick,Donkey Kick,legs,bodyweight,bodyweight,0.8,0.3,0.0,0,"glutes,hamstrings"
+dumbbell-lunge,Dumbbell Lunge,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+dumbbell-romanian-deadlift,Dumbbell Romanian Deadlift,legs,dumbbell,weight,1.0,0.0,0.0,1,"hamstrings,glutes,lowback"
+fire-hydrant,Fire Hydrant,legs,bodyweight,bodyweight,0.8,0.25,0.0,0,"glutes,hamstrings"
+frog-pump,Frog Pump,legs,bodyweight,bodyweight,0.8,0.35,0.0,0,"glutes,hamstrings"
+front-squat,Front Squat,legs,barbell,weight,1.15,0.0,0.0,0,"quads,glutes"
+glute-bridge,Glute Bridge,legs,bodyweight,bodyweight,0.8,0.4,0.0,0,"glutes,hamstrings"
+glute-ham-raise,Glute-Ham Raise,legs,bodyweight,bodyweight,0.6,0.55,0.0,0,hamstrings
+goblet-squat,Goblet Squat,legs,dumbbell,weight,1.0,0.0,0.0,0,"quads,glutes"
+hack-squat,Hack Squat,legs,machine,weight,0.38,0.0,0.0,0,"quads,glutes"
+heel-elevated-squat,Heel-Elevated Squat,legs,barbell,weight,1.0,0.0,0.0,0,"quads,glutes"
+high-box-step-up,High Box Step-Up,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+hip-abduction-machine,Hip Abduction Machine,legs,machine,weight,0.48,0.0,0.0,0,"glutes,hamstrings"
+hip-adduction-machine,Hip Adduction Machine,legs,machine,weight,0.48,0.0,0.0,0,"glutes,hamstrings"
+hip-thrust,Hip Thrust,legs,barbell,weight,1.0,0.0,0.0,0,"glutes,hamstrings"
+jump-lunge,Jump Lunge,legs,bodyweight,bodyweight,1.0,0.5,0.0,0,"quads,glutes"
+jump-squat,Jump Squat,legs,bodyweight,bodyweight,1.0,0.5,0.0,0,"quads,glutes"
+kettlebell-goblet-squat,Kettlebell Goblet Squat,legs,kettlebell,weight,1.0,0.0,0.0,0,"quads,glutes"
+lateral-lunge,Lateral Lunge,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+leg-extension,Leg Extension,legs,machine,weight,0.48,0.0,0.0,0,quads
+leg-press,Leg Press,legs,machine,weight,0.38,0.0,0.0,0,"quads,glutes"
+leg-press-calf-raise,Leg Press Calf Raise,legs,machine,weight,0.29,0.0,0.0,0,calves
+lying-leg-curl,Lying Leg Curl,legs,machine,weight,0.48,0.0,0.0,0,hamstrings
+nordic-hamstring-curl,Nordic Hamstring Curl,legs,bodyweight,bodyweight,0.6,0.6,0.0,0,hamstrings
+overhead-squat,Overhead Squat,legs,barbell,weight,1.0,0.0,0.0,0,"quads,glutes"
+pendulum-squat,Pendulum Squat,legs,machine,weight,0.8,0.0,0.0,0,"quads,glutes"
+pistol-squat,Pistol Squat,legs,bodyweight,bodyweight,1.0,0.9,0.0,0,"quads,glutes"
+reverse-lunge,Reverse Lunge,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+romanian-deadlift,Romanian Deadlift,legs,barbell,weight,1.0,0.0,0.0,0,"hamstrings,glutes,lowback"
+safety-bar-squat,Safety Bar Squat,legs,barbell,weight,1.0,0.0,0.0,0,"quads,glutes"
+seated-calf-raise,Seated Calf Raise,legs,machine,weight,0.36,0.0,0.0,0,calves
+seated-leg-curl,Seated Leg Curl,legs,machine,weight,0.48,0.0,0.0,0,hamstrings
+single-leg-calf-raise,Single-Leg Calf Raise,legs,bodyweight,bodyweight,0.45,0.5,0.0,0,calves
+single-leg-hip-thrust,Single-Leg Hip Thrust,legs,bodyweight,bodyweight,1.0,0.5,0.0,0,"glutes,hamstrings"
+single-leg-press,Single-Leg Press,legs,machine,weight,0.38,0.0,0.0,0,"quads,glutes"
+single-leg-romanian-deadlift,Single-Leg Romanian Deadlift,legs,dumbbell,weight,1.0,0.0,0.0,1,"hamstrings,glutes,lowback"
+sissy-squat,Sissy Squat,legs,bodyweight,bodyweight,0.8,0.55,0.0,0,quads
+smith-machine-split-squat,Smith Machine Split Squat,legs,machine,weight,0.9,0.0,0.0,0,"quads,glutes"
+smith-machine-squat,Smith Machine Squat,legs,machine,weight,0.9,0.0,0.0,0,"quads,glutes"
+standing-calf-raise,Standing Calf Raise,legs,machine,weight,0.36,0.0,0.0,0,calves
+step-up,Step-Up,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+stiff-leg-deadlift,Stiff-Leg Deadlift,legs,barbell,weight,1.0,0.0,0.0,0,"hamstrings,glutes,lowback"
+sumo-deadlift,Sumo Deadlift,legs,barbell,weight,1.15,0.0,0.0,0,"lowback,glutes,hamstrings"
+tibialis-raise,Tibialis Raise,legs,bodyweight,bodyweight,0.6,0.3,0.0,0,calves
+walking-lunge,Walking Lunge,legs,dumbbell,weight,1.0,0.0,0.0,1,"quads,glutes"
+wall-sit,Wall Sit,legs,bodyweight,duration,2.5,0.0,0.0,0,"quads,glutes"
+zercher-squat,Zercher Squat,legs,barbell,weight,1.0,0.0,0.0,0,"quads,glutes"
+arnold-press,Arnold Press,shoulders,dumbbell,weight,0.8,0.0,0.0,1,"shoulders,triceps"
+barbell-front-raise,Barbell Front Raise,shoulders,barbell,weight,0.6,0.0,0.0,0,"shoulders,triceps"
+cable-lateral-raise,Cable Lateral Raise,shoulders,cable,weight,0.54,0.0,0.0,0,"shoulders,triceps"
+cable-rear-delt-fly,Cable Rear Delt Fly,shoulders,cable,weight,0.54,0.0,0.0,2,"shoulders,traps"
+cuban-press,Cuban Press,shoulders,dumbbell,weight,0.8,0.0,0.0,1,"shoulders,traps"
+dumbbell-front-raise,Dumbbell Front Raise,shoulders,dumbbell,weight,0.6,0.0,0.0,1,"shoulders,triceps"
+dumbbell-lateral-raise,Dumbbell Lateral Raise,shoulders,dumbbell,weight,0.6,0.0,0.0,1,"shoulders,triceps"
+dumbbell-y-raise,Dumbbell Y-Raise,shoulders,dumbbell,weight,0.6,0.0,0.0,1,"shoulders,traps"
+handstand-push-up,Handstand Push-Up,shoulders,bodyweight,bodyweight,0.8,0.9,0.0,0,"shoulders,triceps"
+kettlebell-press,Kettlebell Press,shoulders,kettlebell,weight,0.8,0.0,0.0,0,"shoulders,triceps"
+landmine-press,Landmine Press,shoulders,barbell,weight,0.8,0.0,0.0,0,"shoulders,triceps"
+machine-lateral-raise,Machine Lateral Raise,shoulders,machine,weight,0.48,0.0,0.0,0,"shoulders,triceps"
+machine-shoulder-press,Machine Shoulder Press,shoulders,machine,weight,0.8,0.0,0.0,0,"shoulders,triceps"
+overhead-press,Overhead Press,shoulders,barbell,weight,1.0,0.0,0.0,0,"shoulders,triceps"
+pike-push-up,Pike Push-Up,shoulders,bodyweight,bodyweight,0.8,0.65,0.0,0,"shoulders,triceps"
+plate-front-raise,Plate Front Raise,shoulders,plate,weight,0.54,0.0,0.0,0,"shoulders,triceps"
+push-press,Push Press,shoulders,barbell,weight,1.0,0.0,0.0,0,"shoulders,triceps"
+rear-delt-fly,Rear Delt Fly,shoulders,dumbbell,weight,0.6,0.0,0.0,1,"shoulders,traps"
+seated-barbell-press,Seated Barbell Press,shoulders,barbell,weight,1.0,0.0,0.0,0,shoulders
+seated-dumbbell-shoulder-press,Seated Dumbbell Shoulder Press,shoulders,dumbbell,weight,1.0,0.0,0.0,1,"shoulders,triceps"
+standing-dumbbell-shoulder-press,Standing Dumbbell Shoulder Press,shoulders,dumbbell,weight,1.0,0.0,0.0,1,"shoulders,triceps"
+upright-row,Upright Row,shoulders,barbell,weight,0.8,0.0,0.0,0,"shoulders,traps"
+wall-walk,Wall Walk,shoulders,bodyweight,bodyweight,0.8,0.8,0.0,0,"shoulders,triceps"
+z-press,Z Press,shoulders,barbell,weight,1.0,0.0,0.0,0,"shoulders,triceps"
+bench-dip,Bench Dip,triceps,bodyweight,bodyweight,0.8,0.6,0.0,0,"triceps,chest"
+bodyweight-triceps-extension,Bodyweight Triceps Extension,triceps,bodyweight,bodyweight,0.6,0.5,0.0,0,"triceps,chest"
+cable-overhead-triceps-extension,Cable Overhead Triceps Extension,triceps,cable,weight,0.54,0.0,0.0,0,"triceps,chest"
+close-grip-bench-press,Close-Grip Bench Press,triceps,barbell,weight,1.0,0.0,0.0,0,"triceps,chest"
+dumbbell-kickback,Dumbbell Kickback,triceps,dumbbell,weight,0.6,0.0,0.0,1,"triceps,chest"
+dumbbell-skull-crusher,Dumbbell Skull Crusher,triceps,dumbbell,weight,0.6,0.0,0.0,1,"triceps,chest"
+jm-press,JM Press,triceps,barbell,weight,0.8,0.0,0.0,0,"triceps,chest"
+machine-dip,Machine Dip,triceps,machine,weight,0.8,0.0,0.0,0,"triceps,chest"
+overhead-triceps-extension,Overhead Triceps Extension,triceps,dumbbell,weight,0.6,0.0,0.0,0,"triceps,chest"
+reverse-grip-triceps-pushdown,Reverse-Grip Triceps Pushdown,triceps,cable,weight,0.54,0.0,0.0,0,"triceps,chest"
+ring-dip,Ring Dip,triceps,bodyweight,bodyweight,1.0,1.0,0.0,0,"triceps,chest"
+rope-triceps-pushdown,Rope Triceps Pushdown,triceps,cable,weight,0.54,0.0,0.0,0,"triceps,chest"
+single-arm-triceps-pushdown,Single-Arm Triceps Pushdown,triceps,cable,weight,0.54,0.0,0.0,0,"triceps,chest"
+skull-crusher,Skull Crusher,triceps,barbell,weight,0.6,0.0,0.0,0,"triceps,chest"
+tate-press,Tate Press,triceps,dumbbell,weight,0.8,0.0,0.0,1,"triceps,chest"
+triceps-dip,Triceps Dip,triceps,bodyweight,bodyweight,1.0,1.0,0.0,0,"triceps,chest"
+triceps-push-up,Triceps Push-Up,triceps,bodyweight,bodyweight,0.8,0.65,0.0,0,"triceps,chest"
+triceps-pushdown,Triceps Pushdown,triceps,cable,weight,0.54,0.0,0.0,0,"triceps,chest"

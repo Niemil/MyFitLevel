@@ -1221,7 +1221,7 @@ function game_boss_log_card(int $bossId, ?int $meId = null, bool $inner = false)
     echo '</div>';
 }
 
-/** Pays out a finished boss. $killed false = it ran away (a quarter of the pool is still shared out). */
+/** Pays out a finished boss. $killed false = it ran away (40% of the pool is still shared out, and the loot has 40% of its usual odds). */
 function game_boss_end(array $b, bool $killed): void
 {
     if (!$killed) {
@@ -1244,7 +1244,7 @@ function game_boss_end(array $b, bool $killed): void
     $pool = $isTeam ? (int)round((40 + 15 * count($hits)) * $diff) : min(500, 200 + 30 * count($hits));
     $pool = (int)round($pool * $cm);
     if (!$killed) {
-        $pool = (int)round($pool * 0.25);
+        $pool = (int)round($pool * 0.4);
     }
     q('UPDATE bosses SET pool = ? WHERE id = ?', [$pool, $b['id']]);
     $roster = game_roster_by_key((string)$b['boss_key']);
@@ -1259,8 +1259,8 @@ function game_boss_end(array $b, bool $killed): void
             q('UPDATE game_wallet SET kills = kills + 1 WHERE user_id = ?', [$uid]);
         }
         game_coins_add($uid, $coins, $killed ? 'boss' : 'boss_fled', $b['name']);
-        if ($killed && !$isTeam) {
-            $chance = min(0.95, 0.05 + sqrt($share));
+        if (!$isTeam) {
+            $chance = min(0.95, 0.05 + sqrt($share)) * ($killed ? 1 : 0.4);
             $drop = $roster[3];
             if (isset($cat[$drop]) && random_int(1, 10000) <= (int)round($chance * 10000)) {
                 $has = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $drop]);

@@ -104,7 +104,7 @@ $winners = rows('SELECT gt.title, us.username, us.display_name FROM game_titles 
     <li><b>Legendary relic</b>: every boss kill has a 1% chance to drop a permanent relic (+10% to +20% damage or coins, better from tougher bosses) for ONE hero, picked by damage share. Solo, that is a 1% chance; on average one relic per 100 bosses.</li>
     <li><b>Advent</b>: in December a calendar gives everyone the same gift each day, but only on that day. Doors 20 to 24 hold permanent treasures like wings and auras.</li>
     <li><b>Coins</b> also come from workouts (the first two each day), team quests and streaks. Spend them in the <a href="<?= e(url('shop')) ?>">shop</a>.</li>
-    <li>A boss that escapes at the end of the week still pays a small consolation prize.</li>
+    <li>A boss that escapes at the end of the week still pays 40% of the prize pool, and the unique loot is still possible at 40% of the normal odds.</li>
   </ul>
 </div>
 <?php layout_footer('', ['game.js']); ?>

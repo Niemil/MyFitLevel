@@ -105,6 +105,46 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
   </div>
 </section>
 
+<section class="sect rv dressdemo" id="dressdemo">
+  <h2>Dress your hero</h2>
+  <p class="sub">Earn coins from every workout and spend them on gear. Try some of the outfits, wings and auras.</p>
+  <div class="dd-wrap">
+    <div class="dd-stage"><img id="ddimg" src="<?= e(url('fito-demo?o=cha&w=angel_gold&a=ring_gold')) ?>" width="300" height="300" alt="Your hero in a chosen outfit"></div>
+    <div class="dd-pick" data-base="<?= e(url('fito-demo')) ?>">
+      <h4>Outfit</h4>
+      <div class="dd-row" data-k="o">
+        <?php foreach (['wan' => 'Wanderer', 'iro' => 'Ironclad', 'cha' => 'Champion', 'myt' => 'Mythril', 'sto' => 'Stormforged', 'sam' => 'Samurai', 'vik' => 'Viking', 'mag' => 'Archmage', 'nin' => 'Shadow', 'pir' => 'Pirate', 'dra' => 'Dragonscale', 'rea' => 'Reaper'] as $id => $nm): ?>
+          <button type="button" class="btn ghost small<?= $id === 'cha' ? ' on' : '' ?>" data-v="<?= $id ?>"><?= e($nm) ?></button>
+        <?php endforeach; ?>
+      </div>
+      <h4>Wings</h4>
+      <div class="dd-row" data-k="w">
+        <button type="button" class="btn ghost small" data-v="">None</button>
+        <button type="button" class="btn ghost small on" data-v="angel_gold">Golden angel</button>
+        <button type="button" class="btn ghost small" data-v="bat_obsidian">Bat</button>
+        <button type="button" class="btn ghost small" data-v="dragon_crimson">Dragon</button>
+        <button type="button" class="btn ghost small" data-v="fairy_emerald">Fairy</button>
+      </div>
+      <h4>Aura</h4>
+      <div class="dd-row" data-k="a">
+        <button type="button" class="btn ghost small" data-v="">None</button>
+        <button type="button" class="btn ghost small on" data-v="ring_gold">Halo ring</button>
+        <button type="button" class="btn ghost small" data-v="flame_lava">Flame</button>
+        <button type="button" class="btn ghost small" data-v="sparks_sakura">Sparkle</button>
+        <button type="button" class="btn ghost small" data-v="glow_mythril">Glow</button>
+      </div>
+      <h4>Every muscle levels up</h4>
+      <div class="dd-mus">
+        <?php foreach ([['Chest', 8], ['Back', 6], ['Shoulders', 5], ['Arms', 7], ['Core', 4], ['Legs', 9]] as [$mn, $ml]): ?>
+          <div><span><?= e($mn) ?></span><i><b style="width:<?= $ml * 10 ?>%"></b></i><em>Lv <?= $ml ?></em></div>
+        <?php endforeach; ?>
+      </div>
+      <p class="muted small" style="margin:.4rem 0 0">Train a muscle to level it up and unlock stronger gear for that body part. Train your whole body in a week for a damage bonus.</p>
+      <?php if ($open): ?><p style="margin:.6rem 0 0"><a class="btn" href="<?= e(url('register')) ?>">Create a free account</a></p><?php endif; ?>
+    </div>
+  </div>
+</section>
+
 <section class="sect rv landboss">
   <h2>This week's boss is waiting</h2>
   <p class="sub">Every workout anyone logs damages it. Level up to hit harder, share the loot, and team up with friends.</p>
@@ -182,4 +222,4 @@ layout_header($name . ': Free Workout Tracker & Fitocracy Alternative', '', [
   <a class="btn big" href="<?= e(url('register')) ?>">Create a free account</a>
 </div>
 <?php endif; ?>
-<?php layout_footer('', ['home.js', 'game.js']); ?>
+<?php layout_footer('', ['home.js', 'game.js', 'landdress.js']); ?>

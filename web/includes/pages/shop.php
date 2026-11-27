@@ -39,6 +39,33 @@ if (is_post()) {
             q('UPDATE game_items SET equipped = 1 WHERE user_id = ? AND item = ?', [$uid, $key]);
             flash('Equipped ' . $cat[$key][0] . '.');
         }
+    } elseif ($do === 'wear_tried') {
+        // wardrobe: buy whatever is missing (and affordable, and allowed) from the tried-on list, then wear it all
+        $bought = 0; $worn = 0; $skipped = [];
+        foreach (array_slice(array_unique(array_filter(explode(',', (string)($_POST['keys'] ?? '')))), 0, 12) as $k) {
+            if (!isset($cat[$k])) { continue; }
+            $has = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $k]);
+            if (!$has) {
+                $w = game_wallet($uid);
+                if ($cat[$k][5] <= 0 || (int)$u['level'] < game_item_req($k) || game_item_muscle_error($uid, $k) !== null || (int)$w['coins'] < $cat[$k][5]) {
+                    $skipped[] = $cat[$k][0];
+                    continue;
+                }
+                game_coins_add($uid, -$cat[$k][5], 'shop', $cat[$k][0]);
+                game_give_item($uid, $k, 'shop');
+                $bought++;
+            } elseif ((int)$u['level'] < game_item_req($k) || game_item_muscle_error($uid, $k) !== null) {
+                $skipped[] = $cat[$k][0];
+                continue;
+            }
+            $slot = $cat[$k][2];
+            $same = array_keys(array_filter($cat, fn($i) => $i[2] === $slot));
+            q('UPDATE game_items SET equipped = 0 WHERE user_id = ? AND item IN (' . in_clause($same) . ')', array_merge([$uid], $same));
+            q('UPDATE game_items SET equipped = 1 WHERE user_id = ? AND item = ?', [$uid, $k]);
+            $worn++;
+        }
+        flash(($worn ? 'Now wearing ' . $worn . ' item' . ($worn > 1 ? 's' : '') . ($bought ? ' (bought ' . $bought . ')' : '') . '.' : 'Nothing could be worn.')
+            . ($skipped ? ' Not possible yet: ' . implode(', ', $skipped) . ' (coins, level or muscle level).' : ''), $worn ? 'ok' : 'err');
     } elseif ($do === 'sell' && isset($cat[$key])) {
         $r = row('SELECT got_at, source FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key]);
         if ($r && $r['source'] === 'shop' && $cat[$key][5] > 0) {
@@ -72,7 +99,8 @@ if (is_post()) {
     }
     $back = (string)($_POST['back'] ?? '');
     if ($back === 'wardrobe') {
-        redirect('wardrobe?s=' . preg_replace('/[^a-z_]/', '', (string)($_POST['bs'] ?? 'armor')));
+        $bt = implode(',', array_filter(array_map(fn($k) => isset($cat[$k]) ? $k : '', explode(',', (string)($_POST['bt'] ?? '')))));
+        redirect('wardrobe?s=' . preg_replace('/[^a-z_]/', '', (string)($_POST['bs'] ?? 'armor')) . ($bt !== '' ? '&t=' . $bt : '') . '#items');
     }
     redirect(in_array($back, ['feed', 'boss', 'shop'], true) ? $back : 'shop');
 }

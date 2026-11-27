@@ -23,6 +23,7 @@ if ($path === 'index.php') {
 
 $routes = [
     '#^$#'                         => 'home',
+    '#^fito-demo$#'                => 'fitodemo',
     '#^login$#'                    => 'login',
     '#^register$#'                 => 'register',
     '#^logout$#'                   => 'logout',

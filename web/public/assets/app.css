@@ -1156,3 +1156,27 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .tc-b{word-break:break-word;margin-top:2px}
 .tc-x{background:none;border:0;color:inherit;opacity:.55;font-size:.75rem;cursor:pointer;padding:0;text-decoration:underline}
 .tc-form{display:flex;gap:8px}.tc-form input{flex:1;min-width:0}
+
+.wsticky{position:sticky;top:64px;z-index:15;backdrop-filter:blur(8px)}
+.wsticky .charstage{min-height:0;padding:4px 0}
+.wsticky .charstage svg{height:min(300px,34vh);width:auto}
+@media (max-width:899px){.wsticky .charstage svg{height:150px}.wsticky .charmood{font-size:.85rem}}
+
+.dd-wrap{display:grid;grid-template-columns:minmax(240px,340px) 1fr;gap:20px;align-items:center;max-width:900px;margin:0 auto}
+.dd-stage{display:flex;justify-content:center;background:radial-gradient(circle at 50% 60%,rgba(98,204,255,.2),transparent 65%);border-radius:16px;padding:8px}
+.dd-stage img{max-width:100%;height:auto}
+.dd-pick h4{margin:.7rem 0 .3rem;font-size:.85rem;opacity:.8}.dd-pick h4:first-child{margin-top:0}
+.dd-row{display:flex;flex-wrap:wrap;gap:6px}
+.dd-row .btn.on{background:var(--brand,#5a64ff);color:#fff;border-color:transparent}
+.dd-mus>div{display:grid;grid-template-columns:78px 1fr 42px;gap:8px;align-items:center;font-size:.85rem;margin:3px 0}
+.dd-mus i{display:block;height:8px;border-radius:4px;background:rgba(120,120,160,.2);overflow:hidden}
+.dd-mus b{display:block;height:100%;background:linear-gradient(90deg,#62ccff,#5a64ff);animation:ddgrow 1.6s ease-out both}
+.dd-mus em{font-style:normal;opacity:.7;text-align:right}
+@keyframes ddgrow{from{width:0}}
+@media (max-width:700px){.dd-wrap{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.dd-mus b{animation:none}}
+.wsticky{display:flex;align-items:center;justify-content:center;gap:14px;padding:6px 12px}
+.wsticky #wsticky{position:absolute;top:6px;right:8px;float:none!important}
+.wsticky .charstage svg{height:min(200px,26vh)}
+.wsticky .charmood{text-align:left}
+@media (max-width:899px){.wsticky{padding:4px 8px;gap:8px}.wsticky .charstage svg{height:130px}.wsticky #wsticky{font-size:.7rem;padding:2px 6px}}

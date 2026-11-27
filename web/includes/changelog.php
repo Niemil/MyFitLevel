@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.47.6', '2026-11-27 09:00', 'Call log for SnakeDiet and webhooks', ['New The Connect page lists the last 20 outgoing calls (time, address, status and the first part of the reply). Your key is never shown.', 'Improve A failed resend now shows the full reply and the exact address that was called. Only successful resends count toward the limit of 3 per 10 minutes.'], 'new'],
     ['3.47.5', '2026-11-27 08:45', 'Clearer resend errors', ['Fix The SnakeDiet resend button now shows why a workout was refused.'], 'fix'],
     ['3.47.4', '2026-11-27 09:10', 'Sets to SnakeDiet and resend', ['Improve Workouts sent to SnakeDiet now include every set (exercise, reps or seconds, and weight in kg), so SnakeDiet can count calories from the real load.', 'New Connect page: a "Resend last 7 days to SnakeDiet" button for when you set up the link after training. Workouts SnakeDiet already has are skipped.'], 'new'],
     ['3.47.3', '2026-11-27 08:40', 'Workouts go to SnakeDiet as workouts', ['Improve If your webhook points at SnakeDiet, each finished workout is now sent as a real workout (time, type and one line per exercise), so SnakeDiet counts calories and KTN itself. It is no longer posted as a feed message there.'], 'improve'],

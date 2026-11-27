@@ -21,10 +21,43 @@ function webhook_resolve(string $url): ?array
     return [$host, $ip];
 }
 
-function webhook_post(string $url, array $payload, string $key = '', int $timeout = 3): bool
+function webhook_log_ensure(): void
+{
+    static $done = false;
+    if (!$done) {
+        $done = true;
+        q('CREATE TABLE IF NOT EXISTS webhook_log (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL,
+            method VARCHAR(8) NOT NULL DEFAULT \'POST\',
+            url VARCHAR(300) NOT NULL,
+            status SMALLINT NOT NULL DEFAULT 0,
+            response VARCHAR(400) NOT NULL DEFAULT \'\',
+            KEY idx_user (user_id, id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    }
+}
+
+/** Keeps the last 20 outgoing calls per member (never the key). */
+function webhook_log_add(int $uid, string $url, int $status, string $resp): void
+{
+    try {
+        webhook_log_ensure();
+        q('INSERT INTO webhook_log (user_id, created_at, method, url, status, response) VALUES (?,?,?,?,?,?)', [$uid, date('Y-m-d H:i:s'), 'POST', mb_substr($url, 0, 300), $status, mb_substr($resp, 0, 300)]);
+        q('DELETE FROM webhook_log WHERE user_id = ? AND id NOT IN (SELECT id FROM (SELECT id FROM webhook_log WHERE user_id = ? ORDER BY id DESC LIMIT 20) t)', [$uid, $uid]);
+    } catch (Throwable $e) {
+    }
+}
+
+function webhook_post(string $url, array $payload, string $key = '', int $timeout = 3, int $logUid = 0): bool
 {
     $r = webhook_resolve($url);
     if (!$r || !function_exists('curl_init')) {
+        $GLOBALS['webhook_last'] = ['code' => 0, 'url' => $url, 'raw' => '', 'error' => 'address not reachable or not allowed', 'body' => []];
+        if ($logUid > 0) {
+            webhook_log_add($logUid, $url, 0, 'not sent: address could not be resolved or is not allowed');
+        }
         return false;
     }
     $ch = curl_init($url);
@@ -36,8 +69,13 @@ function webhook_post(string $url, array $payload, string $key = '', int $timeou
     ]);
     $body = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $cerr = curl_error($ch);
     curl_close($ch);
-    $GLOBALS['webhook_last'] = ['code' => $code, 'body' => is_string($body) ? (json_decode($body, true) ?: []) : []];
+    $raw = is_string($body) ? trim($body) : '';
+    $GLOBALS['webhook_last'] = ['code' => $code, 'url' => $url, 'raw' => $raw, 'error' => $cerr, 'body' => $raw !== '' ? (json_decode($raw, true) ?: []) : []];
+    if ($logUid > 0) {
+        webhook_log_add($logUid, $url, $code, $raw !== '' ? $raw : ($cerr !== '' ? 'curl: ' . $cerr : ''));
+    }
     return $code >= 200 && $code < 300;
 }
 
@@ -152,8 +190,8 @@ function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, strin
             $payload['details'] = array_slice($details, 0, 60);
         }
     }
-    $ok = webhook_post('https://snakediet.org/api/v1/workouts', $payload, $key, $timeout);
-    $GLOBALS['webhook_err'] = $ok ? '' : ('HTTP ' . (int)($GLOBALS['webhook_last']['code'] ?? 0) . ' ' . (string)($GLOBALS['webhook_last']['body']['error'] ?? ''));
+    $ok = webhook_post('https://snakediet.org/api/v1/workouts', $payload, $key, $timeout, $uid);
+    $GLOBALS['webhook_err'] = $ok ? '' : ('HTTP ' . (int)($GLOBALS['webhook_last']['code'] ?? 0) . ' ' . mb_substr((string)($GLOBALS['webhook_last']['raw'] ?? '') ?: (string)($GLOBALS['webhook_last']['error'] ?? ''), 0, 300) . ' [' . (string)($GLOBALS['webhook_last']['url'] ?? '') . ']');
     return $ok ? (!empty($GLOBALS['webhook_last']['body']['duplicate']) ? 'duplicate' : 'sent') : 'failed';
 }
 
@@ -171,7 +209,7 @@ function webhook_resend_snakediet(int $uid, int $days = 7): array
     foreach ($ws as $w) {
         $r = webhook_snakediet_workout($uid, (int)$w['id'], $w, $u, $url, $key, 8);
         $res[$r]++;
-        if ($r === 'failed') {
+        if ($r === 'failed' && empty($GLOBALS['webhook_resend_err'])) {
             $GLOBALS['webhook_resend_err'] = (string)($GLOBALS['webhook_err'] ?? '');
         }
     }
@@ -205,7 +243,7 @@ function webhook_fire(int $uid, int $wid, int $points, array $awards): void
         if ($details) {
             $payload['details'] = $details;
         }
-        webhook_post($url, $payload, (string)setting('webhook_key:' . $uid, ''));
+        webhook_post($url, $payload, (string)setting('webhook_key:' . $uid, ''), 3, $uid);
     } catch (Throwable $e) {
         // never let a broken webhook break saving a workout
     }

@@ -27,17 +27,19 @@ if ($u && is_post()) {
         }
     } elseif ($do === 'hook_resend') {
         if (!rate_ok('hookresend:' . $uid, 3, 600)) {
-            flash('Wait a few minutes before sending again.', 'err');
+            flash('Wait a few minutes before sending again (3 successful sends per 10 minutes).', 'err');
         } else {
-            rate_hit('hookresend:' . $uid);
             [$n, $d, $x] = webhook_resend_snakediet($uid, 7);
+            if ($n > 0) {
+                rate_hit('hookresend:' . $uid);   // only successful sends count
+            }
             flash($n + $d + $x === 0 ? 'Nothing to send. Save a SnakeDiet address and key first, and log a workout in the last 7 days.' : 'Sent ' . $n . ' workout' . ($n === 1 ? '' : 's') . ($d ? ', ' . $d . ' already there' : '') . ($x ? ', ' . $x . ' failed (' . trim((string)($GLOBALS['webhook_resend_err'] ?? '')) . ')' : '') . '.', $x ? 'err' : 'ok');
         }
     } elseif ($do === 'hook_test') {
         $url = (string)setting('webhook:' . $uid, '');
         if ($url !== '' && rate_ok('hooktest:' . $uid, 5, 600)) {
             rate_hit('hooktest:' . $uid);
-            $ok = webhook_post($url, ['content' => '✅ MyFitLevel test message. It works!', 'text' => '✅ MyFitLevel test message. It works!', 'username' => 'MyFitLevel', 'source' => (string)parse_url(site_url(''), PHP_URL_HOST), 'event' => 'test'], (string)setting('webhook_key:' . $uid, ''));
+            $ok = webhook_post($url, ['content' => '✅ MyFitLevel test message. It works!', 'text' => '✅ MyFitLevel test message. It works!', 'username' => 'MyFitLevel', 'source' => (string)parse_url(site_url(''), PHP_URL_HOST), 'event' => 'test'], (string)setting('webhook_key:' . $uid, ''), 3, $uid);
             flash($ok ? 'Sent! Check where the webhook posts.' : 'The other side did not accept it. Check the address.', $ok ? 'ok' : 'err');
         } else {
             flash('Save a webhook address first (max 5 tests per 10 minutes).', 'err');
@@ -78,6 +80,15 @@ layout_header('Connect & automate', '');
     <?php if (webhook_is_snakediet($hook)): ?><button class="btn ghost" name="do" value="hook_resend" type="submit">Resend last 7 days to SnakeDiet</button><?php endif; ?></div>
     <p class="muted small">Leave empty and save to remove it. Only https addresses on the public internet work.</p></form>
   <?php else: ?><p><a href="<?= e(url('login')) ?>">Log in</a> to set this up.</p><?php endif; ?></div>
+<?php if ($u): webhook_log_ensure(); $wlog = rows('SELECT created_at, method, url, status, response FROM webhook_log WHERE user_id = ? ORDER BY id DESC LIMIT 20', [$uid]); ?>
+<?php if ($wlog): ?>
+<div class="card prose"><h3>Last outgoing calls</h3>
+  <p class="muted small">The last 20 calls made from here (your key is never shown).</p>
+  <?php foreach ($wlog as $l): ?>
+  <div class="small" style="margin:.5rem 0;word-break:break-all"><b class="<?= (int)$l['status'] >= 200 && (int)$l['status'] < 300 ? 'ok' : '' ?>"><?= (int)$l['status'] ?></b> <?= e($l['method']) ?> <code><?= e($l['url']) ?></code> <span class="muted"><?= e($l['created_at']) ?></span><br><span class="muted"><?= e($l['response'] !== '' ? $l['response'] : '(no response)') ?></span></div>
+  <?php endforeach; ?></div>
+<?php endif; endif; ?>
+
 
 <div class="card prose"><h3>🐍 Link with SnakeDiet (and other sites)</h3>
   <p>Two-way, no coding. <b>From here to SnakeDiet:</b> on SnakeDiet create an API key (Settings), then paste here as webhook address <code>https://snakediet.org/api/v1/posts</code> and that key in "Key for that site". Each finished workout then shows up as a post there.</p>

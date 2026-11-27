@@ -22,7 +22,14 @@ function fito_look(int $uid): array
     foreach ($g['by_slot'] as $slot => $key) {
         $i = $cat[$key];
         $tier = game_item_tier($key);
-        $gear[$slot] = ['key' => $key, 'name' => $i[0], 'tier' => $tier];
+        $gear[$slot] = ['key' => $key, 'name' => $i[0], 'tier' => $tier, 'set' => (string)($i[8] ?? '')];
+    }
+    // look-only items cover the stat gear in the same slot
+    foreach (array_keys($gear) as $slot) {
+        if (strpos($slot, 'look_') === 0) {
+            $gear[substr($slot, 5)] = $gear[$slot];
+            unset($gear[$slot]);
+        }
     }
     return ['species' => $r['species'], 'eye' => $r['eye'], 'picks' => (int)$r['picks'], 'gear' => $gear];
 }
@@ -206,7 +213,7 @@ function gear_icon(string $key, int $size = 56): string
     if (!$i) {
         return '';
     }
-    $slot = $i[2];
+    $slot = preg_replace('/^look_/', '', (string)$i[2]);
     [$a, $b] = fito_ramp(game_item_tier($key));
     $f = 'fill="' . $a . '" stroke="' . $b . '" stroke-width="2.5" stroke-linejoin="round"';
     $dk = 'fill="#1d2233"';
@@ -247,4 +254,21 @@ function gear_icon(string $key, int $size = 56): string
             $g = '<path d="M16 8Q32 40 48 8" stroke="#d9deea" stroke-width="2.5" fill="none"/><circle cx="32" cy="42" r="12" ' . $f . '/>';
     }
     return '<svg class="gearico" width="' . $size . '" height="' . $size . '" viewBox="0 0 64 64" aria-hidden="true">' . $g . '</svg>';
+}
+
+/** The look with some items tried on (fitting room). Look-only and stat items both just change how Fito appears. */
+function fito_try_on(array $look, array $keys): array
+{
+    $cat = game_items();
+    foreach ($keys as $k) {
+        if (!isset($cat[$k])) {
+            continue;
+        }
+        $i = $cat[$k];
+        $slot = preg_replace('/^look_/', '', (string)$i[2]);
+        if (in_array($slot, ['weapon', 'helmet', 'armor', 'gloves', 'boots', 'charm', 'wings', 'aura'], true)) {
+            $look['gear'][$slot] = ['key' => $k, 'name' => $i[0], 'tier' => game_item_tier($k), 'set' => (string)($i[8] ?? '')];
+        }
+    }
+    return $look;
 }

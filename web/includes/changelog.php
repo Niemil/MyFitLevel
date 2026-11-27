@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.58.0', '2026-11-27 18:00', 'Wardrobe and fitting room', ['New Wardrobe: try on any gear, even things you cannot buy yet, and see how your character looks.', 'New Look-only outfits for every set. They cover your stat gear, give no bonus and need no level.', 'New Mid and top gear sets now need a muscle level too: Legs for boots, Arms for weapons and gloves, Shoulders for helmets, Chest or Back for armor.'], 'new'],
     ['3.57.0', '2026-11-27 17:10', 'Muscle levels', ['New Every muscle now levels up from the sets you log, shown on the new Muscle levels page.', 'New Train many body areas in a week to get up to +12% boss damage.', 'New 10 new achievements for muscle levels, training every muscle and full body weeks.'], 'new'],
     ['3.56.2', '2026-11-27 16:30', 'Better prize when the boss escapes', ['Improve A boss that escapes now pays 40% of the prize pool, up from 25%, and its unique loot can still drop at 40% of the normal odds.'], 'improve'],
     ['3.56.1', '2026-11-27 16:20', 'Bigger weekly boss prize', ['Improve The weekly boss prize pool now starts at 200 coins and grows by 30 for every hero who hits it, up to 500.'], 'improve'],

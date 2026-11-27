@@ -18,6 +18,8 @@ if (is_post()) {
             flash('You already own that.', 'err');
         } elseif ((int)$u['level'] < game_item_req($key)) {
             flash('You need level ' . game_item_req($key) . ' for that.', 'err');
+        } elseif (($me = game_item_muscle_error($uid, $key)) !== null) {
+            flash($me, 'err');
         } elseif ((int)$w['coins'] < $cat[$key][5]) {
             flash('Not enough coins yet. Keep training!', 'err');
         } else {
@@ -28,6 +30,8 @@ if (is_post()) {
     } elseif ($do === 'equip' && isset($cat[$key])) {
         if ((int)$u['level'] < game_item_req($key)) {
             flash('You need level ' . game_item_req($key) . ' to wear that.', 'err');
+        } elseif (($me = game_item_muscle_error($uid, $key)) !== null) {
+            flash($me, 'err');
         } elseif ((int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key])) {
             $slot = $cat[$key][2];
             $same = array_keys(array_filter($cat, fn($i) => $i[2] === $slot));
@@ -67,6 +71,9 @@ if (is_post()) {
         }
     }
     $back = (string)($_POST['back'] ?? '');
+    if ($back === 'wardrobe') {
+        redirect('wardrobe?s=' . preg_replace('/[^a-z_]/', '', (string)($_POST['bs'] ?? 'armor')));
+    }
     redirect(in_array($back, ['feed', 'boss', 'shop'], true) ? $back : 'shop');
 }
 
@@ -90,6 +97,7 @@ layout_header('Shop', 'quests');
   <div><b><?= number_format((int)$w['dmg_total']) ?></b><span>total damage</span></div>
   <div><b><?= (int)$w['kills'] ?></b><span>bosses helped down</span></div>
 </div>
+<p><a href="<?= e(url('wardrobe')) ?>">Wardrobe and fitting room</a> <span class="muted small">· try on anything, and buy look-only outfits with no stats</span></p>
 <p class="muted">Coins come from your first two workouts each day, team quests and boss prizes. Gear is permanent. Level still matters most: a high level hits much harder than any item.</p>
 
 <?php game_chest_card($uid); ?>
@@ -119,11 +127,11 @@ $piece = function (string $k) use ($cat, $owned, $ownedBy, $wearing, $u, $w): vo
     $has = isset($owned[$k]);
     $cur = $wearing[$sl] ?? null;
     $req = game_item_req($k);
-    $locked = (int)$u['level'] < $req;
+    $locked = (int)$u['level'] < $req || game_item_muscle_error((int)$u['id'], $k) !== null;
     ?>
     <form method="post" class="gitem<?= $has && $owned[$k] ? ' on' : '' ?><?= $price === 0 ? ' rare' : '' ?>"><?= csrf_field() ?><input type="hidden" name="item" value="<?= e($k) ?>">
       <span class="gi-ic"><?= $ic === '' ? cosm_preview($k, $sl) : (in_array($sl, ['weapon', 'helmet', 'armor', 'gloves', 'boots', 'charm', 'wings', 'aura'], true) ? gear_icon($k, 52) : e($ic)) ?></span><b><?= e($n) ?></b>
-      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?><?= $req > 1 ? ' · level ' . $req : '' ?></small>
+      <small><?= $ic === '' ? e($fl) : '' ?><?= $dm ? '+' . $dm . '% damage' : '' ?><?= $dm && $cn ? ' · ' : '' ?><?= $cn ? '+' . $cn . '% coins' : '' ?><?= $req > 1 ? ' · level ' . $req : '' ?><?= game_item_muscle_text($k) !== '' ? ' · ' . e(game_item_muscle_text($k)) : '' ?></small>
       <?php if (!$has && $cur && $cur !== $k && $ic !== ''):
           $cd = $cat[$cur][3]; $cc = $cat[$cur][4]; $dd = $dm - $cd; $dc = $cn - $cc; ?>
         <small class="muted">If worn instead of <?= e($cat[$cur][0]) ?>: <?= ($dd >= 0 ? '+' : '') . $dd ?>% damage, <?= ($dc >= 0 ? '+' : '') . $dc ?>% coins</small>
@@ -167,7 +175,7 @@ $piece = function (string $k) use ($cat, $owned, $ownedBy, $wearing, $u, $w): vo
 
 <?php
 // Other gear you own: older items, boss drops and achievement items
-$otherOwned = array_filter(array_keys($owned), fn($k) => isset($cat[$k]) && !in_array($cat[$k][2], $cosSlots, true) && !in_array($k, $setKeys, true));
+$otherOwned = array_filter(array_keys($owned), fn($k) => isset($cat[$k]) && !in_array($cat[$k][2], $cosSlots, true) && !in_array($k, $setKeys, true) && strpos($k, 'look_') !== 0);
 if ($otherOwned): ?>
 <div class="card">
   <h3>Other gear you own</h3>

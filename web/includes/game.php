@@ -183,7 +183,7 @@ function game_ensure_v1(): void
 /** key => [name, icon, slot, dmg %, coin %, price (0 = boss drop), flavour] */
 function game_items(): array
 {
-    return game_set_items() + [
+    return game_set_items() + game_look_items() + [
         'iron_blade'     => ['Iron Blade', '⚔️', 'weapon', 3, 0, 150, 'A plain, honest sword.'],
         'steel_axe'      => ['Steel Axe', '🪓', 'weapon', 6, 0, 400, 'Heavy and well balanced.'],
         'rune_hammer'    => ['Rune Hammer', '🔨', 'weapon', 10, 0, 900, 'Glows when you hit a PR.'],
@@ -1014,9 +1014,74 @@ function game_set_items(): array
     return $c;
 }
 
+/**
+ * Look-only versions of every set piece (like MapleStory cosmetics): they draw over your stat gear, give no bonus and need no level.
+ * key look_<set>_<w|h|a|g|b>, slot look_<slot>.
+ */
+function game_look_items(): array
+{
+    static $c = null;
+    if ($c !== null) {
+        return $c;
+    }
+    $suf = ['weapon' => 'w', 'helmet' => 'h', 'armor' => 'a', 'gloves' => 'g', 'boots' => 'b'];
+    $c = [];
+    foreach (game_set_defs() as $id => $sdef) {
+        foreach ($sdef['pieces'] as $slot => [$n, $d, $co, $price]) {
+            $c['look_' . $id . '_' . $suf[$slot]] = [$n . ' (look)', '@', 'look_' . $slot, 0, 0, max(20, (int)(round($price * 0.4 / 10) * 10)), 'Look only: the ' . $sdef['name'] . ' style, no bonus and no level needed', $sdef['tier'], $id];
+        }
+    }
+    return $c;
+}
+
+/** Muscle level a set piece asks for on top of the character level: ['areas' => [...], 'level' => n], or null. */
+function game_item_muscle_req(string $key): ?array
+{
+    if (!preg_match('/^set_[a-z]+_([whagb])$/', $key, $m)) {
+        return null;
+    }
+    $lvl = [2 => 3, 3 => 6, 4 => 10][(int)(game_items()[$key][7] ?? 0)] ?? 0;
+    if ($lvl === 0) {
+        return null;
+    }
+    return ['areas' => ['w' => ['Arms'], 'g' => ['Arms'], 'h' => ['Shoulders'], 'a' => ['Chest', 'Back'], 'b' => ['Legs']][$m[1]], 'level' => $lvl];
+}
+
+/** Your level in a body area: its best muscle. */
+function muscle_area_level(int $uid, string $area): int
+{
+    $ms = muscle_stats($uid);
+    $best = 0;
+    foreach (muscle_areas()[$area] ?? [] as $r) {
+        $best = max($best, (int)($ms['lv'][$r] ?? 0));
+    }
+    return $best;
+}
+
+/** Text of the muscle requirement for an item, e.g. "Legs level 6", or ''. */
+function game_item_muscle_text(string $key): string
+{
+    $r = game_item_muscle_req($key);
+    return $r ? implode(' or ', $r['areas']) . ' level ' . $r['level'] : '';
+}
+
+/** Null when the member meets the item's muscle requirement, otherwise a message. */
+function game_item_muscle_error(int $uid, string $key): ?string
+{
+    $r = game_item_muscle_req($key);
+    if (!$r) {
+        return null;
+    }
+    $mine = max(array_map(fn($a) => muscle_area_level($uid, $a), $r['areas']));
+    return $mine >= $r['level'] ? null : 'Needs ' . game_item_muscle_text($key) . ' (yours is ' . $mine . '). Train that muscle to unlock it.';
+}
+
 /** Level needed to buy or wear an item: cheap gear is open to everyone, the best gear is for long-term members. */
 function game_item_req(string $key): int
 {
+    if (strpos($key, 'look_') === 0) {
+        return 1;
+    }
     $price = (int)(game_items()[$key][5] ?? 0);
     if ($price >= 3000) { return 30; }
     if ($price >= 1800) { return 20; }

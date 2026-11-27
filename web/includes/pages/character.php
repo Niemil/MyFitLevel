@@ -47,6 +47,7 @@ $slotNames = ['weapon' => 'Weapon', 'armor' => 'Armor', 'helmet' => 'Helmet', 'g
 layout_header('Character', 'me');
 ?>
 <h1>Your character</h1>
+<p class="small"><a href="<?= e(url('wardrobe')) ?>">Wardrobe and fitting room</a></p>
 <div class="card charcard">
   <div class="charstage"><?= fito_dressed($look, 300) ?></div>
   <div class="charmood">

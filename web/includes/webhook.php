@@ -153,6 +153,7 @@ function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, strin
         }
     }
     $ok = webhook_post('https://snakediet.org/api/v1/workouts', $payload, $key, $timeout);
+    $GLOBALS['webhook_err'] = $ok ? '' : ('HTTP ' . (int)($GLOBALS['webhook_last']['code'] ?? 0) . ' ' . (string)($GLOBALS['webhook_last']['body']['error'] ?? ''));
     return $ok ? (!empty($GLOBALS['webhook_last']['body']['duplicate']) ? 'duplicate' : 'sent') : 'failed';
 }
 
@@ -168,7 +169,11 @@ function webhook_resend_snakediet(int $uid, int $days = 7): array
     $ws = rows('SELECT id, title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE user_id = ? AND performed_at >= ? ORDER BY performed_at LIMIT 25', [$uid, date('Y-m-d H:i:s', time() - $days * 86400)]);
     $res = ['sent' => 0, 'duplicate' => 0, 'failed' => 0];
     foreach ($ws as $w) {
-        $res[webhook_snakediet_workout($uid, (int)$w['id'], $w, $u, $url, $key, 8)]++;
+        $r = webhook_snakediet_workout($uid, (int)$w['id'], $w, $u, $url, $key, 8);
+        $res[$r]++;
+        if ($r === 'failed') {
+            $GLOBALS['webhook_resend_err'] = (string)($GLOBALS['webhook_err'] ?? '');
+        }
     }
     return [$res['sent'], $res['duplicate'], $res['failed']];
 }

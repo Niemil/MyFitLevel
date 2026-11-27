@@ -31,7 +31,7 @@ if ($u && is_post()) {
         } else {
             rate_hit('hookresend:' . $uid);
             [$n, $d, $x] = webhook_resend_snakediet($uid, 7);
-            flash($n + $d + $x === 0 ? 'Nothing to send. Save a SnakeDiet address and key first, and log a workout in the last 7 days.' : 'Sent ' . $n . ' workout' . ($n === 1 ? '' : 's') . ($d ? ', ' . $d . ' already there' : '') . ($x ? ', ' . $x . ' failed' : '') . '.', $x ? 'err' : 'ok');
+            flash($n + $d + $x === 0 ? 'Nothing to send. Save a SnakeDiet address and key first, and log a workout in the last 7 days.' : 'Sent ' . $n . ' workout' . ($n === 1 ? '' : 's') . ($d ? ', ' . $d . ' already there' : '') . ($x ? ', ' . $x . ' failed (' . trim((string)($GLOBALS['webhook_resend_err'] ?? '')) . ')' : '') . '.', $x ? 'err' : 'ok');
         }
     } elseif ($do === 'hook_test') {
         $url = (string)setting('webhook:' . $uid, '');

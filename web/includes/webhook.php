@@ -43,6 +43,14 @@ function webhook_log_ensure(): void
 function webhook_log_add(int $uid, string $url, int $status, string $resp, string $method = 'POST'): void
 {
     try {
+        // Also a plain file outside public/ (config/webhook.log, rotated at 512 KB), readable over FTP/SSH. Never contains keys.
+        $lf = APP_ROOT . '/config/webhook.log';
+        if (is_dir(APP_ROOT . '/config')) {
+            if (is_file($lf) && filesize($lf) > 524288) {
+                @rename($lf, $lf . '.1');
+            }
+            @file_put_contents($lf, date('Y-m-d H:i:s') . ' | u' . $uid . ' | ' . ($method === 'IN' ? 'IN ' : 'OUT') . ' | ' . $url . ' | ' . $status . ' | ' . str_replace(["\r", "\n"], ' ', mb_substr($resp, 0, 300)) . "\n", FILE_APPEND | LOCK_EX);
+        }
         webhook_log_ensure();
         q('INSERT INTO webhook_log (user_id, created_at, method, url, status, response) VALUES (?,?,?,?,?,?)', [$uid, date('Y-m-d H:i:s'), $method, mb_substr($url, 0, 300), $status, mb_substr($resp, 0, 300)]);
         q('DELETE FROM webhook_log WHERE user_id = ? AND id NOT IN (SELECT id FROM (SELECT id FROM webhook_log WHERE user_id = ? ORDER BY id DESC LIMIT 20) t)', [$uid, $uid]);
@@ -154,7 +162,7 @@ function webhook_is_snakediet(string $url): bool
     return $h === 'snakediet.org' || $h === 'www.snakediet.org';
 }
 
-function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, string $url, string $key, int $timeout = 3): string
+function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, string $url, string $key, int $timeout = 3, string $event = 'workout.logged'): string
 {
     $dur = (int)($w['duration_sec'] ?? 0);
     $minutes = $dur > 0 ? (int)round($dur / 60) : (int)round(max(10, (int)$w['set_count'] * 2.5));
@@ -175,7 +183,7 @@ function webhook_snakediet_workout(int $uid, int $wid, array $w, array $u, strin
         }
     }
     $start = min(strtotime((string)$w['performed_at']), time() - 60);
-    $payload = ['id' => 'mfl-' . $uid . '-' . $wid, 'source' => 'myfitlevel.com',
+    $payload = ['id' => 'mfl-' . $uid . '-' . $wid, 'source' => 'myfitlevel.com', 'event' => $event,
         'title' => trim((string)$w['title']) !== '' ? mb_substr((string)$w['title'], 0, 80) : 'Workout',
         'type' => $type, 'start' => date('c', $start)];
     $sets = webhook_sets($wid);
@@ -348,9 +356,11 @@ function inbound_workout(array $user, array $b): array
 
     inbound_ensure();
     $dup = row('SELECT workout_id FROM inbound_workouts WHERE user_id = ? AND ext_id = ?', [$uid, $ext]);
-    if ($dup) {
+    $isUpdate = strtolower((string)($b['event'] ?? '')) === 'workout.updated';
+    if ($dup && !$isUpdate) {
         return $log(200, ['ok' => true, 'duplicate' => true, 'id' => (int)$dup['workout_id']]);
     }
+    $editId = ($dup && $isUpdate) ? (int)$dup['workout_id'] : 0;
     if (!rate_ok('sdin:' . $uid, 60, 600)) {
         return $log(429, ['ok' => false, 'error' => 'rate_limit']);
     }
@@ -365,6 +375,9 @@ function inbound_workout(array $user, array $b): array
     }
     $notes = implode(' · ', $notesBits);
     $input = ['performed_at' => $d->format('Y-m-d H:i:s'), 'title' => $title, 'notes' => $notes, 'duration' => $minutes * 60];
+    if ($editId) {
+        $input['edit_id'] = $editId;   // an update replaces the sets of the same workout, it does not add a new one
+    }
 
     $GLOBALS['inbound_saving'] = true;   // webhook_fire must not send this workout back out
     try {
@@ -394,6 +407,11 @@ function inbound_workout(array $user, array $b): array
         return $log(422, ['ok' => false, 'error' => 'save_failed', 'detail' => (string)$res['error']]);
     }
     $wid = (int)$res['workout_id'];
+    if ($editId) {
+        q('UPDATE inbound_workouts SET minutes = ?, kcal = ? WHERE id = ?', [$minutes, $kcal, (int)val('SELECT id FROM inbound_workouts WHERE workout_id = ?', [$wid])]);
+        rate_hit('sdin:' . $uid);
+        return $log(200, ['ok' => true, 'updated' => true, 'id' => $wid, 'points' => (int)$res['points']]);
+    }
     try {
         q('INSERT INTO inbound_workouts (user_id, ext_id, workout_id, source, minutes, kcal, created_at) VALUES (?,?,?,?,?,?,?)', [$uid, $ext, $wid, $src, $minutes, $kcal, date('Y-m-d H:i:s')]);
     } catch (Throwable $e) {
@@ -403,7 +421,58 @@ function inbound_workout(array $user, array $b): array
     return $log(201, ['ok' => true, 'id' => $wid, 'points' => (int)$res['points'], 'level_up' => (bool)($res['awards']['level_up'] ?? false)]);
 }
 
-function webhook_fire(int $uid, int $wid, int $points, array $awards): void
+/** Deletes a workout that came in from another site and takes its points back. Returns [status, body]. */
+function inbound_delete(array $user, array $b): array
+{
+    $uid = (int)$user['id'];
+    $src = strtolower(preg_replace('/[^a-z0-9.\-]/i', '', (string)($b['source'] ?? '')));
+    $ext = trim((string)($b['id'] ?? ''));
+    $log = static function (int $status, array $body) use ($uid, $src, $ext): array {
+        webhook_log_add($uid, '/api/v1/workouts/delete' . ($src !== '' ? ' (from ' . $src . ')' : '') . ' ' . mb_substr($ext, 0, 60), $status, (string)json_encode($body, JSON_UNESCAPED_UNICODE), 'IN');
+        return [$status, $body];
+    };
+    if ($ext === '' || !preg_match('/^[A-Za-z0-9._:\-]{3,80}$/', $ext)) {
+        return $log(422, ['ok' => false, 'error' => 'invalid_id']);
+    }
+    if ($src !== '' && strcasecmp($src, (string)parse_url(site_url(''), PHP_URL_HOST)) === 0) {
+        return $log(422, ['ok' => false, 'error' => 'own_source']);
+    }
+    if (!rate_ok('sdin:' . $uid, 60, 600)) {
+        return $log(429, ['ok' => false, 'error' => 'rate_limit']);
+    }
+    inbound_ensure();
+    // Only workouts that arrived through this API can be removed this way, never the member's own.
+    $r = row('SELECT id, workout_id FROM inbound_workouts WHERE user_id = ? AND ext_id = ?', [$uid, $ext]);
+    if (!$r) {
+        return $log(200, ['ok' => true, 'deleted' => false]);
+    }
+    $GLOBALS['inbound_saving'] = true;   // a deletion that came from the other site is never sent back
+    try {
+        delete_workout((int)$r['workout_id'], $uid);
+    } finally {
+        $GLOBALS['inbound_saving'] = false;
+    }
+    q('DELETE FROM inbound_workouts WHERE id = ?', [(int)$r['id']]);
+    rate_hit('sdin:' . $uid);
+    return $log(200, ['ok' => true, 'deleted' => true]);
+}
+
+/** Tells SnakeDiet a workout was deleted here (never for workouts that came from SnakeDiet). */
+function webhook_snakediet_delete(int $uid, int $wid): void
+{
+    try {
+        $url = (string)setting('webhook:' . $uid, '');
+        $key = (string)setting('webhook_key:' . $uid, '');
+        if (!webhook_is_snakediet($url) || $key === '' || !empty($GLOBALS['inbound_saving']) || webhook_is_inbound($wid)) {
+            return;
+        }
+        webhook_post('https://snakediet.org/api/v1/workouts/delete', ['id' => 'mfl-' . $uid . '-' . $wid, 'source' => 'myfitlevel.com', 'event' => 'workout.deleted'], $key, 3, $uid);
+    } catch (Throwable $e) {
+        // never block a delete
+    }
+}
+
+function webhook_fire(int $uid, int $wid, int $points, array $awards, bool $isEdit = false): void
 {
     try {
         $url = (string)setting('webhook:' . $uid, '');
@@ -415,11 +484,11 @@ function webhook_fire(int $uid, int $wid, int $points, array $awards): void
         }
         $w = row('SELECT title, performed_at, set_count, volume_kg, duration_sec FROM workouts WHERE id = ? AND user_id = ?', [$wid, $uid]);
         $u = row('SELECT * FROM users WHERE id = ?', [$uid]);
-        if (!$w || !$u || strtotime((string)$w['performed_at']) < time() - 36 * 3600) {
+        if (!$w || !$u || (strtotime((string)$w['performed_at']) < time() - 36 * 3600 && !($isEdit && webhook_is_snakediet($url)))) {
             return;   // old workouts added afterwards do not notify
         }
         if (webhook_is_snakediet($url)) {
-            webhook_snakediet_workout($uid, $wid, $w, $u, $url, (string)setting('webhook_key:' . $uid, ''));
+            webhook_snakediet_workout($uid, $wid, $w, $u, $url, (string)setting('webhook_key:' . $uid, ''), 3, $isEdit ? 'workout.updated' : 'workout.logged');
             return;   // SnakeDiet gets the workout itself, not also a feed post
         }
         $msg = '💪 ' . display_name($u) . ' finished ' . (trim((string)$w['title']) !== '' ? '“' . $w['title'] . '”' : 'a workout') . ': ' . (int)$w['set_count'] . ' sets, ' . $points . ' points.';

@@ -80,6 +80,13 @@ if (preg_match('#^card/([A-Za-z0-9_.-]{1,40})\.svg$#', $route, $cm)) {
     exit;
 }
 
+if ($route === 'ping') {   // open, no key: which version is live
+    header('Cache-Control: no-store');
+    $bt = @filemtime(APP_ROOT . '/includes/bootstrap.php') ?: time();
+    json_out(['ok' => true, 'app' => 'myfitlevel', 'version' => APP_VERSION, 'build' => APP_VERSION . '+' . gmdate('Ymd.His', $bt), 'api' => 'v1', 'time' => gmdate('c'),
+        'features' => ['workouts.in', 'workouts.update', 'workouts.delete', 'posts.in']]);
+}
+
 $user = api_user(($_SERVER['REQUEST_METHOD'] ?? '') === 'GET' && in_array($route, ['widget', 'me', 'stats', 'quests', 'today', 'summary', 'prs', 'week', 'export.csv', 'calendar.ics'], true));
 if (!$user) {
     if (!rate_ok('apifail:' . client_ip(), 30, 600)) {
@@ -407,9 +414,23 @@ switch ($route) {
         $ex = rows('SELECT slug, name, muscle, equipment, kind FROM exercises WHERE active = 1 ORDER BY name');
         json_out(['ok' => true, 'exercises' => $ex]);
 
+    case 'workouts/delete':   // another site tells us a workout it sent earlier was deleted. {"id":"sd-..","source":"snakediet.org","event":"workout.deleted"}
+        if (!is_post()) {
+            json_out(['ok' => false, 'error' => 'Use POST'], 405);
+        }
+        $db = json_decode((string)file_get_contents('php://input'), true);
+        if (!is_array($db)) {
+            json_out(['ok' => false, 'error' => 'invalid_json'], 400);
+        }
+        [$st, $out] = inbound_delete($user, $db);
+        json_out($out, $st);
+
     case 'workouts':
         if (is_post()) {
             $peek = json_decode((string)file_get_contents('php://input'), true);
+            if ($peek === null && trim((string)file_get_contents('php://input')) !== '') {
+                json_out(['ok' => false, 'error' => 'invalid_json'], 400);
+            }
             if (is_array($peek) && !isset($peek['exercises']) && (isset($peek['id']) || isset($peek['minutes']) || isset($peek['type']))) {
                 // a finished workout from another site (SnakeDiet): see inbound_workout()
                 [$st, $out] = inbound_workout($user, $peek);

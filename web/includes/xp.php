@@ -596,8 +596,8 @@ function save_workout(array $user, array $input): array
         $isEdit = $editId > 0 && row('SELECT id FROM workouts WHERE id = ? AND user_id = ?', [$editId, $uid]);
         if ($isEdit) {
             $wid = $editId;
-            q('UPDATE workouts SET performed_at = ?, title = ?, notes = ?, unit = ?, gym_id = ? WHERE id = ?',
-              [$whenStr, $title ?: null, $notes ?: null, ($user['unit'] ?? 'kg') === 'lb' ? 'lb' : 'kg', $gymId ?: null, $wid]);
+            q('UPDATE workouts SET performed_at = ?, title = ?, notes = ?, unit = ?, gym_id = ?, duration_sec = COALESCE(?, duration_sec) WHERE id = ?',
+              [$whenStr, $title ?: null, $notes ?: null, ($user['unit'] ?? 'kg') === 'lb' ? 'lb' : 'kg', $gymId ?: null, $dur, $wid]);
             q('DELETE FROM workout_sets WHERE workout_id = ?', [$wid]);
             q('DELETE FROM workout_ex_notes WHERE workout_id = ?', [$wid]);
         } else {
@@ -689,14 +689,19 @@ function save_workout(array $user, array $input): array
             flash($gameLine);
         }
     }
-    webhook_fire($uid, (int)$wid, (int)$total, $awards);
+    webhook_fire($uid, (int)$wid, (int)$total, $awards, !empty($isEdit));
     return ['ok' => true, 'workout_id' => $wid, 'points' => $total, 'awards' => $awards];
 }
 
 function delete_workout(int $workoutId, int $uid): void
 {
+    webhook_snakediet_delete($uid, $workoutId);   // tell SnakeDiet first (skipped for workouts that came from there)
     game_on_delete($workoutId);
     q('DELETE FROM workouts WHERE id = ? AND user_id = ?', [$workoutId, $uid]);
+    try {
+        q('DELETE FROM inbound_workouts WHERE workout_id = ? AND user_id = ?', [$workoutId, $uid]);   // so the same id can come in again later
+    } catch (Throwable $e) {
+    }
     recalc_user($uid);   // PR flags, badges and quests follow the deletion
 }
 

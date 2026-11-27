@@ -11,7 +11,10 @@ function is_staff(?array $u): bool
 /** Small shield icon next to the name of an admin or moderator. Looks the role up once per request. */
 function role_badge(array $r): string
 {
-    static $staff = null;
+    static $staff = null, $founder = null;
+    if ($founder === null) {
+        $founder = (string)val('SELECT username FROM users WHERE is_admin = 1 ORDER BY id ASC LIMIT 1');
+    }
     if ($staff === null) {
         $staff = [];
         foreach (rows('SELECT username, is_admin, is_mod FROM users WHERE is_admin = 1 OR is_mod = 1') as $s) {
@@ -23,7 +26,8 @@ function role_badge(array $r): string
     if (!$role) {
         return $extra;
     }
-    return $extra . '<span class="role ' . $role . '" title="' . ($role === 'admin' ? 'Site admin' : 'Moderator') . '">' . icon('shield') . '</span>';
+    $crown = ($role === 'admin' && ($r['username'] ?? '') === $founder) ? '<span class="role founder" title="Founder of MyFitLevel">' . icon('crown') . '</span>' : '';
+    return $extra . $crown . '<span class="role ' . $role . '" title="' . ($role === 'admin' ? 'Site admin' : 'Moderator') . '">' . icon('shield') . '</span>';
 }
 
 function mod_log(int $actor, string $action, ?int $targetUser, string $detail = ''): void

@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.68.2', '2026-11-27 23:55', 'Founder medal', ['New A gold crown medal for the founder next to the admin shield, shown on profiles and everywhere the name appears.'], 'new'],
     ['3.68.1', '2026-11-27 23:45', 'Team-only outfits', ['New Two full outfit sets only admins and moderators can get: Overseer (admin) and Warden (moderator), free for the team.'], 'new'],
     ['3.68.0', '2026-11-27 23:25', 'Free cosmetics for the team', ['New Admins and moderators can wear every look-only cosmetic for free, with no coins needed.'], 'new'],
     ['3.67.1', '2026-11-27 21:05', 'Shorter updates page', ['Improve The Updates page is now a short day-by-day summary of the big things.'], 'improve'],

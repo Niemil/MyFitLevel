@@ -1208,3 +1208,5 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .wd-review{text-align:left;border:1px solid rgba(120,120,160,.35);border-radius:10px;padding:8px 10px;margin:6px 0}
 .wd-line{display:flex;justify-content:space-between;gap:8px;font-size:.85rem;padding:2px 0}
 .wd-line em{font-style:normal;opacity:.8}.wd-line.blocked em{color:#e0524a;opacity:1}
+
+.role.founder{color:#ffcf4a}

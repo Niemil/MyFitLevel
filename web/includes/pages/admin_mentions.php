@@ -6,6 +6,17 @@ require_once APP_ROOT . '/includes/mentions.php';
 mentions_ensure();
 if (is_post()) {
     csrf_check();
+    $do = (string)($_POST['do'] ?? '');
+    if ($do === 'queries') {
+        set_setting('mentions_queries', mb_substr((string)($_POST['queries'] ?? ''), 0, 1200));
+        flash('Search words saved.');
+        redirect('admin/mentions');
+    }
+    if ($do === 'runnow') {
+        set_setting('mentions_run_now', (string)time());
+        flash('Requested. The Pi picks it up within 10 minutes.');
+        redirect('admin/mentions');
+    }
     $id = (int)($_POST['id'] ?? 0);
     $to = (string)($_POST['to'] ?? '');
     if ($id > 0 && in_array($to, ['new', 'seen', 'replied', 'ignored'], true)) {
@@ -43,11 +54,26 @@ layout_header('Mentions', '');
   </div>
   <?php endforeach; ?>
 </div>
+<?php
+$last = (int)setting('mentions_last_run', '0');
+$pending = (int)setting('mentions_run_now', '0') > $last;
+$cmd = "curl -fsSL -o ~/mentions_watch.py https://raw.githubusercontent.com/Niemil/MyFitLevel/main/docs/pi/mentions_watch.py && echo 'MFL_KEY=" . $key . "' > ~/.mfl_watch.env && (crontab -l 2>/dev/null | grep -v mentions_watch; echo '*/10 * * * * python3 \$HOME/mentions_watch.py >> \$HOME/mentions_watch.log 2>&1') | crontab - && python3 ~/mentions_watch.py";
+?>
 <div class="card">
-  <h3>Watcher setup</h3>
-  <p class="small muted">The key lets your script send results here. Keep it private.</p>
-  <textarea readonly rows="2" id="mkey" style="width:100%"><?= e($key) ?></textarea>
-  <p><button class="btn small" type="button" data-copy="<?= e($key) ?>">Copy key</button></p>
-  <p class="small muted">Script: <code>docs/pi/mentions_watch.py</code> in the repo.</p>
+  <h3>Search</h3>
+  <p class="small muted">Last run: <?= $last ? e(rel_time(date('Y-m-d H:i:s', $last))) . ' · ' . e((string)setting('mentions_last_info', '')) : 'never' ?>. It runs by itself every night around 03:30.<?= $pending ? ' <b>Run requested, waiting for the Pi.</b>' : '' ?></p>
+  <form method="post" class="inl"><?= csrf_field() ?><input type="hidden" name="do" value="runnow"><button class="btn" type="submit">Run search now</button></form>
+  <form method="post" style="margin-top:12px"><?= csrf_field() ?><input type="hidden" name="do" value="queries">
+    <label class="small muted">Search words, one per line (max 12)</label>
+    <textarea name="queries" rows="8" style="width:100%"><?= e(implode("\n", mentions_queries())) ?></textarea>
+    <p><button class="btn" type="submit">Save search words</button></p>
+  </form>
+</div>
+<div class="card">
+  <h3>Set up the Pi (once)</h3>
+  <p class="small muted">Paste this one line into Pi Connect. It installs the watcher, runs it once and schedules it. Contains your private key.</p>
+  <textarea readonly rows="4" style="width:100%"><?= e($cmd) ?></textarea>
+  <p><button class="btn small" type="button" data-copy="<?= e($cmd) ?>">Copy command</button></p>
+  <p class="small muted">Optional Telegram digest: add <code>TG_TOKEN=...</code> and <code>TG_CHAT=...</code> as extra lines in <code>~/.mfl_watch.env</code>.</p>
 </div>
 <?php layout_footer('', ['copy.js']);

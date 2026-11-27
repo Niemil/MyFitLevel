@@ -203,6 +203,14 @@ function stats_country(): string
  * Record this page view. Returns [hitId, token] for the JS beacon or null when not tracked.
  * Never throws: statistics must not be able to break a page.
  */
+/** Marks this browser as the owner's, so it is left out of the statistics. Not a tracking cookie: it only switches tracking off. */
+function stats_optout_set(): void
+{
+    if (!headers_sent() && empty($_COOKIE['mfl_nostat'])) {
+        setcookie('mfl_nostat', '1', ['expires' => time() + 31536000, 'path' => '/', 'secure' => !empty($_SERVER['HTTPS']), 'httponly' => true, 'samesite' => 'Lax']);
+    }
+}
+
 function stats_track(): ?array
 {
     try {
@@ -218,7 +226,11 @@ function stats_track(): ?array
             return null;
         }
         $u = me();
+        if (!empty($_COOKIE['mfl_nostat'])) {
+            return null;
+        }
         if ($u && !empty($u['is_admin'])) {
+            stats_optout_set();
             return null;
         }
         stats_ensure();

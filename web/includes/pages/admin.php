@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 $admin = require_admin();
+stats_optout_set();
 $aid = (int)$admin['id'];
 $calibFile = __DIR__ . '/admin_calib.php';
 if (is_file($calibFile)) {
@@ -577,4 +578,4 @@ $nav = [
   <p class="muted small">App version <?= e(APP_VERSION) ?> · schema <?= (int)setting('schema_version', 0) ?> · PHP <?= e(PHP_VERSION) ?></p>
 </div>
 <?php endif; ?>
-<?php layout_footer(); ?>
+<?php layout_footer('', $tab === 'stats' ? ['statsfilter.js'] : []); ?>

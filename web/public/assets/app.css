@@ -1140,3 +1140,6 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .sx-tabs a{border-radius:0;padding:8px 0;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
 .sx-tabs a.on{background:none;color:var(--text);box-shadow:none;border-bottom-color:var(--accent)}
 .sx-top .chips .chip{border-radius:6px}
+.vis{padding:10px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.vis-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:2px}
+.vis .sx-sc{min-width:44px}

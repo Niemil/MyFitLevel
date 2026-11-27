@@ -35,3 +35,18 @@ function mentions_key(): string
     }
     return $k;
 }
+
+const MENTIONS_DEFAULT_QUERIES = "fitocracy alternative\nfitocracy replacement\nfitocracy shut down\nlike fitocracy\nfitocracy\ngamified workout tracker\nworkout tracker with levels and points\nRPG fitness app";
+
+function mentions_queries(): array
+{
+    $raw = (string)setting('mentions_queries', MENTIONS_DEFAULT_QUERIES);
+    $out = [];
+    foreach (preg_split('/\R/', $raw) as $l) {
+        $l = mb_substr(trim($l), 0, 80);
+        if ($l !== '' && !in_array($l, $out, true)) {
+            $out[] = $l;
+        }
+    }
+    return array_slice($out, 0, 12);
+}

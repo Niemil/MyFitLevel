@@ -4,11 +4,6 @@ declare(strict_types=1);
 // Receives found mentions from the owner's watcher script. Bearer key required.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
-if (!is_post()) {
-    http_response_code(405);
-    echo '{"error":"method"}';
-    exit;
-}
 require_once APP_ROOT . '/includes/mentions.php';
 try {
     if (!rate_ok('mi' . client_ip(), 30, 600)) {
@@ -22,6 +17,10 @@ try {
     if ($key === '' || !hash_equals(mentions_key(), $key)) {
         http_response_code(401);
         echo '{"error":"bad_key"}';
+        exit;
+    }
+    if (!is_post()) {   // the watcher asks what to search for and whether you pressed "Run now"
+        echo json_encode(['queries' => mentions_queries(), 'run_now' => (int)setting('mentions_run_now', '0') > (int)setting('mentions_last_run', '0')]);
         exit;
     }
     mentions_ensure();
@@ -40,6 +39,10 @@ try {
             $cut($it['title'] ?? '', 300), $cut($it['snippet'] ?? '', 600), $url, max(0, min(100, (int)($it['score'] ?? 0))),
         ]);
         $new += $st->rowCount();
+    }
+    if (!empty($in['finished'])) {
+        set_setting('mentions_last_run', (string)time());
+        set_setting('mentions_last_info', mb_substr(((int)($in['found'] ?? 0)) . ' relevant, ' . $new . ' new' . (!empty($in['errors']) ? ', problems: ' . implode('; ', array_map('strval', array_slice((array)$in['errors'], 0, 3))) : ''), 0, 250));
     }
     q('DELETE FROM mentions WHERE found_at < ? AND status <> ?', [date('Y-m-d H:i:s', time() - 120 * 86400), 'replied']);
     echo json_encode(['ok' => true, 'received' => count($items), 'new' => $new]);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Daily watcher: finds posts about Fitocracy / Fitocracy alternatives on Reddit and Hacker News,
+"""Watcher (runs every 10 minutes from cron, but only searches at night or when you press Run now): finds posts about Fitocracy / Fitocracy alternatives on Reddit and Hacker News,
 sends them to the Mentions page in MyFitLevel admin and (optionally) one Telegram digest.
 It never posts anything anywhere. Python 3 standard library only.
 
@@ -26,7 +26,7 @@ KEY = CFG.get('MFL_KEY', '')
 URL = CFG.get('MFL_URL', 'https://myfitlevel.com/mentions/ingest')
 SEEN = os.path.join(HOME, '.mfl_watch_seen.json')
 UA = 'Mozilla/5.0 (X11; Linux aarch64) mfl-mention-watch/1.0 (personal, 1 run per day)'
-QUERIES = ['fitocracy alternative', 'fitocracy replacement', 'fitocracy shut down', 'like fitocracy', 'fitocracy']
+STATE = os.path.join(HOME, '.mfl_watch_state.json')
 
 
 def get(url, accept='application/json'):
@@ -37,9 +37,15 @@ def get(url, accept='application/json'):
 
 def score(title, text, age_days):
     t = (title + ' ' + text).lower()
-    if 'fitocracy' not in t or 'myfitlevel' in t:
+    if 'myfitlevel' in t:
         return 0
-    s = 20
+    if 'fitocracy' in t:
+        s = 20
+    elif (re.search(r'gamif|\brpg\b|level(s|ing)? up|\bxp\b|points', t) and re.search(r'workout|fitness|gym|lifting', t)
+          and re.search(r'tracker|app\b|website|site\b|community', t) and re.search(r'looking for|recommend|alternative|anyone know|suggest|\?', t)):
+        s = 25
+    else:
+        return 0
     if re.search(r'alternativ|replac|substitut|similar|like fitocracy|instead of|looking for|recommend|anyone know|suggest', t):
         s += 30
     if re.search(r'shut|shutting|dead|gone|closed|closing|died|miss(ed)?\b|no longer|sunset', t):
@@ -98,16 +104,42 @@ def hn(q):
     return out
 
 
+def api(method, data=None):
+    req = urllib.request.Request(URL, data=json.dumps(data).encode() if data is not None else None, method=method,
+                                 headers={'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'User-Agent': UA})
+    return json.loads(urllib.request.urlopen(req, timeout=30).read().decode())
+
+
 def main():
     if not KEY:
         sys.exit('MFL_KEY missing')
     try:
+        state = json.load(open(STATE))
+    except Exception:
+        state = {}
+    force = '--now' in sys.argv
+    cfg = {}
+    try:
+        cfg = api('GET')
+    except Exception as e:
+        print('config failed:', e, file=sys.stderr)
+        if not force:
+            return
+    night = datetime.now().hour == 3 and time.time() - state.get('last', 0) > 20 * 3600
+    first = 'last' not in state
+    if not (force or first or night or cfg.get('run_now')):
+        return
+    queries = cfg.get('queries') or ['fitocracy alternative', 'fitocracy replacement', 'fitocracy shut down', 'like fitocracy', 'fitocracy']
+    try:
         seen = set(json.load(open(SEEN)))
     except Exception:
         seen = set()
-    found = {}
-    for q in QUERIES:
-        for it in reddit(q) + hn(q):
+    found, errors = {}, []
+    for q in queries[:12]:
+        r1, r2 = reddit(q), hn(q)
+        if not r1:
+            errors.append('reddit: nothing for "' + q + '"')
+        for it in r1 + r2:
             if it['url'] and it['url'] not in found:
                 found[it['url']] = it
         time.sleep(4)
@@ -122,13 +154,10 @@ def main():
         items.append(it)
     items.sort(key=lambda x: -x['score'])
     print(f'{len(items)} relevant items')
-    if items:
-        req = urllib.request.Request(URL, data=json.dumps({'items': items[:60]}).encode(), method='POST',
-                                     headers={'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'User-Agent': UA})
-        try:
-            print(urllib.request.urlopen(req, timeout=30).read().decode())
-        except Exception as e:
-            sys.exit(f'upload failed: {e}')
+    try:
+        print(api('POST', {'items': items[:60], 'finished': True, 'found': len(items), 'errors': errors[:3]}))
+    except Exception as e:
+        sys.exit(f'upload failed: {e}')
     fresh = [i for i in items if i['url'] not in seen and i['score'] >= 60][:5]
     if fresh and CFG.get('TG_TOKEN') and CFG.get('TG_CHAT'):
         msg = 'MyFitLevel: %d new post(s) where people may want an alternative\n\n' % len(fresh) + '\n\n'.join(
@@ -140,6 +169,8 @@ def main():
             print('telegram failed:', e, file=sys.stderr)
     seen.update(found.keys())
     json.dump(sorted(seen)[-3000:], open(SEEN, 'w'))
+    state['last'] = time.time()
+    json.dump(state, open(STATE, 'w'))
 
 
 if __name__ == '__main__':

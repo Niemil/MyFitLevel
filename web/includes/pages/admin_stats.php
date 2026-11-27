@@ -190,26 +190,31 @@ function stats_admin_view(): void
 
 <?php elseif ($sub === 'traffic'):
     $S = stats_score_sql();
-    $cl = in_array($_GET['c'] ?? '', ['human', 'unsure', 'bot'], true) ? $_GET['c'] : 'all';
+    $V = "(SELECT day, vid, COUNT(*) pg, MAX($S) sc, MAX(js) js, MAX(human) hu, MAX(dwell) dw, MIN(ts) t0, MAX(ts) t1,
+        COALESCE(MIN(IF(ref_type <> 'internal', id, NULL)), MIN(id)) rid, GROUP_CONCAT(path ORDER BY id SEPARATOR ' > ') paths
+        FROM stat_visits WHERE $W GROUP BY day, vid)";
+    $cl = in_array($_GET['c'] ?? '', ['all', 'human', 'unsure', 'bot'], true) ? $_GET['c'] : 'human';
     $cc = preg_match('/^[A-Z]{2}$|^\?\?$/', (string)($_GET['cc'] ?? '')) ? (string)$_GET['cc'] : '';
-    $TW = $W; $TP = $P;
-    if ($cl === 'human') { $TW .= " AND $S >= 70"; } elseif ($cl === 'unsure') { $TW .= " AND $S BETWEEN 40 AND 69"; } elseif ($cl === 'bot') { $TW .= " AND $S < 40"; }
-    if ($cc !== '') { $TW .= $cc === '??' ? " AND country = ''" : ' AND country = ?'; if ($cc !== '??') { $TP[] = $cc; } }
-    $k = row("SELECT COUNT(*) n, SUM($S >= 70) h, SUM($S BETWEEN 40 AND 69) u, SUM($S < 40) b, SUM(js = 1) j, COUNT(DISTINCT vid) v, AVG($S) a FROM stat_visits WHERE $W", $P);
+    $LW = '1=1'; $LP = $P;
+    if ($cl === 'human') { $LW .= ' AND v.sc >= 70'; } elseif ($cl === 'unsure') { $LW .= ' AND v.sc BETWEEN 40 AND 69'; } elseif ($cl === 'bot') { $LW .= ' AND v.sc < 40'; }
+    if ($cc !== '') { $LW .= $cc === '??' ? " AND r.country = ''" : ' AND r.country = ?'; if ($cc !== '??') { $LP[] = $cc; } }
+    $k = row("SELECT COUNT(*) n, SUM(sc >= 70) h, SUM(sc BETWEEN 40 AND 69) u, SUM(sc < 40) b, SUM(js = 1) j, AVG(sc) a FROM $V v", $P);
     $kn = (int)($k['n'] ?? 0);
-    $tl = fn(string $c, string $x = '') => url('admin?tab=stats&sub=traffic&days=' . $days . '&c=' . $c . ($cc !== '' ? '&cc=' . $cc : '') . $x);
+    $tl = fn(string $c, string $x = '') => url('admin?tab=stats&sub=traffic&days=' . $days . '&c=' . $c . ($cc !== '' && $x === '' ? '&cc=' . $cc : '') . $x);
+    $srcR = stats_src_sql('r.');
     ?>
+<p class="small muted">One visitor = one browser on one day, however many pages it opened. Visitors are recognised by a daily-changing anonymous hash, nothing is stored that can follow a person from day to day (unless they accepted cookies). This browser is left out of the statistics.</p>
 <div class="sx-kpis">
-  <div class="kp"><span>Visits</span><b><?= $nf($kn) ?></b><small><?= $nf((int)($k['v'] ?? 0)) ?> unique per day</small></div>
-  <div class="kp acc"><span>Likely human</span><b><?= $pct((int)($k['h'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['h'] ?? 0)) ?> visits, score 70+</small></div>
-  <div class="kp"><span>Uncertain</span><b><?= $pct((int)($k['u'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['u'] ?? 0)) ?> visits, 40 to 69</small></div>
-  <div class="kp"><span>Likely bot</span><b><?= $pct((int)($k['b'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['b'] ?? 0)) ?> visits, under 40</small></div>
+  <div class="kp"><span>Visitors</span><b><?= $nf($kn) ?></b><small>unique per day</small></div>
+  <div class="kp acc"><span>Likely human</span><b><?= $pct((int)($k['h'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['h'] ?? 0)) ?> visitors, 70+</small></div>
+  <div class="kp"><span>Uncertain</span><b><?= $pct((int)($k['u'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['u'] ?? 0)) ?> visitors, 40 to 69</small></div>
+  <div class="kp"><span>Likely bot</span><b><?= $pct((int)($k['b'] ?? 0), $kn) ?></b><small><?= $nf((int)($k['b'] ?? 0)) ?> visitors, under 40</small></div>
   <div class="kp"><span>JavaScript on</span><b><?= $pct((int)($k['j'] ?? 0), $kn) ?></b><small>ran our script</small></div>
   <div class="kp"><span>Average score</span><b><?= (int)round((float)($k['a'] ?? 0)) ?></b><small>of 100</small></div>
 </div>
 <?php
     $ser = [];
-    foreach (rows("SELECT day, SUM($S >= 70) h, SUM($S BETWEEN 40 AND 69) u, SUM($S < 40) b FROM stat_visits WHERE $W GROUP BY day", $P) as $r) { $ser[$r['day']] = $r; }
+    foreach (rows("SELECT day, SUM(sc >= 70) h, SUM(sc BETWEEN 40 AND 69) u, SUM(sc < 40) b FROM $V v GROUP BY day", $P) as $r) { $ser[$r['day']] = $r; }
     $pts = []; $mx = 1;
     for ($i = $days - 1; $i >= 0; $i--) {
         $d = date('Y-m-d', strtotime("-$i days"));
@@ -221,8 +226,8 @@ function stats_admin_view(): void
     $n = count($pts); $Wd = 640; $Ht = 150; $bw = $Wd / max(1, $n);
 ?>
 <div class="card sx-chart">
-  <h3>Visits per day by likelihood</h3>
-  <svg viewBox="0 0 <?= $Wd ?> <?= $Ht + 22 ?>" role="img" aria-label="Visits per day split into likely human, uncertain and likely bot">
+  <h3>Visitors per day by likelihood</h3>
+  <svg viewBox="0 0 <?= $Wd ?> <?= $Ht + 22 ?>" role="img" aria-label="Visitors per day split into likely human, uncertain and likely bot">
     <?php foreach ($pts as $i => $p): $x = $i * $bw; $y = $Ht;
         foreach (['h' => 'sh', 'u' => 'su', 'b' => 'sb'] as $key => $cls): $hh = $p[$key] / $mx * ($Ht - 12); if ($hh <= 0) { continue; } $y -= $hh; ?>
     <rect x="<?= round($x + $bw * 0.12, 1) ?>" y="<?= round($y, 1) ?>" width="<?= round($bw * 0.76, 1) ?>" height="<?= round($hh, 1) ?>" class="<?= $cls ?>"><title><?= e($p['d']) ?>: <?= $p[$key] ?></title></rect>
@@ -235,46 +240,45 @@ function stats_admin_view(): void
 </div>
 <div class="sx-two">
   <div class="card"><h3>Countries</h3>
-    <div class="tablewrap"><table class="tbl sx-t"><tr><th>Country</th><th>Visits</th><th>Human</th><th>Bot</th></tr>
-    <?php foreach (rows("SELECT IF(country='','??',country) c, COUNT(*) n, SUM($S >= 70) h, SUM($S < 40) b FROM stat_visits WHERE $W GROUP BY c ORDER BY n DESC LIMIT 15", $P) as $r): ?>
-      <tr><td><a href="<?= e($tl($cl, '&cc=' . $r['c'])) ?>"><?= e(stats_flag($r['c'] === '??' ? '' : $r['c']) . ' ' . ($r['c'] === '??' ? 'Unknown' : stats_country_name($r['c']))) ?></a></td>
+    <div class="tablewrap"><table class="tbl sx-t"><tr><th>Country</th><th>Visitors</th><th>Human</th><th>Bot</th></tr>
+    <?php foreach (rows("SELECT IF(r.country='','??',r.country) c, COUNT(*) n, SUM(v.sc >= 70) h, SUM(v.sc < 40) b FROM $V v JOIN stat_visits r ON r.id = v.rid GROUP BY c ORDER BY n DESC LIMIT 15", $P) as $r): ?>
+      <tr><td><a data-sw href="<?= e($tl($cl, '&cc=' . $r['c']) . '#visits') ?>"><?= e($r['c'] === '??' ? 'Unknown' : stats_country_name($r['c'])) ?></a></td>
         <td><?= number_format((int)$r['n']) ?></td><td><?= $pct((int)$r['h'], (int)$r['n']) ?></td><td><?= $pct((int)$r['b'], (int)$r['n']) ?></td></tr>
     <?php endforeach; if ($kn === 0): ?><tr><td class="muted">No data yet</td></tr><?php endif; ?>
     </table></div>
   </div>
-  <div class="card"><h3>Sources</h3>
-    <div class="tablewrap"><table class="tbl sx-t"><tr><th>From</th><th>Visits</th><th>Human</th></tr>
-    <?php foreach (rows("SELECT $src AS k, COUNT(*) n, SUM($S >= 70) h FROM stat_visits WHERE $W AND ref_type <> 'internal' GROUP BY k ORDER BY n DESC LIMIT 15", $P) as $r): ?>
+  <div class="card"><h3>Where they came from</h3>
+    <div class="tablewrap"><table class="tbl sx-t"><tr><th>Source</th><th>Visitors</th><th>Human</th></tr>
+    <?php foreach (rows("SELECT $srcR AS k, COUNT(*) n, SUM(v.sc >= 70) h FROM $V v JOIN stat_visits r ON r.id = v.rid GROUP BY k ORDER BY n DESC LIMIT 15", $P) as $r): ?>
       <tr><td><?= e($r['k']) ?></td><td><?= number_format((int)$r['n']) ?></td><td><?= $pct((int)$r['h'], (int)$r['n']) ?></td></tr>
     <?php endforeach; if ($kn === 0): ?><tr><td class="muted">No data yet</td></tr><?php endif; ?>
     </table></div>
   </div>
 </div>
-<div class="card tablewrap">
-  <h3>Every visit</h3>
+<div class="card" id="visits">
+  <h3>Visitors</h3>
   <p class="sx-filter small">Show:
-    <?php foreach (['all' => 'All', 'human' => 'Likely human', 'unsure' => 'Uncertain', 'bot' => 'Likely bot'] as $c => $lbl): ?>
-    <a class="<?= $cl === $c ? 'on' : '' ?>" href="<?= e($tl($c)) ?>"><?= e($lbl) ?></a>
+    <?php foreach (['human' => 'Likely human', 'unsure' => 'Uncertain', 'bot' => 'Likely bot', 'all' => 'All'] as $c => $lbl): ?>
+    <a data-sw class="<?= $cl === $c ? 'on' : '' ?>" href="<?= e($tl($c) . '#visits') ?>"><?= e($lbl) ?></a>
     <?php endforeach; ?>
-    <?php if ($cc !== ''): ?> · Country: <b><?= e($cc) ?></b> <a href="<?= e(url('admin?tab=stats&sub=traffic&days=' . $days . '&c=' . $cl)) ?>">clear</a><?php endif; ?>
+    <?php if ($cc !== ''): ?><br>Country: <b><?= e($cc === '??' ? 'Unknown' : stats_country_name($cc)) ?></b> <a data-sw href="<?= e(url('admin?tab=stats&sub=traffic&days=' . $days . '&c=' . $cl) . '#visits') ?>">show all countries</a><?php endif; ?>
   </p>
-  <p class="small muted">Score is the chance a visit is a real person, from JavaScript, interaction, time on page and browser headers. VPN and IP do not count. IP is only shown for visitors who pressed OK on the cookie banner.</p>
-  <table class="tbl sx-t">
-    <tr><th>When</th><th>Score</th><th>Page</th><th>From</th><th>Country</th><th>Device</th><th>JS</th><th>Why</th></tr>
-    <?php foreach (rows("SELECT *, $S AS sc FROM stat_visits WHERE $TW ORDER BY id DESC LIMIT 100", $TP) as $r):
-        $sc = (int)$r['sc']; $cls = $sc >= 70 ? 'sh' : ($sc >= 40 ? 'su' : 'sb'); ?>
-    <tr>
-      <td class="small"><?= e(rel_time($r['ts'])) ?></td>
-      <td><span class="sx-sc <?= $cls ?>"><?= $sc ?>%</span></td>
-      <td class="small"><?= e($r['path']) ?></td>
-      <td class="small"><?= e($r['ref_host'] !== '' ? $r['ref_host'] : ($r['utm'] !== '' ? $r['utm'] : $r['ref_type'])) ?></td>
-      <td class="small"><?= e($r['country'] ?: '??') ?></td>
-      <td class="small"><?= e(trim($r['device'] . ' ' . $r['browser'] . ' ' . $r['os'])) ?></td>
-      <td class="small"><?= $r['js'] ? 'On' : 'Off' ?></td>
-      <td class="small muted"><?= e(stats_score_reasons($r)) ?><?= $r['ip'] ? ' · ' . e($r['ip']) : '' ?></td>
-    </tr>
-    <?php endforeach; ?>
-  </table>
+  <p class="small muted">Score is the chance this is a real person (JavaScript, interaction, time on the site, browser headers). VPN does not matter.</p>
+  <?php
+    $list = rows("SELECT v.*, r.ref_host, r.ref_type, r.utm, r.country, r.device, r.browser, r.os, r.lang, r.bot, r.ip, $srcR AS src FROM $V v JOIN stat_visits r ON r.id = v.rid WHERE $LW ORDER BY v.t0 DESC LIMIT 60", $LP);
+    if (!$list): ?><p class="muted">No visitors match.</p><?php endif;
+    foreach ($list as $r):
+        $sc = (int)$r['sc']; $cls = $sc >= 70 ? 'sh' : ($sc >= 40 ? 'su' : 'sb');
+        $dur = max(0, (int)strtotime($r['t1']) - (int)strtotime($r['t0'])) + (int)$r['dw'];
+        $why = stats_score_reasons(['bot' => $r['bot'], 'human' => $r['hu'], 'js' => $r['js'], 'dwell' => $r['dw'], 'lang' => $r['lang'], 'device' => $r['device'], 'browser' => $r['browser']]);
+        $jr = str_replace(' > ', ' › ', mb_substr((string)$r['paths'], 0, 260)); ?>
+  <div class="vis">
+    <div class="vis-h"><span class="sx-sc <?= $cls ?>"><?= $sc ?>%</span><b><?= e($r['src']) ?></b><span class="muted small"><?= e(rel_time($r['t0'])) ?></span></div>
+    <div class="small"><?= e($r['country'] ? stats_country_name($r['country']) : 'Unknown country') ?> · <?= e(trim($r['device'] . ' ' . $r['browser'] . ' ' . $r['os'])) ?> · JavaScript <?= $r['js'] ? 'on' : 'off' ?><?= $r['lang'] ? ' · ' . e(strtoupper($r['lang'])) : '' ?></div>
+    <div class="small"><?= (int)$r['pg'] ?> page<?= (int)$r['pg'] === 1 ? '' : 's' ?><?= $dur >= 5 ? ' · ' . ($dur >= 120 ? round($dur / 60) . ' min' : $dur . ' s') . ' on site' : '' ?>: <span class="muted"><?= e($jr) ?></span></div>
+    <div class="small muted"><?= e($why) ?><?= $r['ip'] ? ' · ' . e($r['ip']) : '' ?></div>
+  </div>
+  <?php endforeach; ?>
 </div>
 
 <?php elseif ($sub === 'pages'): ?>

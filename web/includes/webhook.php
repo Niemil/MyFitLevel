@@ -40,6 +40,50 @@ function webhook_post(string $url, array $payload, string $key = ''): bool
     return $code >= 200 && $code < 300;
 }
 
+/** One short line per exercise, e.g. "Bench press — 4×8 @ 80 kg" (max 40 lines, 140 chars each). */
+function webhook_details(int $wid, string $unit): array
+{
+    $sets = rows('SELECT s.weight_kg, s.reps, s.duration_sec, s.distance_m, e.name FROM workout_sets s JOIN exercises e ON e.id = s.exercise_id WHERE s.workout_id = ? AND s.is_warmup = 0 ORDER BY s.id', [$wid]);
+    $by = [];
+    foreach ($sets as $r) {
+        $by[(string)$r['name']][] = $r;
+    }
+    $out = [];
+    foreach ($by as $name => $list) {
+        $groups = [];
+        foreach ($list as $r) {
+            $w = $r['weight_kg'] !== null && (float)$r['weight_kg'] > 0 ? fmt_weight((float)$r['weight_kg'], $unit) : '';
+            $reps = (int)$r['reps'];
+            if ($reps > 0) {
+                $desc = $reps;
+            } elseif ((int)$r['duration_sec'] > 0) {
+                $desc = fmt_duration((int)$r['duration_sec']);
+            } elseif ((int)$r['distance_m'] > 0) {
+                $desc = fmt_num((int)$r['distance_m'] / 1000, 2) . ' km';
+            } else {
+                $desc = '1';
+            }
+            $key = $desc . '|' . $w;
+            $last = count($groups) - 1;
+            if ($last >= 0 && $groups[$last]['key'] === $key) {
+                $groups[$last]['n']++;
+            } else {
+                $groups[] = ['key' => $key, 'n' => 1, 'desc' => (string)$desc, 'w' => $w, 'time' => $reps <= 0];
+            }
+        }
+        $parts = [];
+        foreach ($groups as $g) {
+            $parts[] = $g['time'] ? ($g['n'] > 1 ? $g['n'] . '× ' : '') . $g['desc'] . ($g['w'] !== '' ? ' @ ' . $g['w'] : '') : $g['n'] . '×' . $g['desc'] . ($g['w'] !== '' ? ' @ ' . $g['w'] : '');
+        }
+        $line = $name . ' — ' . implode(', ', $parts);
+        $out[] = mb_strlen($line) > 140 ? mb_substr($line, 0, 139) . '…' : $line;
+        if (count($out) >= 40) {
+            break;
+        }
+    }
+    return $out;
+}
+
 function webhook_fire(int $uid, int $wid, int $points, array $awards): void
 {
     try {
@@ -56,9 +100,14 @@ function webhook_fire(int $uid, int $wid, int $points, array $awards): void
         if (!empty($awards['level_up'])) {
             $msg .= ' 🎉 Level up!';
         }
-        webhook_post($url, ['content' => $msg, 'text' => $msg, 'username' => 'MyFitLevel', 'source' => (string)parse_url(site_url(''), PHP_URL_HOST), 'url' => site_url('u/' . $u['username']), 'event' => 'workout.saved',
+        $payload = ['content' => $msg, 'text' => $msg, 'username' => 'MyFitLevel', 'source' => (string)parse_url(site_url(''), PHP_URL_HOST), 'url' => site_url('u/' . $u['username']), 'event' => 'workout.saved',
             'workout' => ['id' => $wid, 'title' => $w['title'], 'sets' => (int)$w['set_count'], 'points' => $points, 'volume_kg' => (float)$w['volume_kg'], 'performed_at' => $w['performed_at']],
-            'user' => ['username' => $u['username'], 'level' => (int)$u['level']]], (string)setting('webhook_key:' . $uid, ''));
+            'user' => ['username' => $u['username'], 'level' => (int)$u['level']]];
+        $details = webhook_details($wid, (string)($u['unit'] ?? 'kg'));
+        if ($details) {
+            $payload['details'] = $details;
+        }
+        webhook_post($url, $payload, (string)setting('webhook_key:' . $uid, ''));
     } catch (Throwable $e) {
         // never let a broken webhook break saving a workout
     }

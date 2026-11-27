@@ -391,12 +391,15 @@ function inbound_parse_sets(array $sets): array
             continue;
         }
         $name = trim((string)($s['exercise'] ?? ''));
-        if ($name === '') {
+        $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower((string)($s['exercise_slug'] ?? '')));
+        if ($name === '' && $slug === '') {
             continue;
         }
-        $key = mb_strtolower($name);
+        $key = mb_strtolower($slug !== '' ? 'slug:' . $slug : $name);
         if (!isset($by[$key])) {
-            $by[$key] = ['name' => $name, 'ex' => inbound_find_exercise($name), 'sets' => []];
+            // an exact slug (from exercises.json) always wins over name matching
+            $ex = $slug !== '' ? row('SELECT id, name FROM exercises WHERE active = 1 AND slug = ?', [$slug]) : null;
+            $by[$key] = ['name' => $name !== '' ? $name : $slug, 'ex' => $ex ?: ($name !== '' ? inbound_find_exercise($name) : null), 'sets' => []];
         }
         $ex = $by[$key]['ex'];
         if (!$ex) {

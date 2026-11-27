@@ -1121,3 +1121,6 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .eqic{height:44px;display:flex;align-items:center}
 .eqslot b{font-size:.85rem;line-height:1.15}
 .gi-ic .gearico{display:block;margin:0 auto}
+.cpv{overflow:hidden;font-size:1rem;line-height:1.2}
+.cpv .nfx{font-size:1.05rem;white-space:nowrap;display:inline-block}
+.gi-ic .cpv{height:46px}

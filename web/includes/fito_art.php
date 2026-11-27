@@ -361,12 +361,29 @@ function fa_wings(string $d, array $c): string
         default:
             return fa_wings('angel', $c);
     }
+    if (!empty($GLOBALS['fa_anim'])) {
+        $an = fn(string $sgn) => '<animateTransform attributeName="transform" type="rotate" values="0 66 160;' . $sgn . '9 66 160;0 66 160;' . $sgn . '4 66 160;0 66 160" dur="3s" repeatCount="indefinite"/>';
+        return '<g>' . $an('-') . $w . '</g><g transform="translate(240 0) scale(-1 1)"><g>' . $an('-') . $w . '</g></g>';
+    }
     return $w . '<g transform="translate(240 0) scale(-1 1)">' . $w . '</g>';
 }
 
 function fa_aura(string $d, array $c): string
 {
     $g = $c['g']; $l = $c['l'];
+    if (!empty($GLOBALS['fa_anim'])) {
+        $pulse = '<animate attributeName="opacity" values="1;.55;1" dur="3.4s" repeatCount="indefinite"/>';
+        switch ($d) {
+            case 'ring':
+                return "<g><animateTransform attributeName='transform' type='rotate' values='0 120 170;360 120 170' dur='24s' repeatCount='indefinite'/><circle cx='120' cy='170' r='124' fill='none' stroke='$g' stroke-width='5' opacity='.55'/><circle cx='120' cy='170' r='108' fill='none' stroke='$l' stroke-width='3' opacity='.6' stroke-dasharray='6 10'/></g>";
+            case 'flame':
+                return "<g><animateTransform attributeName='transform' type='translate' values='0 0;0 -5;0 2;0 0' dur='1.1s' repeatCount='indefinite'/><path d='M120 20Q150 70 130 100Q180 80 170 150Q196 130 190 200Q170 250 120 262Q70 250 50 200Q44 130 70 150Q60 80 110 100Q92 70 120 20Z' fill='$g' opacity='.4'><animate attributeName='opacity' values='.4;.25;.45;.4' dur='1.3s' repeatCount='indefinite'/></path></g>";
+            case 'sparks':
+                return "<circle cx='120' cy='170' r='122' fill='$g' opacity='.16'>$pulse</circle><g fill='$l'><path d='M40 90l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z'><animate attributeName='opacity' values='1;.1;1' dur='1.8s' repeatCount='indefinite'/></path><path d='M200 70l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z'><animate attributeName='opacity' values='.2;1;.2' dur='2.2s' repeatCount='indefinite'/></path><path d='M30 220l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z'><animate attributeName='opacity' values='1;.2;1' dur='2.6s' repeatCount='indefinite'/></path><path d='M210 210l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z'><animate attributeName='opacity' values='.3;1;.3' dur='1.5s' repeatCount='indefinite'/></path></g>";
+            default:
+                return "<circle cx='120' cy='170' r='128' fill='$g' opacity='.28'><animate attributeName='opacity' values='.28;.12;.28' dur='3.4s' repeatCount='indefinite'/></circle>";
+        }
+    }
     switch ($d) {
         case 'ring':
             return "<circle cx='120' cy='170' r='124' fill='none' stroke='$g' stroke-width='5' opacity='.55'/><circle cx='120' cy='170' r='108' fill='none' stroke='$l' stroke-width='2' opacity='.5' stroke-dasharray='6 8'/>";

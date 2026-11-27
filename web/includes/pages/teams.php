@@ -22,6 +22,18 @@ function team_staff_ids(int $tid): array
     return array_map('intval', array_column(rows("SELECT user_id FROM team_members WHERE team_id = ? AND role IN ('leader','officer')", [$tid]), 'user_id'));
 }
 
+function team_chat_ensure(): void
+{
+    static $ok = false;
+    if ($ok) { return; }
+    db()->exec("CREATE TABLE IF NOT EXISTS team_chat (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, team_id INT UNSIGNED NOT NULL, user_id INT UNSIGNED NOT NULL,
+        body VARCHAR(400) NOT NULL, created_at DATETIME NOT NULL, KEY idx_tc (team_id, id),
+        CONSTRAINT fk_tc_t FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+        CONSTRAINT fk_tc_u FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $ok = true;
+}
+
 if (is_post()) {
     csrf_check();
     $do = (string)($_POST['do'] ?? '');
@@ -29,6 +41,31 @@ if (is_post()) {
     $team = $tid ? row('SELECT * FROM teams WHERE id = ?', [$tid]) : null;
     $target = (int)($_POST['uid'] ?? 0);
     $back = $tid ? 'team/' . $tid : 'teams';
+
+    if ($do === 'chat_say' || $do === 'chat_del') {
+        // team chat: members only, plain text, light on the server
+        team_chat_ensure();
+        if (!$mine || (int)$mine['id'] !== $tid) {
+            flash('Only team members can use the team chat.', 'err');
+        } elseif ($do === 'chat_say') {
+            $msg = clean_text((string)($_POST['msg'] ?? ''), 400);
+            if ($msg === '') {
+                flash('Write a message first.', 'err');
+            } elseif (!rate_ok('tchat:' . $uid, 12, 60)) {
+                flash('Slow down a little, try again in a minute.', 'err');
+            } else {
+                q('INSERT INTO team_chat (team_id, user_id, body, created_at) VALUES (?,?,?,?)', [$tid, $uid, $msg, now()]);
+                q('DELETE FROM team_chat WHERE team_id = ? AND id < COALESCE((SELECT m FROM (SELECT MIN(id) AS m FROM (SELECT id FROM team_chat WHERE team_id = ? ORDER BY id DESC LIMIT 200) z) y), 0)', [$tid, $tid]);
+            }
+        } else {
+            $cid = (int)($_POST['cid'] ?? 0);
+            $c = row('SELECT user_id FROM team_chat WHERE id = ? AND team_id = ?', [$cid, $tid]);
+            if ($c && ((int)$c['user_id'] === $uid || in_array($mine['role'], ['leader', 'officer'], true))) {
+                q('DELETE FROM team_chat WHERE id = ?', [$cid]);
+            }
+        }
+        redirect($back . '#chat');
+    }
 
     if ($do === 'create') {
         $name = clean_text((string)($_POST['name'] ?? ''), 30);
@@ -299,6 +336,26 @@ if ($viewId) {
     <form method="post"><?= csrf_field() ?><input type="hidden" name="tid" value="<?= $tid ?>"><input type="hidden" name="do" value="<?= (int)$team['is_open'] ? 'join' : 'apply' ?>">
       <button class="btn big" type="submit"><?= (int)$team['is_open'] ? 'Join this team' : 'Ask to join' ?></button></form>
   <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<?php if ($isMember): team_chat_ensure();
+    $chat = array_reverse(rows('SELECT c.id, c.user_id, c.body, c.created_at, us.username, us.display_name FROM team_chat c JOIN users us ON us.id = c.user_id WHERE c.team_id = ? ORDER BY c.id DESC LIMIT 40', [$tid])); ?>
+<div class="card" id="chat">
+  <h3>Team chat</h3>
+  <?php if (!$chat): ?><p class="muted small">No messages yet. Say hello to your team.</p><?php endif; ?>
+  <div class="tchat">
+  <?php foreach ($chat as $c): $mineMsg = (int)$c['user_id'] === $uid; ?>
+    <div class="tc-msg<?= $mineMsg ? ' me' : '' ?>">
+      <div class="tc-h"><a href="<?= e(url('u/' . $c['username'])) ?>"><b><?= e($c['display_name'] ?: $c['username']) ?></b></a> <small class="muted"><?= e(rel_time($c['created_at'])) ?></small>
+        <?php if ($mineMsg || $staff): ?><form method="post" class="inl"><?= csrf_field() ?><input type="hidden" name="tid" value="<?= $tid ?>"><input type="hidden" name="do" value="chat_del"><input type="hidden" name="cid" value="<?= (int)$c['id'] ?>"><button class="tc-x" type="submit" title="Delete">Delete</button></form><?php endif; ?></div>
+      <div class="tc-b"><?= nl2br(e($c['body'])) ?></div>
+    </div>
+  <?php endforeach; ?>
+  </div>
+  <form method="post" class="tc-form"><?= csrf_field() ?><input type="hidden" name="tid" value="<?= $tid ?>"><input type="hidden" name="do" value="chat_say">
+    <input name="msg" maxlength="400" placeholder="Message your team" autocomplete="off" required><button class="btn small" type="submit">Send</button></form>
+  <p class="muted small" style="margin-bottom:0">Only your team can see this. The last 200 messages are kept. Reload the page to see new ones.</p>
 </div>
 <?php endif; ?>
 

@@ -38,10 +38,12 @@ function fito_look(int $uid): array
 function fito_dressed(array $look, int $size = 220, string $class = ''): string
 {
     $GLOBALS['fito_dress'] = $look;
+    $GLOBALS['fa_anim'] = $size >= 200;   // wings flap and auras move on big characters only, so lists stay light
     try {
         return fito('idle', $size, 'dressed ' . $class);
     } finally {
         $GLOBALS['fito_dress'] = null;
+        $GLOBALS['fa_anim'] = false;
     }
 }
 

@@ -1148,3 +1148,11 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .ml-area small{font-weight:400;font-size:.72rem}.ml-area.on{color:var(--text);border-color:var(--accent)}
 .ml-row{padding:8px 0;border-top:1px solid var(--line)}.ml-top{display:flex;justify-content:space-between}
 .ml-bar{height:8px;background:var(--line);border-radius:4px;margin:6px 0;overflow:hidden}.ml-bar i{display:block;height:100%;background:var(--accent)}
+
+.tchat{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin:.4rem 0 .6rem}
+.tc-msg{background:rgba(120,120,160,.10);border-radius:10px;padding:6px 10px}
+.tc-msg.me{background:rgba(90,100,255,.12)}
+.tc-h{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.tc-b{word-break:break-word;margin-top:2px}
+.tc-x{background:none;border:0;color:inherit;opacity:.55;font-size:.75rem;cursor:pointer;padding:0;text-decoration:underline}
+.tc-form{display:flex;gap:8px}.tc-form input{flex:1;min-width:0}

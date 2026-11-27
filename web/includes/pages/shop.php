@@ -12,7 +12,9 @@ if (is_post()) {
     $do = (string)($_POST['do'] ?? '');
     $key = (string)($_POST['item'] ?? '');
     $w = game_wallet($uid);
-    if ($do === 'buy' && isset($cat[$key]) && $cat[$key][5] > 0) {
+    if ($do === 'buy' && isset($cat[$key]) && $cat[$key][5] > 0 && fa_staff_only($key) && !is_staff($u)) {
+        flash('That one is for the team only.', 'err');
+    } elseif ($do === 'buy' && isset($cat[$key]) && $cat[$key][5] > 0) {
         $cost = game_price_for($u, $key, $cat) < 0 ? 0 : (int)$cat[$key][5];
         $own = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $key]);
         if ($own) {
@@ -44,7 +46,7 @@ if (is_post()) {
         // wardrobe: buy whatever is missing (and affordable, and allowed) from the tried-on list, then wear it all
         $bought = 0; $worn = 0; $skipped = [];
         foreach (array_slice(array_unique(array_filter(explode(',', (string)($_POST['keys'] ?? '')))), 0, 12) as $k) {
-            if (!isset($cat[$k])) { continue; }
+            if (!isset($cat[$k]) || (fa_staff_only($k) && !is_staff($u))) { continue; }
             $has = (int)val('SELECT COUNT(*) FROM game_items WHERE user_id = ? AND item = ?', [$uid, $k]);
             if (!$has) {
                 $w = game_wallet($uid);

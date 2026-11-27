@@ -15,7 +15,7 @@ $s = isset($slotNames[(string)($_GET['s'] ?? '')]) ? (string)$_GET['s'] : 'armor
 // items being tried on: one per slot, the last one wins
 $try = [];
 foreach (array_slice(array_filter(explode(',', (string)($_GET['t'] ?? ''))), 0, 12) as $k) {
-    if (isset($cat[$k])) {
+    if (isset($cat[$k]) && (!fa_staff_only($k) || is_staff($u))) {
         $try[preg_replace('/^look_/', '', (string)$cat[$k][2])] = $k;
     }
 }
@@ -55,7 +55,7 @@ $stat = []; $looks = [];
 foreach ($cat as $k => $i) {
     $slot = (string)$i[2];
     if ($slot === $s && ($i[5] > 0 || isset($owned[$k]))) { $stat[$k] = $i; }
-    if ($slot === 'look_' . $s) { $looks[$k] = $i; }
+    if ($slot === 'look_' . $s && (!fa_staff_only($k) || is_staff($u))) { $looks[$k] = $i; }
 }
 uasort($stat, fn($a, $b) => [game_item_tier_of($a), $a[5]] <=> [game_item_tier_of($b), $b[5]]);
 function game_item_tier_of(array $i): int { return (int)($i[7] ?? 0); }

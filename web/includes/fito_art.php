@@ -469,6 +469,8 @@ function fa_look_sets(): array
         'knt' => ['Obsidian Knight', ['weapon' => ['Night Greatsword', 'greatsword', 'obsidian', 640], 'helmet' => ['Night Helm', 'crest', 'obsidian', 480], 'armor' => ['Night Plate', 'tabard', 'obsidian', 680], 'gloves' => ['Night Gauntlets', 'spiked', 'obsidian', 300], 'boots' => ['Night Sabatons', 'sabaton', 'obsidian', 320]]],
         'gol' => ['Golden Guard', ['weapon' => ['Golden Mace', 'mace', 'gold', 600], 'helmet' => ['Golden Helm', 'winged', 'gold', 480], 'armor' => ['Golden Plate', 'plate', 'gold', 700], 'gloves' => ['Golden Gauntlets', 'plated', 'gold', 300], 'boots' => ['Golden Sabatons', 'sabaton', 'gold', 320]]],
         'cru' => ['Crusader', ['weapon' => ['Crusader Sword', 'longsword', 'steel', 440], 'helmet' => ['Crusader Helm', 'barbute', 'steel', 340], 'armor' => ['Crusader Tabard', 'tabard', 'crimson', 520], 'gloves' => ['Crusader Gauntlets', 'gauntlet', 'steel', 220], 'boots' => ['Crusader Greaves', 'greaves', 'steel', 240]]],
+        'adm' => ['Overseer (admin)', ['weapon' => ['Overseer Blade', 'glowsword', 'gold', 100], 'helmet' => ['Overseer Crown', 'crown', 'gold', 100], 'armor' => ['Overseer Robes', 'royal', 'royal', 100], 'gloves' => ['Overseer Gloves', 'glove', 'gold', 100], 'boots' => ['Overseer Boots', 'winged', 'gold', 100]]],
+        'mod' => ['Warden (moderator)', ['weapon' => ['Warden Halberd', 'spear', 'frost', 100], 'helmet' => ['Warden Helm', 'winged', 'frost', 100], 'armor' => ['Warden Plate', 'plate', 'steel', 100], 'gloves' => ['Warden Gauntlets', 'plated', 'frost', 100], 'boots' => ['Warden Boots', 'winged', 'steel', 100]]],
     ];
 }
 
@@ -561,4 +563,11 @@ function fa_icon(string $slot, array $spec, int $size): string
     }
     return '<svg class="gearico" width="' . $size . '" height="' . $size . '" viewBox="' . $box . '" aria-hidden="true"><defs><filter id="ftGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'
         . fa_defs($spec[1]) . $art . '</svg>';
+}
+
+
+/** Sets only admins and moderators can get. */
+function fa_staff_only(string $key): bool
+{
+    return str_starts_with($key, 'look_adm_') || str_starts_with($key, 'look_mod_');
 }

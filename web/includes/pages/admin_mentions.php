@@ -13,8 +13,7 @@ if (is_post()) {
         redirect('admin/mentions');
     }
     if ($do === 'runnow') {
-        set_setting('mentions_run_now', (string)time());
-        flash('Requested. The Pi picks it up within 10 minutes.');
+        flash('Search done: ' . mentions_search_run());
         redirect('admin/mentions');
     }
     $id = (int)($_POST['id'] ?? 0);
@@ -28,7 +27,6 @@ $f = in_array($_GET['f'] ?? '', ['open', 'all', 'replied', 'ignored'], true) ? $
 $w = $f === 'open' ? "status IN ('new','seen')" : ($f === 'all' ? '1=1' : 'status = ' . ($f === 'replied' ? "'replied'" : "'ignored'"));
 $list = rows("SELECT * FROM mentions WHERE $w ORDER BY (status='new') DESC, score DESC, id DESC LIMIT 100");
 $cnt = (int)val("SELECT COUNT(*) FROM mentions WHERE status = 'new'");
-$key = mentions_key();
 layout_header('Mentions', '');
 ?>
 <h1 class="pagetitle">Mentions</h1>
@@ -54,26 +52,16 @@ layout_header('Mentions', '');
   </div>
   <?php endforeach; ?>
 </div>
-<?php
-$last = (int)setting('mentions_last_run', '0');
-$pending = (int)setting('mentions_run_now', '0') > $last;
-$cmd = "curl -fsSL -o ~/mentions_watch.py https://raw.githubusercontent.com/Niemil/MyFitLevel/main/docs/pi/mentions_watch.py && echo 'MFL_KEY=" . $key . "' > ~/.mfl_watch.env && (crontab -l 2>/dev/null | grep -v mentions_watch; echo '*/10 * * * * python3 \$HOME/mentions_watch.py >> \$HOME/mentions_watch.log 2>&1') | crontab - && python3 ~/mentions_watch.py";
-?>
+<?php $last = (int)setting('mentions_last_run', '0'); ?>
 <div class="card">
   <h3>Search</h3>
-  <p class="small muted">Last run: <?= $last ? e(rel_time(date('Y-m-d H:i:s', $last))) . ' · ' . e((string)setting('mentions_last_info', '')) : 'never' ?>. It runs by itself every night around 03:30.<?= $pending ? ' <b>Run requested, waiting for the Pi.</b>' : '' ?></p>
+  <p class="small muted">Searches Hacker News, Reddit, Lemmy and Stack Exchange for the words below. Last run: <?= $last ? e(rel_time(date('Y-m-d H:i:s', $last))) . ' · ' . e((string)setting('mentions_last_info', '')) : 'never' ?>. It also runs by itself about once a day through your existing cron job.</p>
   <form method="post" class="inl"><?= csrf_field() ?><input type="hidden" name="do" value="runnow"><button class="btn" type="submit">Run search now</button></form>
+  <p class="small muted">Takes up to half a minute.</p>
   <form method="post" style="margin-top:12px"><?= csrf_field() ?><input type="hidden" name="do" value="queries">
     <label class="small muted">Search words, one per line (max 12)</label>
     <textarea name="queries" rows="8" style="width:100%"><?= e(implode("\n", mentions_queries())) ?></textarea>
     <p><button class="btn" type="submit">Save search words</button></p>
   </form>
 </div>
-<div class="card">
-  <h3>Set up the Pi (once)</h3>
-  <p class="small muted">Paste this one line into Pi Connect. It installs the watcher, runs it once and schedules it. Contains your private key.</p>
-  <textarea readonly rows="4" style="width:100%"><?= e($cmd) ?></textarea>
-  <p><button class="btn small" type="button" data-copy="<?= e($cmd) ?>">Copy command</button></p>
-  <p class="small muted">Optional Telegram digest: add <code>TG_TOKEN=...</code> and <code>TG_CHAT=...</code> as extra lines in <code>~/.mfl_watch.env</code>.</p>
-</div>
-<?php layout_footer('', ['copy.js']);
+<?php layout_footer();

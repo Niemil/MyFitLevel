@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.56.0', '2026-11-27 15:20', 'Alert mail on the Mentions page', ['Improve Google Alerts and F5Bot mails sent to the site mailbox are read automatically and listed on the Mentions page. The web search was removed.'], 'improve'],
     ['3.55.0', '2026-11-27 14:40', 'Mentions search runs on the site', ['Improve The search for Fitocracy-related posts now runs on the website itself, with a Run search now button, and once a day through the cron job. No extra computer needed.'], 'improve'],
     ['3.54.0', '2026-11-27 14:00', 'Traffic by visitor', ['Improve Traffic now counts one visitor per browser and day, with where they came from, which pages they opened and a human score. Filters refresh the list without jumping to the top, and the list reads well on a phone.', 'Improve Your own browser is left out of the statistics once you open admin.', 'New Mentions: edit the search words, press Run search now and see when the nightly search last ran.'], 'improve'],
     ['3.53.0', '2026-11-27 13:10', 'Mentions page in admin', ['New Admin has a Mentions page that lists posts on the web where people talk about Fitocracy or ask for an alternative, with a match percentage. Mark them replied or ignored.'], 'new'],

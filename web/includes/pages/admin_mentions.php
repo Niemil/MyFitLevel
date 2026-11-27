@@ -7,13 +7,9 @@ mentions_ensure();
 if (is_post()) {
     csrf_check();
     $do = (string)($_POST['do'] ?? '');
-    if ($do === 'queries') {
-        set_setting('mentions_queries', mb_substr((string)($_POST['queries'] ?? ''), 0, 1200));
-        flash('Search words saved.');
-        redirect('admin/mentions');
-    }
-    if ($do === 'runnow') {
-        flash('Search done: ' . mentions_search_run());
+    if ($do === 'mailcheck') {
+        set_setting('mentions_imap_host', clean_text((string)($_POST['host'] ?? ''), 120));
+        flash(mentions_check_mail());
         redirect('admin/mentions');
     }
     $id = (int)($_POST['id'] ?? 0);
@@ -52,16 +48,29 @@ layout_header('Mentions', '');
   </div>
   <?php endforeach; ?>
 </div>
-<?php $last = (int)setting('mentions_last_run', '0'); ?>
+<?php $last = (int)setting('mentions_last_run', '0'); $mc = mail_conf(); $notes = json_decode((string)setting('mentions_notes', '[]'), true) ?: []; ?>
+<?php if ($notes): ?>
 <div class="card">
-  <h3>Search</h3>
-  <p class="small muted">Searches Hacker News, Reddit, Lemmy and Stack Exchange for the words below. Last run: <?= $last ? e(rel_time(date('Y-m-d H:i:s', $last))) . ' · ' . e((string)setting('mentions_last_info', '')) : 'never' ?>. It also runs by itself about once a day through your existing cron job.</p>
-  <form method="post" class="inl"><?= csrf_field() ?><input type="hidden" name="do" value="runnow"><button class="btn" type="submit">Run search now</button></form>
-  <p class="small muted">Takes up to half a minute.</p>
-  <form method="post" style="margin-top:12px"><?= csrf_field() ?><input type="hidden" name="do" value="queries">
-    <label class="small muted">Search words, one per line (max 12)</label>
-    <textarea name="queries" rows="8" style="width:100%"><?= e(implode("\n", mentions_queries())) ?></textarea>
-    <p><button class="btn" type="submit">Save search words</button></p>
+  <h3>Needs your click</h3>
+  <p class="small muted">Confirmation mails from Google Alerts or F5Bot. Open the link once to switch the alert on.</p>
+  <?php foreach ($notes as $nt): ?><p class="small"><?= e($nt['s']) ?><?php foreach ($nt['u'] as $u): ?><br><a href="<?= e($u) ?>" target="_blank" rel="noopener noreferrer nofollow"><?= e(mb_substr($u, 0, 70)) ?></a><?php endforeach; ?></p><?php endforeach; ?>
+</div>
+<?php endif; ?>
+<div class="card">
+  <h3>Alert mail</h3>
+  <p class="small muted">Send Google Alerts and F5Bot to <b><?= e($mc['user']) ?></b>. The site reads that mailbox every time the daily cron job runs and lists the posts above. Last check: <?= $last ? e(rel_time(date('Y-m-d H:i:s', $last))) . ' · ' . e((string)setting('mentions_last_info', '')) : 'never' ?>.</p>
+  <form method="post"><?= csrf_field() ?><input type="hidden" name="do" value="mailcheck">
+    <label class="small muted">Mail server (usually the same as in Admin, Email)</label>
+    <input type="text" name="host" value="<?= e((string)setting('mentions_imap_host', '') ?: (string)$mc['host']) ?>" style="width:100%">
+    <p><button class="btn" type="submit">Check mail now</button></p>
   </form>
+</div>
+<div class="card">
+  <h3>How to set it up</h3>
+  <ol class="small">
+    <li>google.com/alerts: type a phrase such as <i>fitocracy alternative</i>, press Show options, choose <b>As-it-happens</b> or <b>Once a day</b> and deliver to <b><?= e($mc['user']) ?></b>. Make one alert per phrase.</li>
+    <li>f5bot.com: sign up with <b><?= e($mc['user']) ?></b> and add your keywords.</li>
+    <li>A confirmation mail arrives first. Press Check mail now and it shows up under Needs your click.</li>
+  </ol>
 </div>
 <?php layout_footer();

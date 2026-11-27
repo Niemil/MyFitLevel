@@ -9,4 +9,4 @@ if ($tok === '' || !hash_equals($tok, (string)$args[0])) {
 }
 echo 'miss-you mails sent: ' . miss_you_run(25) . "\n";
 require_once APP_ROOT . '/includes/mentions.php';
-echo (function () { try { return mentions_cron(); } catch (Throwable $e) { return 'mentions: failed'; } })() . "\n";
+echo mentions_cron() . "\n";

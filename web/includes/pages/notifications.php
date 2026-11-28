@@ -22,6 +22,8 @@ layout_header('Notifications');
           case 'comment': $msg = "$who commented on your workout"; break;
           case 'post_props':   $msg = "$who gave props to your post"; break;
           case 'post_comment': $msg = "$who commented on your post"; break;
+          case 'event_props':   $msg = '<a href="' . e(url('event?k=' . rawurlencode((string)$n['text']))) . '">' . $who . ' gave props to your update</a>'; break;
+          case 'event_comment': $msg = '<a href="' . e(url('event?k=' . rawurlencode((string)$n['text']))) . '#comments">' . $who . ' commented on your update</a>'; break;
           case 'dm':      $msg = '<a href="' . e(url('messages/' . $n['username'])) . '">' . $who . ' sent you a message</a>'; break;
           case 'follow':  $msg = "$who started following you"; break;
           case 'boss': $msg = '<a href="' . e(url('boss')) . '">' . e((string)$n['text']) . '</a>'; break;

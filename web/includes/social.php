@@ -118,6 +118,7 @@ function attach_post_data(array $ps, int $viewerId): array
 
 function render_feed_items(array $items, ?array $viewer): void
 {
+    event_prefetch($items, $viewer);
     foreach ($items as $it) {
         render_feed_item($it, $viewer);
     }
@@ -211,81 +212,139 @@ function render_feed_item(array $it, ?array $viewer, bool $compactWorkouts = fal
         case 'badge': event_card($it, $viewer); break;
         case 'steps':
         case 'boss':
-        case 'loot': activity_card($it); break;
+        case 'loot': activity_card($it, $viewer); break;
         default: $compactWorkouts ? workout_compact($it['row'], $viewer) : workout_card($it['row'], $viewer);
     }
 }
 
-/** "Completed a Quest for 350 pts" / "Achievement unlocked" lines, like the old Fitocracy feed. */
-function event_card(array $it, ?array $viewer): void
+/** Tables for props and comments on feed events (quests, achievements, steps, boss fights, loot). */
+function event_ensure(): void
 {
-    $r = $it['row'];
-    $name = display_name($r);
-    if ($it['type'] === 'quest') {
-        $d = quest_defs()[$r['code']] ?? null;
-        if (!$d) { return; }
-        $head = 'Completed a Quest for <b>' . (int)$r['reward'] . ' pts</b>';
-        $title = $d[0]; $desc = $d[1]; $icon = '⚔️';
-    } else {
-        $d = badge_defs()[$r['code']] ?? null;
-        if (!$d) { return; }
-        $head = 'Achievement unlocked';
-        $title = $d[0]; $desc = $d[1]; $icon = $d[2];
+    static $done = false;
+    if ($done || setting('event_tables_ok') === '1') { $done = true; return; }
+    $done = true;
+    q('CREATE TABLE IF NOT EXISTS event_props (
+        ekey VARCHAR(90) NOT NULL, user_id INT UNSIGNED NOT NULL, created_at DATETIME NOT NULL,
+        PRIMARY KEY (ekey, user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    q('CREATE TABLE IF NOT EXISTS event_comments (
+        id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY, ekey VARCHAR(90) NOT NULL, user_id INT UNSIGNED NOT NULL,
+        body VARCHAR(500) NOT NULL, created_at DATETIME NOT NULL, KEY idx_e (ekey)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+    set_setting('event_tables_ok', '1');
+}
+
+/** A stable id for a feed event: type:userId:ref */
+function event_key(string $type, array $r): string
+{
+    $uid = (int)($r['user_id'] ?? $r['id'] ?? 0);
+    $ref = match ($type) {
+        'quest', 'badge' => (string)$r['code'],
+        'steps' => (string)$r['day'],
+        'loot' => (string)$r['item'],
+        default => (string)$r['boss_id'],
+    };
+    return ['quest' => 'q', 'badge' => 'b', 'steps' => 's', 'loot' => 'l', 'boss' => 'x'][$type] . ':' . $uid . ':' . $ref;
+}
+
+/** props / comment counts for a batch of events, cached for the request */
+function event_stats(array $keys = [], ?int $viewerId = null): void
+{
+    static $have = [];
+    global $EVENT_STATS;
+    $EVENT_STATS ??= [];
+    $need = array_values(array_diff(array_unique($keys), $have));
+    if (!$need) { return; }
+    event_ensure();
+    $in = implode(',', array_fill(0, count($need), '?'));
+    foreach ($need as $k) { $EVENT_STATS[$k] = ['props' => 0, 'comments' => 0, 'mine' => false]; $have[] = $k; }
+    foreach (rows("SELECT ekey, COUNT(*) c FROM event_props WHERE ekey IN ($in) GROUP BY ekey", $need) as $r) { $EVENT_STATS[$r['ekey']]['props'] = (int)$r['c']; }
+    foreach (rows("SELECT ekey, COUNT(*) c FROM event_comments WHERE ekey IN ($in) GROUP BY ekey", $need) as $r) { $EVENT_STATS[$r['ekey']]['comments'] = (int)$r['c']; }
+    if ($viewerId) {
+        foreach (rows("SELECT ekey FROM event_props WHERE user_id = ? AND ekey IN ($in)", array_merge([$viewerId], $need)) as $r) { $EVENT_STATS[$r['ekey']]['mine'] = true; }
     }
+}
+
+/** Load stats for every event in a list before drawing it. */
+function event_prefetch(array $items, ?array $viewer): void
+{
+    $keys = [];
+    foreach ($items as $it) {
+        if (in_array($it['type'], ['quest', 'badge', 'steps', 'loot', 'boss'], true)) { $keys[] = event_key($it['type'], $it['row']); }
+    }
+    if ($keys) { event_stats($keys, $viewer ? (int)$viewer['id'] : null); }
+}
+
+/** What an event says: [icon, head html, title, description] or null */
+function event_parts(string $type, array $r): ?array
+{
+    if ($type === 'quest') {
+        $d = quest_defs()[$r['code']] ?? null;
+        return $d ? ['⚔️', 'Completed a quest for <b>' . (int)$r['reward'] . ' pts</b>', $d[0], $d[1]] : null;
+    }
+    if ($type === 'badge') {
+        $d = badge_defs()[$r['code']] ?? null;
+        return $d ? [$d[2], 'Achievement unlocked', $d[0], $d[1]] : null;
+    }
+    if ($type === 'steps') {
+        $per = max(1, (int)game_cfg('steps_per_point'));
+        $pts = intdiv(min((int)$r['steps'], max(0, (int)game_cfg('steps_cap_day'))), $per);
+        return ['👟', 'Walked <b>' . number_format((int)$r['steps']) . ' steps</b> on ' . e(date('M j', strtotime((string)$r['day']))), '+' . $pts . ' pts from steps',
+            ((int)$r['distance_m'] > 0 ? number_format((int)$r['distance_m'] / 1000, 1) . ' km · ' : '') . 'synced from ' . ($r['source'] === 'manual' ? 'a manual entry' : (string)$r['source'])];
+    }
+    if ($type === 'boss') {
+        $srcs = array_map(fn($x) => $x === 'steps' ? 'steps' : 'workouts', explode(',', (string)$r['srcs']));
+        return [game_roster_by_key((string)$r['boss_key'])[2], $r['raid_team'] ? 'Fought in a team raid' : 'Hit the weekly boss', (string)$r['boss_name'],
+            number_format((int)$r['dmg']) . ' damage · ' . (int)$r['n'] . ' hit' . ((int)$r['n'] === 1 ? '' : 's') . ' from ' . implode(' and ', array_unique($srcs))];
+    }
+    $d = game_items()[$r['item']] ?? null;
+    if (!$d) { return null; }
+    return [$d[1], ['drop' => 'Won a boss drop', 'relic' => 'Found a legendary relic', 'advent' => 'Opened an advent door'][$r['source']] ?? 'Earned a rare item', $d[0],
+        ($d[3] ? '+' . $d[3] . '% damage' : '') . ($d[3] && $d[4] ? ' · ' : '') . ($d[4] ? '+' . $d[4] . '% coins' : '')];
+}
+
+/** One tight row per event, with Props and Comments like everything else in the feed. */
+function event_row(string $type, array $r, string $time, ?array $viewer, bool $full = false): void
+{
+    $p = event_parts($type, $r);
+    if (!$p) { return; }
+    [$icon, $head, $title, $desc] = $p;
+    $key = event_key($type, $r);
+    event_stats([$key], $viewer ? (int)$viewer['id'] : null);
+    $st = $GLOBALS['EVENT_STATS'][$key];
+    $href = url('event?k=' . rawurlencode($key));
     ?>
-<article class="card eventcard">
-  <a href="<?= e(url('u/' . $r['username'])) ?>"><?= uavatar($r, 42) ?></a>
-  <div class="evbadge" aria-hidden="true"><?= $icon ?></div>
+<article class="card eventrow">
+  <a href="<?= e(url('u/' . $r['username'])) ?>"><?= uavatar($r, 34) ?></a>
   <div class="grow">
-    <div class="small"><a class="uname<?= uname_cls((string)$r['username']) ?>" href="<?= e(url('u/' . $r['username'])) ?>"><?= e($name) ?></a> <span class="muted"><?= e(rel_time($it['time'])) ?></span></div>
-    <div class="evhead"><?= $head ?></div>
-    <b><?= e($title) ?></b>
-    <div class="muted small"><?= e($desc) ?></div>
+    <div class="evline"><span class="evic" aria-hidden="true"><?= $icon ?></span> <a class="uname<?= uname_cls((string)$r['username']) ?>" href="<?= e(url('u/' . $r['username'])) ?>"><?= e(display_name($r)) ?></a> <span class="muted"><?= $head ?></span> <b><?= e($title) ?></b> <span class="muted small">· <?= e(rel_time($time)) ?></span></div>
+    <?php if ($desc !== ''): ?><div class="muted small"><?= e($desc) ?></div><?php endif; ?>
+    <div class="evact">
+      <?php if ($viewer): ?>
+      <form method="post" action="<?= e(url('act/event_props')) ?>" data-ajax class="inl">
+        <?= csrf_field() ?><input type="hidden" name="ekey" value="<?= e($key) ?>">
+        <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '/') ?>">
+        <button class="act <?= $st['mine'] ? 'on' : '' ?>" type="submit" data-propbtn><?= icon('prop') ?> <span data-count><?= (int)$st['props'] ?></span> Props</button>
+      </form>
+      <?php else: ?>
+      <a class="act" href="<?= e(url('login')) ?>"><?= icon('prop') ?> <?= (int)$st['props'] ?> Props</a>
+      <?php endif; ?>
+      <a class="act" href="<?= e($href) ?>#comments"><?= icon('chat') ?> <?= (int)$st['comments'] ?> Comments</a>
+    </div>
   </div>
 </article>
 <?php
 }
 
+function event_card(array $it, ?array $viewer): void
+{
+    event_row($it['type'], $it['row'], (string)$it['time'], $viewer);
+}
 
 /** Profile activity lines for steps, boss hits and loot (coins are never shown). */
-function activity_card(array $it): void
+function activity_card(array $it, ?array $viewer = null): void
 {
-    $r = $it['row'];
-    $name = display_name($r);
-    if ($it['type'] === 'steps') {
-        $per = max(1, (int)game_cfg('steps_per_point'));
-        $pts = intdiv(min((int)$r['steps'], max(0, (int)game_cfg('steps_cap_day'))), $per);
-        $icon = '👟';
-        $head = 'Walked <b>' . number_format((int)$r['steps']) . ' steps</b> on ' . e(date('M j', strtotime((string)$r['day'])));
-        $title = '+' . $pts . ' pts from steps';
-        $desc = ((int)$r['distance_m'] > 0 ? number_format((int)$r['distance_m'] / 1000, 1) . ' km · ' : '') . 'synced from ' . ($r['source'] === 'manual' ? 'a manual entry' : (string)$r['source']);
-    } elseif ($it['type'] === 'boss') {
-        $icon = game_roster_by_key((string)$r['boss_key'])[2];
-        $head = $r['raid_team'] ? 'Fought in a team raid' : 'Hit the weekly boss';
-        $title = (string)$r['boss_name'];
-        $srcs = array_map(fn($x) => $x === 'steps' ? 'steps' : 'workouts', explode(',', (string)$r['srcs']));
-        $desc = number_format((int)$r['dmg']) . ' damage · ' . (int)$r['n'] . ' hit' . ((int)$r['n'] === 1 ? '' : 's') . ' from ' . implode(' and ', array_unique($srcs));
-    } else {
-        $cat = game_items();
-        $d = $cat[$r['item']] ?? null;
-        if (!$d) { return; }
-        $icon = $d[1];
-        $head = ['drop' => 'Won a boss drop', 'relic' => 'Found a legendary relic', 'advent' => 'Opened an advent door'][$r['source']] ?? 'Earned a rare item';
-        $title = $d[0];
-        $desc = ($d[3] ? '+' . $d[3] . '% damage' : '') . ($d[3] && $d[4] ? ' · ' : '') . ($d[4] ? '+' . $d[4] . '% coins' : '');
-    }
-    ?>
-<article class="card eventcard">
-  <a href="<?= e(url('u/' . $r['username'])) ?>"><?= uavatar($r, 42) ?></a>
-  <div class="evbadge" aria-hidden="true"><?= $icon ?></div>
-  <div class="grow">
-    <div class="small"><a class="uname<?= uname_cls((string)$r['username']) ?>" href="<?= e(url('u/' . $r['username'])) ?>"><?= e($name) ?></a> <span class="muted"><?= e(rel_time($it['time'])) ?></span></div>
-    <div class="evhead"><?= $head ?></div>
-    <b><?= e($title) ?></b>
-    <?php if ($desc !== ''): ?><div class="muted small"><?= e($desc) ?></div><?php endif; ?>
-  </div>
-</article>
-<?php
+    event_row($it['type'], $it['row'], (string)$it['time'], $viewer);
 }
 
 /* ================= Private messages ================= */

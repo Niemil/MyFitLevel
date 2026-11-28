@@ -185,6 +185,48 @@ switch ($action) {
         }
         break;
 
+    case 'event_props':
+    case 'event_comment':
+    case 'event_comment_delete':
+        event_ensure();
+        if ($action === 'event_comment_delete') {
+            $c = row('SELECT id, user_id, ekey FROM event_comments WHERE id = ?', [(int)($_POST['comment_id'] ?? 0)]);
+            if ($c && ((int)$c['user_id'] === $uid || is_staff($u) || (int)explode(':', $c['ekey'])[1] === $uid)) {
+                q('DELETE FROM event_comments WHERE id = ?', [$c['id']]);
+            }
+            break;
+        }
+        $ekey = (string)($_POST['ekey'] ?? '');
+        if (!preg_match('/^[qbslx]:(\d+):[\w.\-]{1,60}$/', $ekey, $em)) {
+            $result = ['ok' => false, 'error' => 'Not found'];
+            break;
+        }
+        $owner = row('SELECT id, visibility FROM users WHERE id = ? AND is_banned = 0', [(int)$em[1]]);
+        if (!$owner || !can_see_member($owner, $u)) {
+            $result = ['ok' => false, 'error' => 'Not found'];
+            break;
+        }
+        if ($action === 'event_props') {
+            $has = row('SELECT 1 FROM event_props WHERE ekey = ? AND user_id = ?', [$ekey, $uid]);
+            if ($has) {
+                q('DELETE FROM event_props WHERE ekey = ? AND user_id = ?', [$ekey, $uid]);
+            } elseif (rate_ok('props:' . $uid, 200, 3600)) {
+                q('INSERT IGNORE INTO event_props (ekey, user_id, created_at) VALUES (?,?,?)', [$ekey, $uid, now()]);
+                rate_hit('props:' . $uid);
+                notify((int)$owner['id'], $uid, 'event_props', null, $ekey);
+            }
+            $result['on'] = !$has;
+            $result['count'] = (int)val('SELECT COUNT(*) FROM event_props WHERE ekey = ?', [$ekey]);
+            break;
+        }
+        $body = clean_text((string)($_POST['body'] ?? ''), 500);
+        if ($body === '') { flash('Write something first.', 'err'); break; }
+        if (!rate_ok('comment:' . $uid, 30, 600)) { flash('Too many comments. Try again in a few minutes.', 'err'); break; }
+        q('INSERT INTO event_comments (ekey, user_id, body, created_at) VALUES (?,?,?,?)', [$ekey, $uid, $body, now()]);
+        rate_hit('comment:' . $uid);
+        notify((int)$owner['id'], $uid, 'event_comment', null, $ekey);
+        break;
+
     case 'post_props':
         $pid = (int)($_POST['post_id'] ?? 0);
         $po = row('SELECT p.id, p.user_id, us.visibility FROM posts p JOIN users us ON us.id = p.user_id WHERE p.id = ? AND us.is_banned = 0', [$pid]);

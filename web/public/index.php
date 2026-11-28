@@ -51,6 +51,7 @@ $routes = [
     '#^gym/(\d+)/edit$#'           => 'gymedit',
     '#^gym/(\d+)$#'                => 'gym',
     '#^post/(\d+)$#'               => 'post',
+    '#^event$#'                    => 'event',
     '#^fitocracy-archive$#'        => 'fitoarchive',
     '#^u/([A-Za-z0-9_]{3,20})$#'   => 'profile',
     '#^me$#'                       => 'me',

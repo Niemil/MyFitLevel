@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('APP_VERSION', '3.71.0');
+define('APP_VERSION', '3.72.0');
 const SCHEMA_VERSION = 16;
 
 if (!defined('APP_ROOT')) {

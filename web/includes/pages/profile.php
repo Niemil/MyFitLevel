@@ -258,7 +258,7 @@ if ($showWorkouts && preg_match('/^(\d+),(\d+)$/', (string)setting('ba:' . $pid,
   <?php elseif (!$list): ?>
     <div class="card center muted">Nothing here yet.</div>
   <?php endif; ?>
-  <?php foreach ($list as $it) { render_feed_item($it, $viewer, true); } ?>
+  <?php event_prefetch($list, $viewer); foreach ($list as $it) { render_feed_item($it, $viewer, true); } ?>
   <?php if ($more && $nextBefore): ?>
     <p class="center"><a class="btn ghost" href="<?= e(url('u/' . $p['username'] . '?before=' . urlencode($nextBefore))) ?>">Older</a></p>
   <?php endif; ?>

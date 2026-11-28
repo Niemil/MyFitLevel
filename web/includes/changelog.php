@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.72.0', '2026-11-28 09:10', 'Tighter feed with props on everything', ['Improve Quests, achievements, steps, boss fights and loot are now one slim row in the feed.', 'New Props and comments on all of them, with a small page for each update.'], 'improve'],
     ['3.71.0', '2026-11-28 08:05', 'Fairer squats', ['Improve Squats, lunges and step-ups now count half your bodyweight on top of the bar, like pull-ups and dips already do. Everyone is recalculated automatically.'], 'improve'],
     ['3.70.0', '2026-11-28 00:40', 'Today page and heroes everywhere', ['New A Today page: your hero, daily chest, goals and the boss first. The Feed is now just the community feed.', 'New Heroes show up in the boss arena, on the leaderboard podium and on the boss page.', 'Improve New menu: Today, Feed, Track, Quests, Me. Leaderboard, Teams, Boss and Challenges are on the Quests page.', 'New Buy a full costume in one step from the Wardrobe.'], 'new'],
     ['3.69.1', '2026-11-28 00:10', 'Full costumes', ['New A Full costumes list at the top of the Wardrobe: try a whole outfit in one tap.', 'Improve Cosmetics now cost more, so a full costume is a goal for 3-6 months of regular training. Team items stay free for the team.'], 'new'],

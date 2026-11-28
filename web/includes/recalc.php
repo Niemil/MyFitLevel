@@ -14,7 +14,7 @@ declare(strict_types=1);
  * The fingerprint is refreshed after each app update, after admin edits and when the admin changes the level speed.
  */
 
-const RULES_VERSION = 5;   // bump when you change scoring CODE that the fingerprint can't see (e.g. the formula shape)
+const RULES_VERSION = 6;   // bump when you change scoring CODE that the fingerprint can't see (e.g. the formula shape)
 
 function rules_fingerprint(): string
 {

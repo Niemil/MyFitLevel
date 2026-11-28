@@ -118,7 +118,7 @@
     var kg = IS_LB ? num(s.w) / LB : num(s.w);
     var reps = num(s.r), p = 0;
     var sd = (ex.equipment === 'dumbbell' || ex.per_side === 1) ? 2 : 1;
-    if (ex.kind === 'weight') { var ld = kg * sd; p = reps > 0 ? ex.coef * Math.pow(ld * (1 + Math.min(reps, 12) / 30), 1.3) * D.scale : 0; }
+    if (ex.kind === 'weight') { var ld = kg * sd + D.bw * (ex.bw_pct || 0); p = reps > 0 ? ex.coef * Math.pow(ld * (1 + Math.min(reps, 12) / 30), 1.3) * D.scale : 0; }
     else if (ex.kind === 'bodyweight') { var lb = D.bw * ex.bw_pct + kg; p = reps > 0 ? ex.coef * Math.pow(lb * (1 + Math.min(reps, 12) / 30), 1.3) * D.scale : 0; }
     else if (ex.kind === 'cardio') { var km = num(s.d), tm = num(s.t); if (ex.dist_coef > 0 && km > 0) { var vv = tm > 0 ? km / (tm / 3600) : ex.ref; var rt = Math.max(0.4, Math.min(2.5, vv / ex.ref)); p = ex.dist_coef * 6.6 * Math.pow(km, 1.2) * Math.pow(rt, 1.3); } else p = ex.coef * 6.6 * (tm / 60); }
     else if (ex.kind === 'duration') p = ex.coef * 3 * (num(s.t) / 60);

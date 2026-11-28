@@ -5,6 +5,9 @@
  * Format: ['YYYY-MM-DD', 'Headline', ['point', ...]]
  */
 return [
+    ['2026-11-28', 'Fairer squats', [
+        'Squats, lunges and step-ups now count half your bodyweight on top of the bar, so heavier people get credit for moving more.',
+    ]],
     ['2026-11-27', 'Dress-up, muscle levels and team chat', [
         'Your hero: a full wardrobe with a fitting room, new gear art, animated wings and auras, and male or female looks for every animal.',
         'Muscle levels: every muscle group levels up from your training and shows on your character.',

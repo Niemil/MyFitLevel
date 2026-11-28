@@ -54,6 +54,11 @@ function staff_ensure(): void
 /** One-time balance changes, applied automatically. */
 function staff_once(): void
 {
+    if (setting('bw_squat_v') !== '1') {
+        set_setting('bw_squat_v', '1');
+        // Loaded squats, lunges and step-ups count half your bodyweight on top of the bar (scoring rules v6)
+        q("UPDATE exercises SET bw_pct = 0.5 WHERE kind = 'weight' AND equipment IN ('barbell','dumbbell','kettlebell','bodyweight') AND bw_pct = 0 AND (name LIKE '%squat%' OR name LIKE '%lunge%' OR name LIKE '%step-up%' OR name LIKE '%step up%') AND name NOT LIKE '%hack%'");
+    }
     if (setting('bal_v2') !== '1') {
         set_setting('bal_v2', '1');
         set_setting('level_scale', '1');             // the new curve is set directly in level_anchors()

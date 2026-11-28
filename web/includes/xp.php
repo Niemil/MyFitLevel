@@ -171,7 +171,8 @@ function set_points(array $ex, array $s, float $bodyweightKg): array
 
     switch ($ex['kind']) {
         case 'weight':
-            $load  = $kg * $side;
+            // Squats, lunges and step-ups also move your own body: bw_pct of your bodyweight counts on top of the bar.
+            $load  = $kg * $side + $bodyweightKg * (float)($ex['bw_pct'] ?? 0);
             $score = $load * (1 + min($reps, 12) / 30);          // Epley estimated 1RM (valid up to ~12 reps)
             $pts   = $reps > 0 ? $coef * (max(0.0, $score) ** LOAD_EXP) * POINTS_SCALE : 0.0;
             break;

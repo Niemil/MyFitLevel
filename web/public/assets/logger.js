@@ -808,3 +808,15 @@
   if (t) t.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); close(); } });
   var g = document.getElementById('f_gym'); if (g) g.addEventListener('change', function () { setTimeout(close, 150); });
 })();
+
+(function () {
+  var f = document.getElementById('wphotos'), m = document.getElementById('wphmsg');
+  if (!f) { return; }
+  f.addEventListener('change', function () {
+    var max = parseInt(f.getAttribute('data-max'), 10) || 0;
+    if (f.files.length > max) {
+      f.value = '';
+      if (m) { m.textContent = max > 0 ? 'Pick at most ' + max + ' photo' + (max === 1 ? '' : 's') + '.' : 'Remove a photo first to add another.'; }
+    } else if (m) { m.textContent = f.files.length ? f.files.length + ' selected' : ''; }
+  });
+})();

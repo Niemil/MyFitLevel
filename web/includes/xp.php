@@ -710,6 +710,12 @@ function delete_workout(int $workoutId, int $uid): void
 {
     webhook_snakediet_delete($uid, $workoutId);   // tell SnakeDiet first (skipped for workouts that came from there)
     game_on_delete($workoutId);
+    try {
+        foreach (rows("SELECT * FROM images WHERE kind = 'workout' AND post_id = ? AND user_id = ?", [$workoutId, $uid]) as $im) {
+            image_delete($im);
+        }
+    } catch (Throwable $e) {
+    }
     q('DELETE FROM workouts WHERE id = ? AND user_id = ?', [$workoutId, $uid]);
     try {
         q('DELETE FROM inbound_workouts WHERE workout_id = ? AND user_id = ?', [$workoutId, $uid]);   // so the same id can come in again later

@@ -1237,3 +1237,7 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .eventrow .evact .act{padding:2px 8px;font-size:.8rem}
 
 .avatar.heroav{background:#1b1f33;object-fit:cover}
+.wphotos input[type=file]{display:block;margin-top:.5rem;max-width:100%}
+.wph-have{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+.wph{display:flex;flex-direction:column;gap:.25rem;font-size:.8rem;width:84px}
+.wph img{width:84px;height:84px;object-fit:cover;border-radius:8px}

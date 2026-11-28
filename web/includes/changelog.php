@@ -6,6 +6,7 @@ declare(strict_types=1);
  * Add a new entry at the TOP with every update: [version, 'YYYY-MM-DD HH:MM', 'Headline', ['point', ...], 'fix|new|improve']
  */
 return [
+    ['3.74.0', '2026-11-28 10:30', 'Photos on workouts', ['New Add 1 to 3 photos to a workout when you log or edit it. They show on the workout card in the feed, on your profile and on the workout page.', 'Improve Deleting a workout also deletes its photos.'], 'new'],
     ['3.73.0', '2026-11-28 09:40', 'Your avatar and name icons', ['New Settings: use your hero as your avatar instead of your photo, and choose which icons show next to your name (team, trophy, admin shield, founder crown).'], 'new'],
     ['3.72.0', '2026-11-28 09:10', 'Tighter feed with props on everything', ['Improve Quests, achievements, steps, boss fights and loot are now one slim row in the feed.', 'New Props and comments on all of them, with a small page for each update.'], 'improve'],
     ['3.71.0', '2026-11-28 08:05', 'Fairer squats', ['Improve Squats, lunges and step-ups now count half your bodyweight on top of the bar, like pull-ups and dips already do. Everyone is recalculated automatically.'], 'improve'],

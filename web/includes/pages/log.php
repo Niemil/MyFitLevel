@@ -28,6 +28,10 @@ if (is_post()) {
         redirect('log');
     }
     rate_hit('log:' . $uid);
+    $photoErr = workout_photos_save((int)$res['workout_id'], $uid);
+    if ($photoErr !== '') {
+        flash($photoErr, 'err');
+    }
     if ((int)($_POST['edit_id'] ?? 0)) {
         flash('Workout updated.');
         redirect('workout/' . $res['workout_id']);
@@ -133,7 +137,7 @@ if (isset($_GET['edit'])) {
             $its[] = ['id' => (int)$exId, 'sets' => $sets, 'note' => (string)($notesBy[$exId] ?? '')];
         }
         $editData = ['id' => (int)$ew['id'], 'title' => (string)$ew['title'], 'notes' => (string)$ew['notes'],
-            'when' => date('Y-m-d\TH:i', strtotime($ew['performed_at'])), 'gym' => (string)(int)$ew['gym_id'], 'items' => $its, 'started' => 1, 'began' => 0, 'ts' => 0];
+            'when' => date('Y-m-d\TH:i', strtotime($ew['performed_at'])), 'gym' => (string)(int)$ew['gym_id'], 'items' => $its, 'images' => workout_images([(int)$ew['id']])[(int)$ew['id']] ?? [], 'started' => 1, 'began' => 0, 'ts' => 0];
     }
 }
 
@@ -220,7 +224,7 @@ layout_header('Track workout', 'log');
   </div>
 </section>
 <?php endif; ?>
-<form method="post" id="logform" class="logform" autocomplete="off">
+<form method="post" id="logform" class="logform" autocomplete="off" enctype="multipart/form-data">
   <?= csrf_field() ?>
   <input type="hidden" name="nonce" value="<?= e(bin2hex(random_bytes(8))) ?>">
   <input type="hidden" name="duration" id="f_dur" value="0">
@@ -275,6 +279,19 @@ layout_header('Track workout', 'log');
       <label>Notes for the whole workout <small class="muted">(optional)</small>
         <textarea name="notes" id="f_notes" rows="2" maxlength="1000" placeholder="How did it feel?"></textarea>
       </label>
+    </div>
+
+    <div class="card wphotos">
+      <b>Photos</b> <small class="muted">(optional, up to 3)</small>
+      <?php if ($editData && $editData['images']): ?>
+      <div class="wph-have">
+        <?php foreach ($editData['images'] as $im): ?>
+        <label class="wph"><img alt="Photo" src="<?= e(img_url($im['token'], true)) ?>"><span><input type="checkbox" name="rm_img[]" value="<?= (int)$im['id'] ?>"> Remove</span></label>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+      <input type="file" name="wphotos[]" id="wphotos" accept="image/jpeg,image/png,image/webp" multiple data-max="<?= 3 - ($editData ? count($editData['images']) : 0) ?>">
+      <div class="small muted" id="wphmsg" role="status"></div>
     </div>
 
     <div class="savebar">

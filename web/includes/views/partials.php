@@ -331,6 +331,7 @@ function attach_workout_data(array $ws, int $viewerId): array
             $byW[$nn['workout_id']][$nn['exercise_id']]['note'] = $nn['note'];
         }
     }
+    $wimgs = workout_images($ids);
     $props = array_column(rows("SELECT workout_id, COUNT(*) c FROM props WHERE workout_id IN ($in) GROUP BY workout_id", $ids), 'c', 'workout_id');
     $coms = array_column(rows("SELECT workout_id, COUNT(*) c FROM comments WHERE workout_id IN ($in) GROUP BY workout_id", $ids), 'c', 'workout_id');
     $mine = array_column(rows("SELECT workout_id FROM props WHERE user_id = ? AND workout_id IN ($in)", array_merge([$viewerId], $ids)), 'workout_id');
@@ -348,6 +349,7 @@ function attach_workout_data(array $ws, int $viewerId): array
         $w['gym_public'] = $gy['is_public'] ?? 0;
         $w['gym_owner'] = $gy['owner_id'] ?? 0;
         $w['exercises'] = array_values($byW[$w['id']] ?? []);
+        $w['images'] = $wimgs[(int)$w['id']] ?? [];
         $w['props'] = (int)($props[$w['id']] ?? 0);
         $w['comments'] = (int)($coms[$w['id']] ?? 0);
         $w['propped'] = in_array($w['id'], $mine);
@@ -371,6 +373,7 @@ function workout_card(array $w, ?array $viewer, bool $full = false): void
     <div class="pts"><b>+<?= number_format((int)$w['points']) ?></b><small>pts</small></div>
   </header>
   <?php if (!empty($w['title'])): ?><h3 class="wtitle"><?= e($w['title']) ?></h3><?php endif; ?>
+  <?= !empty($w['images']) ? photo_grid($w['images']) : '' ?>
   <?php
   $nSets = 0;
   foreach ($w['exercises'] as $ex0) { $nSets += count($ex0['sets']); }

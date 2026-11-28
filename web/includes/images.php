@@ -197,3 +197,56 @@ function uavatar_inner(string $name, $tok, int $size): string
     }
     return avatar($name, $size);
 }
+
+
+/** Workout photos reuse the images table: kind 'workout', post_id holds the workout id. Adds the enum value once. */
+function wimg_ensure(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    if (setting('wimg_v') === '1') {
+        return;
+    }
+    try {
+        q("ALTER TABLE images MODIFY kind ENUM('post','avatar','gallery','workout') NOT NULL DEFAULT 'post'");
+        set_setting('wimg_v', '1');
+    } catch (Throwable $e) {
+    }
+}
+
+function workout_images(array $workoutIds): array
+{
+    if (!$workoutIds) {
+        return [];
+    }
+    wimg_ensure();
+    $out = [];
+    foreach (rows('SELECT id, post_id, token FROM images WHERE kind = \'workout\' AND post_id IN (' . in_clause($workoutIds) . ') ORDER BY id', $workoutIds) as $r) {
+        $out[(int)$r['post_id']][] = $r;
+    }
+    return $out;
+}
+
+/** Saves up to 3 photos in total for a workout (counting the ones already there); also removes ticked ones. Returns an error text or ''. */
+function workout_photos_save(int $wid, int $uid): string
+{
+    wimg_ensure();
+    foreach ((array)($_POST['rm_img'] ?? []) as $iid) {
+        $im = row("SELECT * FROM images WHERE id = ? AND user_id = ? AND kind = 'workout' AND post_id = ?", [(int)$iid, $uid, $wid]);
+        if ($im) {
+            image_delete($im);
+        }
+    }
+    $have = (int)val("SELECT COUNT(*) FROM images WHERE user_id = ? AND kind = 'workout' AND post_id = ?", [$uid, $wid]);
+    $err = '';
+    foreach (array_slice(files_list('wphotos'), 0, max(0, 3 - $have)) as $f) {
+        $r = image_store($f, $uid, 'workout', $wid);
+        if (!$r['ok']) {
+            $err = $r['error'];
+        }
+    }
+    return $err;
+}

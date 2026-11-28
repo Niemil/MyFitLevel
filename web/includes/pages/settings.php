@@ -27,6 +27,13 @@ if (is_post()) {
         q('UPDATE users SET display_name = ?, bio = ?, unit = ?, bodyweight_kg = ?, visibility = ?, share_public = ?, prefill = ?, skin = ? WHERE id = ?',
           [$dn ?: null, $bio ?: null, $unit, $bw, $vis, $vis === 'followers' ? 0 : 1, $pre, $skin, $uid]);
         flash('Settings saved.');
+    } elseif ($do === 'looks') {
+        prof_look_ensure();
+        $mode = ($_POST['avatar_mode'] ?? 'photo') === 'hero' ? 'hero' : 'photo';
+        $show = (array)($_POST['show'] ?? []);
+        $hide = array_values(array_filter(['team', 'title', 'founder', 'role'], fn($k) => !in_array($k, $show, true)));
+        q('UPDATE users SET avatar_mode = ?, hide_icons = ? WHERE id = ?', [$mode, implode(',', $hide), $uid]);
+        flash('Saved. Your avatar and name icons are updated.');
     } elseif ($do === 'email') {
         $email = clean_text((string)($_POST['email'] ?? ''), 190);
         if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -149,6 +156,25 @@ layout_header('Settings');
         <option value="none" <?= $u['prefill'] === 'none' ? 'selected' : '' ?>>Start empty (I still see last time's numbers)</option>
       </select></label>
     <button class="btn" type="submit">Save</button>
+  </form>
+</div>
+
+<div class="card" id="looks">
+  <h3>Avatar &amp; name icons</h3>
+  <?php prof_look_ensure(); $hidNow = name_icons_hidden((string)$u['username']); $isStaffU = is_staff($u); ?>
+  <form method="post">
+    <?= csrf_field() ?><input type="hidden" name="do" value="looks">
+    <p class="muted small" style="margin-top:0">Your avatar shows next to your name in the feed, comments and rankings.</p>
+    <label class="check"><input type="radio" name="avatar_mode" value="photo" <?= ($u['avatar_mode'] ?? 'photo') !== 'hero' ? 'checked' : '' ?>> My profile photo</label>
+    <label class="check"><input type="radio" name="avatar_mode" value="hero" <?= ($u['avatar_mode'] ?? 'photo') === 'hero' ? 'checked' : '' ?>> My hero (dressed in your gear)</label>
+    <p class="muted small" style="margin:12px 0 4px">Icons next to my name</p>
+    <label class="check"><input type="checkbox" name="show[]" value="team" <?= !in_array('team', $hidNow, true) ? 'checked' : '' ?>> Team badge</label>
+    <label class="check"><input type="checkbox" name="show[]" value="title" <?= !in_array('title', $hidNow, true) ? 'checked' : '' ?>> Trophy for a season title</label>
+    <?php if ($isStaffU): ?>
+    <label class="check"><input type="checkbox" name="show[]" value="role" <?= !in_array('role', $hidNow, true) ? 'checked' : '' ?>> Admin or moderator shield</label>
+    <label class="check"><input type="checkbox" name="show[]" value="founder" <?= !in_array('founder', $hidNow, true) ? 'checked' : '' ?>> Founder crown (if you have it)</label>
+    <?php endif; ?>
+    <p><button class="btn" type="submit">Save</button></p>
   </form>
 </div>
 

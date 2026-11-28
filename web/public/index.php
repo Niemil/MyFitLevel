@@ -28,6 +28,7 @@ $routes = [
     '#^register$#'                 => 'register',
     '#^logout$#'                   => 'logout',
     '#^today$#'                    => 'today',
+    '#^hero-avatar/(\d+)$#'        => 'heroavatar',
     '#^feed$#'                     => 'feed',
     '#^log$#'                      => 'log',
     '#^log/draft$#'                => 'draft',

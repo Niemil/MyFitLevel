@@ -1235,3 +1235,5 @@ html.fx-calm .f-aura,.nomotion .f-aura{animation:none}
 .eventrow .evic{font-size:1.05rem;margin-right:2px}
 .eventrow .evact{display:flex;gap:6px;margin-top:4px}
 .eventrow .evact .act{padding:2px 8px;font-size:.8rem}
+
+.avatar.heroav{background:#1b1f33;object-fit:cover}

@@ -6,6 +6,7 @@
  */
 return [
     ['2026-11-28', 'Fairer squats', [
+        'Pick your hero as your avatar, and choose which icons show next to your name, in Settings.',
         'A tighter feed: achievements, quests and boss fights are slim rows, and you can give props and comment on all of them.',
         'Squats, lunges and step-ups now count half your bodyweight on top of the bar, so heavier people get credit for moving more.',
     ]],

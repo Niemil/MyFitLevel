@@ -554,11 +554,12 @@ function game_user_badges(string $username): string
         }
     }
     $out = '';
-    if (isset($teams[$username])) {
+    $hid = name_icons_hidden($username);
+    if (isset($teams[$username]) && !in_array('team', $hid, true)) {
         $t = $teams[$username];
         $out .= ' <a class="tbadge" href="' . e(url('team/' . $t['id'])) . '" title="' . e($t['name']) . '">' . e($t['emoji']) . '</a>';
     }
-    if (isset($titles[$username])) {
+    if (isset($titles[$username]) && !in_array('title', $hid, true)) {
         $out .= ' <span class="tbadge" title="' . e($titles[$username]) . '">🏆</span>';
     }
     return $out;

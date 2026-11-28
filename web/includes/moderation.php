@@ -9,6 +9,32 @@ function is_staff(?array $u): bool
 }
 
 /** Small shield icon next to the name of an admin or moderator. Looks the role up once per request. */
+/** Columns for the member's own choices: avatar_mode ('photo' or 'hero') and hide_icons (comma list of: team, title, founder, role). */
+function prof_look_ensure(): void
+{
+    static $done = false;
+    if ($done || setting('prof_look_ok') === '1') { $done = true; return; }
+    $done = true;
+    if (!row("SHOW COLUMNS FROM users LIKE 'avatar_mode'")) {
+        q("ALTER TABLE users ADD COLUMN avatar_mode VARCHAR(6) NOT NULL DEFAULT 'photo', ADD COLUMN hide_icons VARCHAR(60) NOT NULL DEFAULT ''");
+    }
+    set_setting('prof_look_ok', '1');
+}
+
+/** Icons a member chose to hide next to their name: [username => ['team','role',...]] */
+function name_icons_hidden(string $username): array
+{
+    static $map = null;
+    if ($map === null) {
+        prof_look_ensure();
+        $map = [];
+        foreach (rows("SELECT username, hide_icons FROM users WHERE hide_icons <> ''") as $r) {
+            $map[$r['username']] = explode(',', $r['hide_icons']);
+        }
+    }
+    return $map[$username] ?? [];
+}
+
 function role_badge(array $r): string
 {
     static $staff = null, $founder = null;
@@ -21,13 +47,14 @@ function role_badge(array $r): string
             $staff[$s['username']] = $s['is_admin'] ? 'admin' : 'mod';
         }
     }
+    $hid = name_icons_hidden((string)($r['username'] ?? ''));
     $extra = game_user_badges((string)($r['username'] ?? ''));
     $role = $staff[$r['username'] ?? ''] ?? null;
     if (!$role) {
         return $extra;
     }
-    $crown = ($role === 'admin' && ($r['username'] ?? '') === $founder) ? '<span class="role founder" title="Founder of MyFitLevel">' . icon('crown') . '</span>' : '';
-    return $extra . $crown . '<span class="role ' . $role . '" title="' . ($role === 'admin' ? 'Site admin' : 'Moderator') . '">' . icon('shield') . '</span>';
+    $crown = ($role === 'admin' && ($r['username'] ?? '') === $founder && !in_array('founder', $hid, true)) ? '<span class="role founder" title="Founder of MyFitLevel">' . icon('crown') . '</span>' : '';
+    return $extra . $crown . (in_array('role', $hid, true) ? '' : '<span class="role ' . $role . '" title="' . ($role === 'admin' ? 'Site admin' : 'Moderator') . '">' . icon('shield') . '</span>');
 }
 
 function mod_log(int $actor, string $action, ?int $targetUser, string $detail = ''): void
